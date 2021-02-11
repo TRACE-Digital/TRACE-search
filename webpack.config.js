@@ -3,6 +3,7 @@ const path = require('path');
 
 const config = {
   entry: './src/index.ts',
+  mode: 'development',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js'
@@ -22,6 +23,11 @@ const config = {
       '.ts',
       '.js'
     ]
+  },
+  devServer: {
+    contentBase: path.resolve(__dirname, 'dist'),
+    compress: false,
+    port: 8000,
   }
 };
 

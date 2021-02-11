@@ -11,12 +11,12 @@ npm install
 
 To start:
 ```sh
-npm start && cd dist && python3 -m http.server
+npm start
 # Open the browser to localhost:8000
 
 # OR
 
-node ./dist/bundle.js
+node dist/bundle.js
 ```
 
 To create a production build:
