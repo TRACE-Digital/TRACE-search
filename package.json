@@ -12,7 +12,9 @@
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pouchdb": "^7.2.2"
+  },
   "devDependencies": {
     "ts-loader": "^8.0.17",
     "typescript": "^4.1.5",
