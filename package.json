@@ -5,7 +5,7 @@
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0+",
   "scripts": {
     "start": "webpack serve",
     "clean": "rm dist/bundle.js",
