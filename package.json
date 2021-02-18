@@ -19,7 +19,9 @@
     "prepare": "npm run build-prod",
     "build": "npm run build-prod",
     "build-dev": "webpack --config webpack.dev.js",
-    "build-prod": "webpack --config webpack.prod.js"
+    "build-prod": "webpack --config webpack.prod.js",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
   },
   "main": "dist/trace-search.js",
   "types": "dist/index.d.ts",
@@ -33,8 +35,11 @@
     "@types/pouchdb": "^6.4.0",
     "@types/pouchdb-browser": "^6.1.3",
     "clean-webpack-plugin": "^3.0.0",
+    "prettier": "^2.2.1",
     "ts-loader": "^8.0.17",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.1.5",
     "webpack": "^5.21.2",
     "webpack-cli": "^4.5.0",
