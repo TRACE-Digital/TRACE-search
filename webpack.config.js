@@ -1,6 +1,10 @@
 const webpack = require('webpack');
 const path = require('path');
 
+// Add this plugin so that we can use baseUrl in tsconfig.json
+// https://github.com/TypeStrong/ts-loader#baseurl--paths-module-resolution
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+
 const config = {
   entry: './src/index.ts',
   mode: 'development',
@@ -22,7 +26,8 @@ const config = {
       '.tsx',
       '.ts',
       '.js'
-    ]
+    ],
+    plugins: [new TsconfigPathsPlugin({})]
   },
   devServer: {
     contentBase: path.resolve(__dirname, 'dist'),
