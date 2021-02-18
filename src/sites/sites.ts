@@ -36,7 +36,7 @@ export const sherlockSites: SherlockSiteList = sherlock;
 export const traceSites: TraceSiteList = trace;
 
 // Overlay the TRACE changes
-for (let siteName in trace) {
+for (const siteName of Object.keys(trace)) {
     mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
 }
 

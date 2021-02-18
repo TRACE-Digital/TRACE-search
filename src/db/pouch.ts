@@ -33,7 +33,7 @@ export async function setupDb() {
     // console.log(`PouchDB using adapter: ${_localDb.adapter}`);
 
     try {
-        let localInfo = await _localDb.info();
+        const localInfo = await _localDb.info();
         console.debug('Local database information:');
         console.debug(localInfo);
     } catch (e) {

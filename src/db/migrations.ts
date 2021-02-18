@@ -15,7 +15,7 @@ export async function doMigrations(db: PouchDB.Database) {
     try {
         currentVersion = await db.get(SETTINGS_KEY);
     } catch (e) {
-        console.assert(e.name == 'not_found', 'Unknown error retrieving current version!');
+        console.assert(e.name === 'not_found', 'Unknown error retrieving current version!');
     }
 
     while (currentVersion < VERSION) {
