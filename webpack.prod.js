@@ -6,11 +6,11 @@ module.exports = merge(common, {
   mode: 'production',
   devtool: 'source-map',
   optimization: {
-    minimize: true
+    minimize: true,
   },
   plugins: [
     new webpack.DefinePlugin({
       __BUILD_TYPE__: JSON.stringify('prod'),
     }),
-  ]
+  ],
 });

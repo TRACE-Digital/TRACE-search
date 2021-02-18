@@ -7,7 +7,7 @@ module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
   optimization: {
-    minimize: false
+    minimize: false,
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -17,5 +17,5 @@ module.exports = merge(common, {
   devServer: {
     static: path.resolve(__dirname, 'dist'),
     port: 8000,
-  }
+  },
 });

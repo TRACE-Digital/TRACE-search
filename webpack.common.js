@@ -12,7 +12,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // https://marcobotto.com/blog/compiling-and-bundling-typescript-libraries-with-webpack/
 
 // Can't do string interpolation in object keys
-const entries = {}
+const entries = {};
 entries[`${app.name}`] = './src/index.ts';
 entries[`${app.name}.min`] = './src/index.ts';
 
@@ -24,41 +24,32 @@ const config = {
     libraryTarget: 'umd',
     library: 'traceSearch',
     umdNamedDefine: true,
-    globalObject: 'this',     // Support DOM and Node https://webpack.js.org/configuration/output/#outputglobalobject
+    globalObject: 'this', // Support DOM and Node https://webpack.js.org/configuration/output/#outputglobalobject
   },
   module: {
     rules: [
       {
         test: /\.ts(x)?$/,
         loader: 'ts-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
       },
-    ]
+    ],
   },
   plugins: [
     new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: [
-        '**/*',
-        '!index.html'
-      ]
+      cleanOnceBeforeBuildPatterns: ['**/*', '!index.html'],
     }),
     new webpack.DefinePlugin({
       __NAME__: JSON.stringify(app.name),
       __VERSION__: JSON.stringify(app.version),
       __DESCRIPTION__: JSON.stringify(app.description),
-      __BUILT_AT__: JSON.stringify((new Date()).toJSON())
-    })
+      __BUILT_AT__: JSON.stringify(new Date().toJSON()),
+    }),
   ],
   resolve: {
-    extensions: [
-      '.tsx',
-      '.ts',
-      '.js'
-    ],
-    plugins: [
-      new TsconfigPathsPlugin({})
-    ]
-  }
+    extensions: ['.tsx', '.ts', '.js'],
+    plugins: [new TsconfigPathsPlugin({})],
+  },
 };
 
 module.exports = config;
