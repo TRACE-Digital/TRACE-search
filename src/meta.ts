@@ -1,12 +1,15 @@
-import app from '../package.json';
+// Make Typescript happy about variables defined by the Webpack DefinePlugin
+declare var __NAME__: string;
+declare var __VERSION__: string;
+declare var __DESCRIPTION__: string;
+declare var __BUILD_TYPE__: string;
+declare var __BUILT_AT__: string;
 
-// https://stackoverflow.com/questions/9153571/is-there-a-way-to-get-version-from-package-json-in-nodejs-code#comment55397717_10855054
-// TODO: Security concern since this possibly exposes all of package.json
-// I don't know that this is dangerous for us, but we could move to Webpack DefinePlugin
-
-export const NAME = app.name;
-export const VERSION = app.version;
-export const DESCRIPTION = app.description;
+export const NAME = __NAME__;
+export const VERSION = __VERSION__;
+export const DESCRIPTION = __DESCRIPTION__;
+export const BUILD_TYPE = __BUILD_TYPE__;
+export const BUILT_AT = __BUILT_AT__;
 
 // Minimum version of the TRACE browser extension that we are compatible with
 export const EXTENSION_MIN_VERSION = '0.0.0';
