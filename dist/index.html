@@ -8,6 +8,10 @@
         <div id="app">
             Test page. Open the browser console.
         </div>
-        <script src="index.js"></script>
+        <script src="trace-search.js"></script>
+        <script>
+            /* Top level module should be exposed for use */
+            console.assert(traceSearch.version);
+        </script>
     </body>
 </html>
