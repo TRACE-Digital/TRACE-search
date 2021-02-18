@@ -23,27 +23,21 @@ interface TraceSiteList {
     [key: string]: TraceSite
 }
 
-interface Site extends SherlockSite, TraceSite {
+export interface Site extends SherlockSite, TraceSite {
 }
 
-interface SiteList {
+export interface SiteList {
     [key: string]: Site
 }
 
 // Copy Sherlock as the base
 const mergedSites = JSON.parse(JSON.stringify(sherlock));
-const sherlockSites: SherlockSiteList = sherlock;
-const traceSites: TraceSiteList = trace;
+export const sherlockSites: SherlockSiteList = sherlock;
+export const traceSites: TraceSiteList = trace;
 
 // Overlay the TRACE changes
 for (let siteName in trace) {
     mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
 }
 
-const sites: SiteList = mergedSites as SiteList;
-
-export default {
-    all: sites,
-    trace: traceSites,
-    sherlock: sherlockSites
-};
+export const allSites: SiteList = mergedSites as SiteList;
