@@ -2,32 +2,31 @@ import * as sherlock from './sherlock.json';
 import * as trace from './trace.json';
 
 interface SherlockSite {
-    errorMsg?: string | string[],
-    errorType: string,
-    regexCheck?: string,
-    url: string,
-    urlMain: string,
-    username_claimed: string,
-    username_unclaimed: string
+  errorMsg?: string | string[];
+  errorType: string;
+  regexCheck?: string;
+  url: string;
+  urlMain: string;
+  username_claimed: string;
+  username_unclaimed: string;
 }
 
 interface SherlockSiteList {
-    [key: string]: SherlockSite
+  [key: string]: SherlockSite;
 }
 
 interface TraceSite {
-    logoUrl: string
+  logoUrl: string;
 }
 
 interface TraceSiteList {
-    [key: string]: TraceSite
+  [key: string]: TraceSite;
 }
 
-export interface Site extends SherlockSite, TraceSite {
-}
+export interface Site extends SherlockSite, TraceSite {}
 
 export interface SiteList {
-    [key: string]: Site
+  [key: string]: Site;
 }
 
 // Copy Sherlock as the base
@@ -37,7 +36,7 @@ export const traceSites: TraceSiteList = trace;
 
 // Overlay the TRACE changes
 for (const siteName of Object.keys(trace)) {
-    mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
+  mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
 }
 
 export const allSites: SiteList = mergedSites as SiteList;

@@ -8,62 +8,62 @@ import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
  * @param db
  */
 export async function doMigrations(db: PouchDB.Database) {
-    console.group('Starting migrations...');
+  console.group('Starting migrations...');
 
-    // Default version
-    let currentVersion = '0.0.0';
-    try {
-        currentVersion = await db.get(SETTINGS_KEY);
-    } catch (e) {
-        console.assert(e.name === 'not_found', 'Unknown error retrieving current version!');
+  // Default version
+  let currentVersion = '0.0.0';
+  try {
+    currentVersion = await db.get(SETTINGS_KEY);
+  } catch (e) {
+    console.assert(e.name === 'not_found', 'Unknown error retrieving current version!');
+  }
+
+  while (currentVersion < VERSION) {
+    const migration = migrations[currentVersion];
+
+    if (migration === undefined) {
+      console.groupEnd();
+      throw new Error(`No migration path from ${currentVersion} to ${VERSION}.`);
     }
 
-    while (currentVersion < VERSION) {
-        const migration = migrations[currentVersion];
+    console.group(`Migrating from ${currentVersion} to ${migration.nextVersion}...`);
 
-        if (migration === undefined) {
-            console.groupEnd();
-            throw new Error(`No migration path from ${currentVersion} to ${VERSION}.`);
-        }
-
-        console.group(`Migrating from ${currentVersion} to ${migration.nextVersion}...`);
-
-        for (const op of migration.operations) {
-            try {
-                console.groupCollapsed(`Running '${op.name}'...`);
-                await op.run(db);
-                console.log('Done');
-                console.groupEnd();
-            } catch (e) {
-                // TODO: Revert?
-                console.groupEnd();
-                console.groupEnd();
-                console.groupEnd();
-                console.error(`Migration operation failed!: ${e}`);
-                throw e;
-            }
-        }
-
-        currentVersion = migration.nextVersion;
-
-        console.log(`Migrated to ${currentVersion}`);
+    for (const op of migration.operations) {
+      try {
+        console.groupCollapsed(`Running '${op.name}'...`);
+        await op.run(db);
+        console.log('Done');
         console.groupEnd();
+      } catch (e) {
+        // TODO: Revert?
+        console.groupEnd();
+        console.groupEnd();
+        console.groupEnd();
+        console.error(`Migration operation failed!: ${e}`);
+        throw e;
+      }
     }
-    console.log('Migrations complete');
+
+    currentVersion = migration.nextVersion;
+
+    console.log(`Migrated to ${currentVersion}`);
     console.groupEnd();
+  }
+  console.log('Migrations complete');
+  console.groupEnd();
 }
 
 interface MigrationDefinitions {
-    [currentVersion: string]: {
-        readonly nextVersion: string,
-        readonly operations: MigrationOperation[]
-    }
+  [currentVersion: string]: {
+    readonly nextVersion: string;
+    readonly operations: MigrationOperation[];
+  };
 }
 
 interface MigrationOperation {
-    readonly name: string,
-    readonly revert: (db: PouchDB.Database) => any,
-    readonly run: (db: PouchDB.Database) => any
+  readonly name: string;
+  readonly revert: (db: PouchDB.Database) => any;
+  readonly run: (db: PouchDB.Database) => any;
 }
 
 /**
@@ -74,19 +74,18 @@ interface MigrationOperation {
  * - Don't `put()` documents that don't need updates; it'll just make unneeded revisions
  */
 const migrations: MigrationDefinitions = {
-    '0.0.0': {
-        nextVersion: '0.0.1',
-        operations: [
-            {
-                name: 'initialize_settings',
-                run: async (db: PouchDB.Database) => {
-                    await db.put(DEFAULT_SETTINGS);
-                },
-                revert: async (db: PouchDB.Database) => {
-                    await db.remove(await db.get(SETTINGS_KEY));
-                }
-            }
-        ]
-    }
-}
-
+  '0.0.0': {
+    nextVersion: '0.0.1',
+    operations: [
+      {
+        name: 'initialize_settings',
+        run: async (db: PouchDB.Database) => {
+          await db.put(DEFAULT_SETTINGS);
+        },
+        revert: async (db: PouchDB.Database) => {
+          await db.remove(await db.get(SETTINGS_KEY));
+        },
+      },
+    ],
+  },
+};

@@ -20,7 +20,7 @@
     "build": "npm run build-prod",
     "build-dev": "webpack --config webpack.dev.js",
     "build-prod": "webpack --config webpack.prod.js",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.json\"",
     "lint": "tslint -p tsconfig.json"
   },
   "main": "dist/trace-search.js",
