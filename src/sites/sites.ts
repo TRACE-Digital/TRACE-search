@@ -23,9 +23,7 @@ interface TraceSiteList {
     [key: string]: TraceSite
 }
 
-interface Site {
-    url: string,
-    logoUrl: string
+interface Site extends SherlockSite, TraceSite {
 }
 
 interface SiteList {
