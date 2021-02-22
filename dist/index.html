@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TRACE Search Test Page</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="app">
+            Test page. Open the browser console.
+        </div>
+        <script src="trace-search.js"></script>
+        <script>
+            /* Top level module should be exposed for use */
+            console.assert(traceSearch.version);
+        </script>
+    </body>
+</html>
