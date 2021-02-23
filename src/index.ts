@@ -18,4 +18,5 @@ export { allSites as supportedSites } from 'sites';
 export { VERSION as version } from 'meta';
 
 // Top level types that we want to be publicly visible
+export * from 'search';
 export { Site, SiteList } from 'sites';
