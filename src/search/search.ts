@@ -4,7 +4,7 @@
  */
 
 import { DbStorable } from 'db';
-import { Site } from 'sites';
+import { allSites, Site, SiteList } from 'sites';
 import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
 /**
@@ -12,7 +12,10 @@ import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './acc
  */
 export class SearchDefinition implements DbStorable {
 
+  private static idForDefaultName = 0;
+
   public id: string[] = [];
+  public name: string;
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
 
@@ -23,12 +26,17 @@ export class SearchDefinition implements DbStorable {
   public lastNames: string[] = [];
 
   public history: Search[] = [];
+  public get completedHistory() {
+    return this.history.filter(execution => execution.state === SearchState.COMPLETED);
+  }
 
   public get lastRun(): Search | null {
     // TODO: If this.history is sorted, we can simplify
     let result = null;
-    for (const search of this.history) {
-      if (result === null || search.startedAt >= result.startedAt) {
+    for (const search of this.completedHistory) {
+      if (result === null ||
+        (search.startedAt && result.startedAt && (search.startedAt >= result.startedAt))
+      ) {
         result = search;
       }
     }
@@ -41,6 +49,15 @@ export class SearchDefinition implements DbStorable {
     }
     return null;
   };
+
+  constructor(name?: string, sites?: SiteList) {
+    this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
+
+    sites = sites || allSites;
+    this.includedSites = Object.values(sites);
+
+    this.id = ['searchDef', this.createdAt.toJSON(), this.name]
+  }
 
   /**
    * Return a fresh execution of this search.
@@ -75,14 +92,33 @@ export class SearchDefinition implements DbStorable {
 export class Search implements DbStorable {
 
   public id: string[] = [];
-  public startedAt: Date = new Date();
-  public completedAt: Date | null = null;
+  public startedAt: Date | null = null;
+  public endedAt: Date | null = null;
 
   public definition: SearchDefinition;
   public state = SearchState.CREATED;
-  public progress: number = 0;
+  public get progress() {
+    if (this.definition.includedSites.length === 0) {
+      return 100;
+    }
+    return Math.round(Object.values(this.results).length / this.definition.includedSites.length * 100);
+  }
 
+  /**
+   * `resultsDict` is the best structure for storing and checking results
+   * internally during search, but is kind of messy to iterate over after.
+   *
+   * Provide flattened alternatives that make it easier to get the data.
+   *
+   * Since we don't really need to remove or reorder, this isn't too painful
+   * to manage.
+   *
+   * If it's too memory intensive, we can reevaluate.
+   */
   public results: ThirdPartyAccount[] = [];
+  public resultsDict: SearchResults = {};
+  public resultsBySite: SearchResultsBySite = {};
+  public resultsByUser: SearchResultsByUser = {};
   public get discoveredResults() {
     return this.results.filter(account => account instanceof DiscoveredAccount);
   }
@@ -98,34 +134,115 @@ export class Search implements DbStorable {
    * Start the search.
    */
   public start() {
-    const validStates = [
-      SearchState.CREATED,
-      SearchState.PAUSED
-    ];
-    if (! validStates.includes(this.state)) {
+    let logAction = '';
+
+    if (this.state === SearchState.CREATED) {
+      logAction = 'Starting';
+    }
+    else if (this.state === SearchState.PAUSED) {
+      logAction = 'Resuming';
+    }
+    else {
       throw new Error(`Cannot call start() while state is '${this.state}'!`);
     }
 
+    console.groupCollapsed(`${logAction} search...`);
+
     this.state = SearchState.IN_PROGRESS;
+    this.startedAt = new Date();
+
+    // TODO: This is synchronous right now
+    // Should probably devise something async
+    try {
+      this.doSearch();
+    } catch (e) {
+      console.error(`Search failed!:`);
+      console.error(e);
+
+      this.fail();
+    }
+
+    console.groupEnd();
   }
 
   /**
    * Cancel the search.
    */
   public cancel() {
-    const validStates = [
-      SearchState.IN_PROGRESS,
-      SearchState.PAUSED
-    ];
-    if (! validStates.includes(this.state)) {
+    let logState = '';
+
+    if (this.state === SearchState.IN_PROGRESS) {
+      logState = 'active';
+    }
+    else if (this.state === SearchState.PAUSED) {
+      logState = 'paused';
+    }
+    else {
       throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
+    console.log(`Cancelling ${logState} search...`);
+
     this.state = SearchState.CANCELLED;
+
+    // TODO: Interrupt doSearch() if we make it async
   }
 
-  private doSearch() {
+  /**
+   * Perform the search for each `definition.includedSites`.
+   *
+   * This is incremental. It won't duplicate sites that already have results.
+   */
+  protected doSearch() {
+    for (const site of this.definition.includedSites) {
+      for (const userName of this.definition.userNames) {
+        // Ignore sites that we already have results for
+        if (site.name in this.resultsDict) {
+          if (this.definition.name in this.resultsDict[site.name]) {
+            continue;
+          }
+        }
 
+        if (site.name === 'default') {
+          console.log(site);
+        }
+
+        console.log(`Checking ${site.name}...`);
+
+        const account = new DiscoveredAccount(site, userName);
+
+        // TODO: Actually search
+
+        // Store in multiple formats. See note above member initialization
+        this.results.push(account);
+        this.resultsDict[site.name] = this.resultsDict[site.name] || {};
+        this.resultsDict[site.name][userName] = account;
+        this.resultsBySite[site.name] = this.resultsBySite[site.name] || [];
+        this.resultsBySite[site.name].push(account);
+        this.resultsByUser[userName] = this.resultsByUser[userName] || [];
+        this.resultsByUser[userName].push(account);
+      }
+    }
+
+    this.complete();
+  }
+
+  /**
+   * Mark this search as completed.
+   */
+  protected complete() {
+    console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+
+    this.state = SearchState.COMPLETED;
+    this.endedAt = new Date();
+  }
+
+  /**
+   * Mark this search as failed.
+   */
+  protected fail() {
+    this.state = SearchState.FAILED;
+    this.endedAt = new Date();
   }
 }
 
@@ -139,4 +256,28 @@ export enum SearchState {
   CANCELLED = 'Cancelled',
   COMPLETED = 'Completed',
   FAILED = 'Failed',
+}
+
+/**
+ * Dictionary keyed by site name, containing a dictionary keyed by user
+ * name, containing the account.
+ *
+ * This is kind of messy. Keying by site name isn't unique
+ * since we can match on multiple user names, so we nest the
+ * usernames.
+ *
+ * But the nesting makes iteration hard.
+ */
+export interface SearchResults {
+  [siteName: string]: {
+    [userName: string]: ThirdPartyAccount
+  }
+}
+
+export interface SearchResultsBySite {
+  [siteName: string]: ThirdPartyAccount[]
+}
+
+export interface SearchResultsByUser {
+  [userName: string]: ThirdPartyAccount[]
 }

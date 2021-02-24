@@ -69,6 +69,8 @@ export class DiscoveredAccount extends ThirdPartyAccount {
    * Convert this account into a `ClaimedAccount`.
    */
   public claim(): ClaimedAccount {
+    this.type = AccountType.CLAIMED;
+
     const modified = this as any;
     modified.claimedOn = new Date();
     return modified as ClaimedAccount;
@@ -78,6 +80,8 @@ export class DiscoveredAccount extends ThirdPartyAccount {
    * Reject and convert this account into a `RejectedAccount`.
    */
   public reject(): RejectedAccount {
+    this.type = AccountType.REJECTED;
+
     const modified = this as any;
     modified.rejectedOn = new Date();
     return modified as RejectedAccount;
