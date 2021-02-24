@@ -120,10 +120,10 @@ export class Search implements DbStorable {
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
   public get discoveredResults() {
-    return this.results.filter(account => account instanceof DiscoveredAccount);
+    return this.results.filter(account => account instanceof DiscoveredAccount) as DiscoveredAccount[];
   }
   public get unregisteredResults() {
-    return this.results.filter(account => account instanceof UnregisteredAccount);
+    return this.results.filter(account => account instanceof UnregisteredAccount) as UnregisteredAccount[];
   }
 
   constructor(definition: SearchDefinition) {
