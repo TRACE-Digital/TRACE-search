@@ -3,18 +3,21 @@
  * TRACE searches.
  */
 
-import { DbStorable, PouchDbId, SearchDefinitionSchema, SearchSchema } from 'db';
+import { IDbStorable, getDb, PouchDbId, SearchDefinitionSchema, SearchSchema, toId, DbResponse } from 'db';
 import { allSites, Site, SiteList } from 'sites';
 import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+
+const searchDefinitions: { [key: string]: SearchDefinition } = {};
+const searches: { [key: string]: Search } = {};
 
 /**
  * Parameters that define a repeatable `Search`.
  */
-export class SearchDefinition implements DbStorable {
+export class SearchDefinition implements IDbStorable {
   private static idForDefaultName = 0;
 
-  public readonly id: PouchDbId = [];
-  public readonly rev: string = '';
+  public readonly id: PouchDbId;
+  public rev: string = '';
 
   public name: string;
   public createdAt: Date = new Date();
@@ -49,13 +52,13 @@ export class SearchDefinition implements DbStorable {
     return null;
   }
 
-  constructor(name?: string, sites?: SiteList) {
+  constructor(name?: string, siteNames?: string[]) {
     this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
 
-    sites = sites || allSites;
-    this.includedSites = Object.values(sites);
+    siteNames = siteNames || Object.keys(allSites);
+    this.includedSites = siteNames.map(name => allSites[name]);
 
-    this.id = ['searchDef', this.createdAt.toJSON(), this.name];
+    this.id = toId(['searchDef', this.createdAt, this.name]);
   }
 
   /**
@@ -84,6 +87,24 @@ export class SearchDefinition implements DbStorable {
     throw new Error('Not implemented yet!');
   }
 
+  /**
+   * Save/update this search definition in the database.
+   *
+   * Don't call this unless you've made changes!
+   * Each call will create a revision and take up space.
+   */
+  public async save(): Promise<DbResponse> {
+    const db = await getDb();
+    const result = await db.put(this.serialize());
+    if (result.ok) {
+      this.rev = result.rev;
+      return result;
+    }
+
+    console.error(result);
+    throw new Error('Failed to save search definition!');
+  }
+
   public serialize(): SearchDefinitionSchema {
     return {
       _id: this.id,
@@ -103,9 +124,10 @@ export class SearchDefinition implements DbStorable {
 /**
  * Single execution of a `SearchDefinition`.
  */
-export class Search implements DbStorable {
-  public readonly id: PouchDbId = [];
-  public readonly rev: string = '';
+export class Search implements IDbStorable {
+
+  public readonly id: PouchDbId;
+  public rev: string = '';
 
   public state = SearchState.CREATED;
   public startedAt: Date | null = null;
@@ -145,7 +167,8 @@ export class Search implements DbStorable {
     this.definition = definition;
 
     // Copy the definition ID and add our pieces
-    this.id = this.definition.id.slice().concat(['search', new Date().toJSON()]);
+    const idBase = JSON.parse(this.definition.id);
+    this.id = toId(idBase.concat(['search', new Date()]));
   }
 
   /**
@@ -208,6 +231,8 @@ export class Search implements DbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected doSearch() {
+    const resultIdPrefix = JSON.parse(this.id).concat('searchResult');
+
     for (const site of this.definition.includedSites) {
       for (const userName of this.definition.userNames) {
         // Ignore sites that we already have results for
@@ -223,7 +248,7 @@ export class Search implements DbStorable {
 
         console.log(`Checking ${site.name}...`);
 
-        const account = new DiscoveredAccount(site, userName, this.id);
+        const account = new DiscoveredAccount(site, userName, resultIdPrefix);
 
         // TODO: Actually search
 
@@ -257,6 +282,24 @@ export class Search implements DbStorable {
   protected fail() {
     this.state = SearchState.FAILED;
     this.endedAt = new Date();
+  }
+
+  /**
+   * Save/update this search in the database.
+   *
+   * Don't call this unless you've made changes!
+   * Each call will create a revision and take up space.
+   */
+  public async save(): Promise<DbResponse> {
+    const db = await getDb();
+    const result = await db.put(this.serialize());
+    if (result.ok) {
+      this.rev = result.rev;
+      return result;
+    }
+
+    console.error(result);
+    throw new Error('Failed to save search definition!');
   }
 
   public serialize(): SearchSchema {

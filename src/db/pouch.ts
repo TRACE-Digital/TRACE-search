@@ -14,19 +14,26 @@ let _remoteDb: PouchDB.Database | null = null;
 
 export const DB_NAME = 'trace';
 
+export async function getDb() {
+  if (_localDb) {
+    return _localDb;
+  }
+  return await setupDb();
+}
+
 /**
  * Initializes or returns the PouchDB instance.
  */
-export async function setupDb() {
+async function setupDb() {
   if (_localDb) {
     return _localDb;
   }
 
-  _localDb = new PouchDB(DB_NAME);
-  console.debug(_localDb);
-
   // If you need a fresh db
   // await _devNukeDb();
+
+  _localDb = new PouchDB(DB_NAME);
+  console.debug(_localDb);
 
   // Typing module doesn't have .adapter since its unofficial, but you can
   // check what it is in the other log output
@@ -54,9 +61,12 @@ export async function setupDb() {
 /**
  * Nuke the database.
  */
-async function _devNukeDb() {
-  if (_localDb) {
+async function _devNukeDb(dbName: string = DB_NAME) {
+  if (_localDb && _localDb.name == dbName) {
     await _localDb.destroy();
-    _localDb = new PouchDB(DB_NAME);
+    _localDb = null;
+  } else {
+    const db = new PouchDB(dbName);
+    await db.destroy();
   }
 }

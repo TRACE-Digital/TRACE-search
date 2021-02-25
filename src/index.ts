@@ -1,20 +1,21 @@
 import { allSites } from 'sites';
-import { setupDb } from 'db';
+import { getDb } from 'db';
 import * as meta from 'meta';
 import { ClaimedAccount, DiscoveredAccount, SearchDefinition } from 'search';
+import deepEqual from 'deep-equal';
 
 async function main() {
   console.log(`${meta.NAME} v${meta.VERSION}-${meta.BUILD_TYPE} built ${meta.BUILT_AT}`);
 
-  console.log(allSites);
+  // Trigger database setup
+  await getDb();
 
-  const db = await setupDb();
-  console.log(db);
+  console.log(allSites);
 
   console.groupCollapsed('Test search');
 
   // Make a test search
-  const searchDef = new SearchDefinition();
+  const searchDef = new SearchDefinition('Test Search', ['Wikipedia']);
   searchDef.userNames.push('test');
 
   console.log(searchDef);
@@ -36,12 +37,32 @@ async function main() {
   console.log(claimed instanceof DiscoveredAccount);
 
   console.groupEnd();
-
   console.groupCollapsed('Test serialization');
 
   console.log(searchDef.serialize());
   console.log(search.serialize());
   console.log(claimed.serialize());
+
+  console.groupEnd();
+  console.groupCollapsed('Test database store/retrieve');
+
+  const db = await getDb();
+  console.log(db);
+
+  const result = await searchDef.save();
+  console.log(result);
+
+  const retrieved = await db.get(searchDef.id);
+
+  console.log(searchDef.serialize());
+  console.log(retrieved);
+
+  // Comparing JSON.stringify() results depends on the order of keys
+  // Rely on the deep-equals library instead
+  const areEqual = deepEqual(searchDef.serialize(), retrieved);
+
+  console.assert(areEqual, 'Database: stored !== retrieved');
+  console.log(`stored === retrieved: ${areEqual}`);
 
   console.groupEnd();
 }

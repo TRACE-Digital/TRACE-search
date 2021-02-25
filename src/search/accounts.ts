@@ -3,7 +3,7 @@
  * and third-party accounts.
  */
 
-import { DbStorable, PouchDbId } from 'db';
+import { DbResponse, getDb, IDbStorable, PouchDbId, toId } from 'db';
 import {
   AccountSchema,
   ClaimedAccountSchema,
@@ -38,9 +38,9 @@ export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 /**
  * Account associated with a third-party `Site`.
  */
-export abstract class ThirdPartyAccount implements DbStorable {
-  public readonly id: PouchDbId = [];
-  public readonly rev: string = '';
+export abstract class ThirdPartyAccount implements IDbStorable {
+  public readonly id: PouchDbId;
+  public rev: string = '';
 
   abstract type: AccountType;
   public createdAt: Date = new Date();
@@ -49,15 +49,33 @@ export abstract class ThirdPartyAccount implements DbStorable {
   public readonly userName: string;
   public readonly url: string;
 
-  constructor(site: Site, userName: string, idPrefix: PouchDbId = []) {
+  constructor(site: Site, userName: string, idPrefix: string[] = []) {
     this.site = site;
     this.userName = userName;
 
-    this.id = idPrefix.slice().concat(['account', this.site.name, this.userName]);
+    this.id = toId(idPrefix.slice().concat(['account', this.site.name, this.userName]));
 
     // TODO: Simple replacement for the Python format strings
     // Need to make sure this works for everything
     this.url = this.site.url.replace('{}', this.userName);
+  }
+
+  /**
+   * Save/update this account in the database.
+   *
+   * Don't call this unless you've made changes!
+   * Each call will create a revision and take up space.
+   */
+  public async save(): Promise<DbResponse> {
+    const db = await getDb();
+    const result = await db.put(this.serialize());
+    if (result.ok) {
+      this.rev = result.rev;
+      return result;
+    }
+
+    console.error(result);
+    throw new Error('Failed to save account!');
   }
 
   public serialize(): AccountSchema {
