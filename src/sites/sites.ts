@@ -17,14 +17,16 @@ interface SherlockSiteList {
 }
 
 interface TraceSite {
-  logoUrl: string;
+  errorType?: string;
+  logoUrl?: string;
 }
 
 interface TraceSiteList {
   [key: string]: TraceSite;
 }
 
-export interface Site extends SherlockSite, TraceSite {}
+// export interface Site extends SherlockSite, TraceSite {}
+export type Site = SherlockSite & TraceSite
 
 export interface SiteList {
   [key: string]: Site;
