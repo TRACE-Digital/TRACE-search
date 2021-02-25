@@ -4,7 +4,13 @@
  */
 
 import { DbStorable, PouchDbId } from 'db';
-import { AccountSchema, ClaimedAccountSchema, DiscoveredAccountSchema, ManualAccountSchema, RejectedAccountSchema } from 'db/schema';
+import {
+  AccountSchema,
+  ClaimedAccountSchema,
+  DiscoveredAccountSchema,
+  ManualAccountSchema,
+  RejectedAccountSchema,
+} from 'db/schema';
 import { Site } from 'sites';
 
 export enum AccountType {
@@ -12,13 +18,13 @@ export enum AccountType {
   CLAIMED = 'Claimed',
   REJECTED = 'Rejected',
   MANUAL = 'Manual',
-  UNREGISTERED = 'Unregistered'
-};
+  UNREGISTERED = 'Unregistered',
+}
 
 /**
  * Rating from 0-10 with 10 being highly confident.
  */
-export type ConfidenceRating = 0|1|2|3|4|5|6|7|8|9|10;
+export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 /**
  * TODO: Figure out these constructors
@@ -61,8 +67,8 @@ export abstract class ThirdPartyAccount implements DbStorable {
       type: this.type,
       createdAt: this.createdAt.toJSON(),
       siteName: this.site.name,
-      userName: this.userName
-    }
+      userName: this.userName,
+    };
   }
 }
 

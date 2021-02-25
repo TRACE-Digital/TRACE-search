@@ -1,5 +1,5 @@
-import { AccountType, SearchState } from "search";
-import { PouchDbId } from "./types";
+import { AccountType, SearchState } from 'search';
+import { PouchDbId } from './types';
 
 /**
  * Fields that all database objects contain.
@@ -18,13 +18,13 @@ export interface AccountSchema extends BaseSchema {
   createdAt: string;
   siteName: string;
   userName: string;
-};
+}
 
 export interface DiscoveredAccountSchema extends AccountSchema {
   confidence: number;
   matchedFirstNames: string[];
   matchedLastNames: string[];
-};
+}
 
 export interface ClaimedAccountSchema extends DiscoveredAccountSchema {
   claimedAt: string;

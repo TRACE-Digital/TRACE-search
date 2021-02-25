@@ -11,7 +11,6 @@ import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './acc
  * Parameters that define a repeatable `Search`.
  */
 export class SearchDefinition implements DbStorable {
-
   private static idForDefaultName = 0;
 
   public readonly id: PouchDbId = [];
@@ -36,21 +35,19 @@ export class SearchDefinition implements DbStorable {
     // TODO: If this.history is sorted, we can simplify
     let result = null;
     for (const search of this.completedHistory) {
-      if (result === null ||
-        (search.startedAt && result.startedAt && (search.startedAt >= result.startedAt))
-      ) {
+      if (result === null || (search.startedAt && result.startedAt && search.startedAt >= result.startedAt)) {
         result = search;
       }
     }
     return result;
-  };
+  }
 
   public get lastRunAt(): Date | null {
     if (this.lastRun) {
       return this.lastRun.startedAt;
     }
     return null;
-  };
+  }
 
   constructor(name?: string, sites?: SiteList) {
     this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
@@ -58,7 +55,7 @@ export class SearchDefinition implements DbStorable {
     sites = sites || allSites;
     this.includedSites = Object.values(sites);
 
-    this.id = ['searchDef', this.createdAt.toJSON(), this.name]
+    this.id = ['searchDef', this.createdAt.toJSON(), this.name];
   }
 
   /**
@@ -98,8 +95,8 @@ export class SearchDefinition implements DbStorable {
       userNames: this.userNames,
       firstNames: this.firstNames,
       lastNames: this.lastNames,
-      historyIds: this.history.map(execution => execution.id)
-    }
+      historyIds: this.history.map(execution => execution.id),
+    };
   }
 }
 
@@ -107,7 +104,6 @@ export class SearchDefinition implements DbStorable {
  * Single execution of a `SearchDefinition`.
  */
 export class Search implements DbStorable {
-
   public readonly id: PouchDbId = [];
   public readonly rev: string = '';
 
@@ -120,7 +116,7 @@ export class Search implements DbStorable {
     if (this.definition.includedSites.length === 0) {
       return 100;
     }
-    return Math.round(Object.values(this.results).length / this.definition.includedSites.length * 100);
+    return Math.round((Object.values(this.results).length / this.definition.includedSites.length) * 100);
   }
 
   /**
@@ -149,7 +145,7 @@ export class Search implements DbStorable {
     this.definition = definition;
 
     // Copy the definition ID and add our pieces
-    this.id = this.definition.id.slice().concat(['search', new Date().toJSON()])
+    this.id = this.definition.id.slice().concat(['search', new Date().toJSON()]);
   }
 
   /**
@@ -160,11 +156,9 @@ export class Search implements DbStorable {
 
     if (this.state === SearchState.CREATED) {
       logAction = 'Starting';
-    }
-    else if (this.state === SearchState.PAUSED) {
+    } else if (this.state === SearchState.PAUSED) {
       logAction = 'Resuming';
-    }
-    else {
+    } else {
       throw new Error(`Cannot call start() while state is '${this.state}'!`);
     }
 
@@ -195,11 +189,9 @@ export class Search implements DbStorable {
 
     if (this.state === SearchState.IN_PROGRESS) {
       logState = 'active';
-    }
-    else if (this.state === SearchState.PAUSED) {
+    } else if (this.state === SearchState.PAUSED) {
       logState = 'paused';
-    }
-    else {
+    } else {
       throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
@@ -275,8 +267,8 @@ export class Search implements DbStorable {
       startedAt: this.startedAt ? this.startedAt.toJSON() : null,
       endedAt: this.endedAt ? this.endedAt.toJSON() : null,
       definitionId: this.definition.id,
-      resultIds: this.results.map(result => result.id)
-    }
+      resultIds: this.results.map(result => result.id),
+    };
   }
 }
 
@@ -305,7 +297,7 @@ export enum SearchState {
 export interface SearchResults {
   [siteName: string]: {
     [userName: string]: ThirdPartyAccount;
-  }
+  };
 }
 
 export interface SearchResultsBySite {
