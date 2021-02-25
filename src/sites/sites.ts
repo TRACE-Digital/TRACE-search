@@ -2,6 +2,7 @@ import * as sherlock from './sherlock.json';
 import * as trace from './trace.json';
 
 interface SherlockSite {
+<<<<<<< Updated upstream
     errorMsg?: string | string[],
     errorType: string,
     regexCheck?: string,
@@ -9,6 +10,16 @@ interface SherlockSite {
     urlMain: string,
     username_claimed: string,
     username_unclaimed: string
+=======
+  errorMsg?: string | string[];
+  errorType: string;
+  errorUrl?: string;
+  regexCheck?: string;
+  url: string;
+  urlMain: string;
+  username_claimed: string;
+  username_unclaimed: string;
+>>>>>>> Stashed changes
 }
 
 interface SherlockSiteList {
