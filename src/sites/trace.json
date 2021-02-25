@@ -1,5 +1,11 @@
 {
   "2Dimensions": {
     "logoUrl": "https://turkstra.net/album/04292019/images/DSC_0310.JPG"
+  },
+  "VK": {
+    "errorType": "response_code"
+  },
+  "WordPressOrg": {
+    "errorType": "response_code"
   }
 }

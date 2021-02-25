@@ -1,7 +1,8 @@
 import { search } from 'pouchdb-find';
 import searchSites from 'search/search';
+import { allSites } from './sites';
 
 export * from './sites';
 
-let usernames = ["blue", "cohenchris"]
+let usernames: string[] = ["blue"]
 searchSites(usernames)

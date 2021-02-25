@@ -16,6 +16,7 @@
  
 import { allSites, Site, SiteList } from 'sites';
 
+import fetch from './fetchWithTimeout'      // fetch(url, options, timeout_ms)
 
 export interface SearchResult {
     // enter needed fields here
@@ -42,6 +43,8 @@ Access-Control-Allow-Credentials: 'expose'
     Searches our compiled list of sites for the username(s) provided
     Usernames must be provided in list form:
         ["cohenchris", "jmcker", ...]
+    
+    By default, sherlock.json has 298 sites (as of 2-25-21)
 */
 export const searchSites = async (usernames: string[]) => {
     let foundProfiles: SearchResultList = {}
@@ -103,8 +106,9 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
             // A 2XX status code (response.status) will be returned if the profile exists.
             // To speed things up, just use a 'HEAD' request (TODO)
             // CORS not cooperating with 'HEAD'
-            response = await fetch(profileUrl, { method: 'HEAD' })
+            response = await fetch(profileUrl, { method: 'HEAD' }, 5000)    // timeout after 5s
                                     .catch(error => {
+                                        console.log("Error! - " + error)
                                         return undefined
                                     })
 
@@ -118,11 +122,12 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
             // A specific error message will be returned if the profile does not exist, specified by 'errorMsg'
             // Compare 'response' to 'errorMsg'
             // console.log(`${siteName} -- Checking if response message is '${errorMsg}'...`)
-            response = await fetch(profileUrl, { credentials: 'include' })
+            response = await fetch(profileUrl, { credentials: 'include' }, 5000)    // timeout after 5s
                                     .then(response => {
                                         return response.text()
                                     })
                                     .catch(error => {
+                                        console.log("Error! - " + error)
                                         return undefined
                                     })
             
@@ -154,8 +159,9 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
             //     console.log(`profileExists: ${response.url != errorUrl}`)
             //     console.log(`======================`)
             // }
-            response = await fetch(profileUrl)
+            response = await fetch(profileUrl, {}, 5000)  // timeout after 5s
                                 .catch(error => {
+                                    console.log("Error! - " + error)
                                     return undefined
                                 })
             
