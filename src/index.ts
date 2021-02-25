@@ -11,6 +11,8 @@ async function main() {
   const db = await setupDb();
   console.log(db);
 
+  console.groupCollapsed('Test search');
+
   // Make a test search
   const searchDef = new SearchDefinition();
   searchDef.userNames.push('test');
@@ -30,8 +32,18 @@ async function main() {
   const claimed = search.discoveredResults[0].claim();
   console.log(claimed);
   console.log(typeof claimed);
-  console.log(claimed instanceof ClaimedAccount)
+  console.log(claimed instanceof ClaimedAccount);
   console.log(claimed instanceof DiscoveredAccount);
+
+  console.groupEnd();
+
+  console.groupCollapsed('Test serialization');
+
+  console.log(searchDef.serialize());
+  console.log(search.serialize());
+  console.log(claimed.serialize());
+
+  console.groupEnd();
 }
 
 main();

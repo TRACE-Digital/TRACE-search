@@ -3,7 +3,8 @@
  * and third-party accounts.
  */
 
-import { DbStorable } from 'db';
+import { DbStorable, PouchDbId } from 'db';
+import { AccountSchema, ClaimedAccountSchema, DiscoveredAccountSchema, ManualAccountSchema, RejectedAccountSchema } from 'db/schema';
 import { Site } from 'sites';
 
 export enum AccountType {
@@ -32,23 +33,36 @@ export type ConfidenceRating = 0|1|2|3|4|5|6|7|8|9|10;
  * Account associated with a third-party `Site`.
  */
 export abstract class ThirdPartyAccount implements DbStorable {
-  public readonly id: string[] = [];
+  public readonly id: PouchDbId = [];
+  public readonly rev: string = '';
 
   abstract type: AccountType;
+  public createdAt: Date = new Date();
 
   public readonly site: Site;
   public readonly userName: string;
   public readonly url: string;
 
-  constructor(site: Site, userName: string) {
+  constructor(site: Site, userName: string, idPrefix: PouchDbId = []) {
     this.site = site;
     this.userName = userName;
 
-    this.id = ['account', this.site.name, this.userName];
+    this.id = idPrefix.slice().concat(['account', this.site.name, this.userName]);
 
     // TODO: Simple replacement for the Python format strings
     // Need to make sure this works for everything
     this.url = this.site.url.replace('{}', this.userName);
+  }
+
+  public serialize(): AccountSchema {
+    return {
+      _id: this.id,
+      _rev: this.rev,
+      type: this.type,
+      createdAt: this.createdAt.toJSON(),
+      siteName: this.site.name,
+      userName: this.userName
+    }
   }
 }
 
@@ -59,7 +73,6 @@ export abstract class ThirdPartyAccount implements DbStorable {
  */
 export class DiscoveredAccount extends ThirdPartyAccount {
   public type = AccountType.DISCOVERED;
-  public discoveredOn: Date = new Date();
 
   public confidence: ConfidenceRating = 5;
   public matchedFirstNames: string[] = [];
@@ -72,19 +85,29 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     this.type = AccountType.CLAIMED;
 
     const modified = this as any;
-    modified.claimedOn = new Date();
+    modified.claimedAt = new Date();
     return modified as ClaimedAccount;
   }
 
   /**
    * Reject and convert this account into a `RejectedAccount`.
+   *
+   * TODO: This doesn't really convert the type in Typescript's eyes yet
    */
   public reject(): RejectedAccount {
     this.type = AccountType.REJECTED;
 
     const modified = this as any;
-    modified.rejectedOn = new Date();
+    modified.rejectedAt = new Date();
     return modified as RejectedAccount;
+  }
+
+  public serialize(): DiscoveredAccountSchema {
+    const base = super.serialize() as DiscoveredAccountSchema;
+    base.confidence = this.confidence;
+    base.matchedFirstNames = this.matchedFirstNames;
+    base.matchedLastNames = this.matchedLastNames;
+    return base;
   }
 }
 
@@ -93,7 +116,13 @@ export class DiscoveredAccount extends ThirdPartyAccount {
  */
 export class ClaimedAccount extends DiscoveredAccount {
   public type = AccountType.CLAIMED;
-  public claimedOn: Date = new Date();
+  public claimedAt: Date = new Date();
+
+  public serialize(): ClaimedAccountSchema {
+    const base = super.serialize() as ClaimedAccountSchema;
+    base.claimedAt = this.claimedAt.toJSON();
+    return base;
+  }
 }
 
 /**
@@ -101,7 +130,13 @@ export class ClaimedAccount extends DiscoveredAccount {
  */
 export class RejectedAccount extends DiscoveredAccount {
   public type = AccountType.REJECTED;
-  public rejectedOn: Date = new Date();
+  public rejectedAt: Date = new Date();
+
+  public serialize(): RejectedAccountSchema {
+    const base = super.serialize() as RejectedAccountSchema;
+    base.rejectedAt = this.rejectedAt.toJSON();
+    return base;
+  }
 }
 
 /**
@@ -118,6 +153,12 @@ export class ManualAccount extends ThirdPartyAccount {
    */
   public edit() {
     throw new Error('Not implemented!');
+  }
+
+  public serialize(): ManualAccountSchema {
+    const base = super.serialize() as ManualAccountSchema;
+    base.lastEditedAt = this.lastEditedAt.toJSON();
+    return base;
   }
 }
 

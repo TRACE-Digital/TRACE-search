@@ -3,7 +3,7 @@
  * TRACE searches.
  */
 
-import { DbStorable } from 'db';
+import { DbStorable, PouchDbId, SearchDefinitionSchema, SearchSchema } from 'db';
 import { allSites, Site, SiteList } from 'sites';
 import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
@@ -14,7 +14,9 @@ export class SearchDefinition implements DbStorable {
 
   private static idForDefaultName = 0;
 
-  public id: string[] = [];
+  public readonly id: PouchDbId = [];
+  public readonly rev: string = '';
+
   public name: string;
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
@@ -84,6 +86,21 @@ export class SearchDefinition implements DbStorable {
   public delete() {
     throw new Error('Not implemented yet!');
   }
+
+  public serialize(): SearchDefinitionSchema {
+    return {
+      _id: this.id,
+      _rev: this.rev,
+      name: this.name,
+      createdAt: this.createdAt.toJSON(),
+      lastEditedAt: this.lastEditedAt.toJSON(),
+      includedSiteNames: this.includedSites.map(site => site.name),
+      userNames: this.userNames,
+      firstNames: this.firstNames,
+      lastNames: this.lastNames,
+      historyIds: this.history.map(execution => execution.id)
+    }
+  }
 }
 
 /**
@@ -91,12 +108,14 @@ export class SearchDefinition implements DbStorable {
  */
 export class Search implements DbStorable {
 
-  public id: string[] = [];
+  public readonly id: PouchDbId = [];
+  public readonly rev: string = '';
+
+  public state = SearchState.CREATED;
   public startedAt: Date | null = null;
   public endedAt: Date | null = null;
 
   public definition: SearchDefinition;
-  public state = SearchState.CREATED;
   public get progress() {
     if (this.definition.includedSites.length === 0) {
       return 100;
@@ -128,6 +147,9 @@ export class Search implements DbStorable {
 
   constructor(definition: SearchDefinition) {
     this.definition = definition;
+
+    // Copy the definition ID and add our pieces
+    this.id = this.definition.id.slice().concat(['search', new Date().toJSON()])
   }
 
   /**
@@ -209,7 +231,7 @@ export class Search implements DbStorable {
 
         console.log(`Checking ${site.name}...`);
 
-        const account = new DiscoveredAccount(site, userName);
+        const account = new DiscoveredAccount(site, userName, this.id);
 
         // TODO: Actually search
 
@@ -244,6 +266,18 @@ export class Search implements DbStorable {
     this.state = SearchState.FAILED;
     this.endedAt = new Date();
   }
+
+  public serialize(): SearchSchema {
+    return {
+      _id: this.id,
+      _rev: this.rev,
+      state: this.state,
+      startedAt: this.startedAt ? this.startedAt.toJSON() : null,
+      endedAt: this.endedAt ? this.endedAt.toJSON() : null,
+      definitionId: this.definition.id,
+      resultIds: this.results.map(result => result.id)
+    }
+  }
 }
 
 /**
@@ -270,14 +304,14 @@ export enum SearchState {
  */
 export interface SearchResults {
   [siteName: string]: {
-    [userName: string]: ThirdPartyAccount
+    [userName: string]: ThirdPartyAccount;
   }
 }
 
 export interface SearchResultsBySite {
-  [siteName: string]: ThirdPartyAccount[]
+  [siteName: string]: ThirdPartyAccount[];
 }
 
 export interface SearchResultsByUser {
-  [userName: string]: ThirdPartyAccount[]
+  [userName: string]: ThirdPartyAccount[];
 }
