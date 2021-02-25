@@ -16,7 +16,7 @@ npm start
 
 # OR
 
-node dist/bundle.js
+node dist/trace-search.js
 ```
 
 To create a production build:
@@ -34,5 +34,13 @@ npm run build-dev
 ## Running ##
 
 ```sh
-node dist/bundle.js
+npm run build-dev && node dist/trace-search.js
+```
+
+## Publishing ##
+
+We don't have the NPM package set up yet, but we can test creating a package locally.
+
+```sh
+npm pack
 ```
