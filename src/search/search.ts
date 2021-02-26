@@ -41,7 +41,7 @@ export class SearchDefinition implements IDbStorable {
 
     const db = await getDb();
     const response = await db.bulkGet<SearchSchema>({
-      docs: data.historyIds.map(id => ({ id: id }))
+      docs: data.historyIds.map(id => ({ id }))
     });
 
     // Clear the history so we don't have to worry about duplicates
@@ -113,7 +113,7 @@ export class SearchDefinition implements IDbStorable {
     this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
 
     siteNames = siteNames || Object.keys(allSites);
-    this.includedSites = siteNames.map(name => allSites[name]);
+    this.includedSites = siteNames.map(siteName => allSites[siteName]);
 
     this.id = toId(['searchDef', this.createdAt.toJSON(), this.name]);
   }
@@ -218,7 +218,7 @@ export class Search implements IDbStorable {
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
     const response = await db.bulkGet<DiscoveredAccountSchema>({
-      docs: data.resultIds.map(id => ({ id: id }))
+      docs: data.resultIds.map(id => ({ id }))
     });
 
     for (const result of response.results) {

@@ -48,6 +48,7 @@ for (const siteName of Object.keys(mergedSites)) {
 
 // TODO: Not really sure how this gets here, but it's a nested copy of
 // everything. Might need to check hasOwnProperty() or something
+// tslint:disable-next-line:no-string-literal
 delete mergedSites['default'];
 
 export const allSites = mergedSites as SiteList;

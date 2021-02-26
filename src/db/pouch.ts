@@ -11,6 +11,7 @@ import { doMigrations } from './migrations';
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
+_remoteDb = null;
 
 export const DB_NAME = 'trace';
 
@@ -62,7 +63,7 @@ async function setupDb() {
  * Nuke the database.
  */
 async function _devNukeDb(dbName: string = DB_NAME) {
-  if (_localDb && _localDb.name == dbName) {
+  if (_localDb && _localDb.name === dbName) {
     await _localDb.destroy();
     _localDb = null;
   } else {
