@@ -68,6 +68,28 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    * ```
    */
   public static async deserialize(data: AccountSchema, instance?: ThirdPartyAccount) {
+    /**
+     * Hack to handle deserialization of accounts that have an `idPrefix`.
+     * This really only breaks if another ID field (i.e. `userName`) contains
+     * the entire `instance.id`.
+     *
+     * This is actually possible since userName is supplied by the user, but we'll let
+     * it ride for now. This is really more of a guard for us as developers.
+     *
+     * If we create `fromId()` to deconstruct an ID, we can improve this.
+     *
+     * Example:
+     *  data._id: searchResult/account/example.com/user1
+     *  instance._id: account/example.com/user1
+     *
+     * Broken example:
+     *  data._id: searchResult/account/definitely-not-example.com/account/example.com/user1
+     *  instance._id: account/example.com/user1
+     */
+    if (instance && data._id.includes(instance.id)) {
+      instance.id = data._id;
+    }
+
     throwIfIdMismatch(data, instance);
 
     if (instance === undefined) {
