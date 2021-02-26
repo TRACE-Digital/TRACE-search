@@ -3,7 +3,19 @@
  * TRACE searches.
  */
 
-import { IDbStorable, getDb, PouchDbId, SearchDefinitionSchema, SearchSchema, toId, DbResponse, DbDocError, DiscoveredAccountSchema, throwIfIdMismatch, isDbDocError } from 'db';
+import {
+  IDbStorable,
+  getDb,
+  PouchDbId,
+  SearchDefinitionSchema,
+  SearchSchema,
+  toId,
+  DbResponse,
+  DbDocError,
+  DiscoveredAccountSchema,
+  throwIfIdMismatch,
+  isDbDocError,
+} from 'db';
 import { allSites, Site, SiteList } from 'sites';
 import { accounts, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
@@ -41,7 +53,7 @@ export class SearchDefinition implements IDbStorable {
 
     const db = await getDb();
     const response = await db.bulkGet<SearchSchema>({
-      docs: data.historyIds.map(id => ({ id }))
+      docs: data.historyIds.map(id => ({ id })),
     });
 
     // Clear the history so we don't have to worry about duplicates
@@ -60,9 +72,9 @@ export class SearchDefinition implements IDbStorable {
         instance.history.push(searches[result.id]);
       } else {
         try {
-          const search = await Search.deserialize(doc.ok)
+          const search = await Search.deserialize(doc.ok);
           instance.history.push(search);
-        } catch(e) {
+        } catch (e) {
           console.debug(result);
           console.warn(`Skipping search '${result.id}'. Failed to deserialize: ${e}`);
           continue;
@@ -186,7 +198,6 @@ export class SearchDefinition implements IDbStorable {
  * Single execution of a `SearchDefinition`.
  */
 export class Search implements IDbStorable {
-
   public static async deserialize(data: SearchSchema, existingInstance?: Search) {
     throwIfIdMismatch(data, existingInstance);
 
@@ -218,7 +229,7 @@ export class Search implements IDbStorable {
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
     const response = await db.bulkGet<DiscoveredAccountSchema>({
-      docs: data.resultIds.map(id => ({ id }))
+      docs: data.resultIds.map(id => ({ id })),
     });
 
     for (const result of response.results) {
@@ -236,7 +247,7 @@ export class Search implements IDbStorable {
         try {
           const account = await ThirdPartyAccount.deserialize(doc.ok);
           instance.storeResult(account);
-        } catch(e) {
+        } catch (e) {
           console.debug(result);
           console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
           continue;

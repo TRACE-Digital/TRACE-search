@@ -34,7 +34,9 @@ export function toId(value: string[], prefix?: PouchDbId): PouchDbId {
 export type DbResponse = PouchDB.Core.Response;
 
 /** Name this type from `bulkGet()` so we can use it. */
-export interface DbDocError { error: PouchDB.Core.Error };
+export interface DbDocError {
+  error: PouchDB.Core.Error;
+}
 
 /**
  * Type guard for narrowing type on `bulkGet()` response.

@@ -55,7 +55,7 @@ async function main() {
 
   const retrieved = await db.get<SearchDefinitionSchema>(searchDef.id);
 
-  console.log('Search definition serialization/retrieval:')
+  console.log('Search definition serialization/retrieval:');
   console.log(searchDef.serialize());
   console.log(retrieved);
 
@@ -69,7 +69,7 @@ async function main() {
   const allSearchDefs = await db.allDocs({
     include_docs: true,
     startkey: 'searchDef/',
-    endkey: `searchDef/${UTF_MAX}`
+    endkey: `searchDef/${UTF_MAX}`,
   });
   console.log(allSearchDefs);
 

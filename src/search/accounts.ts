@@ -35,7 +35,6 @@ export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
  * Account associated with a third-party `Site`.
  */
 export abstract class ThirdPartyAccount implements IDbStorable {
-
   /**
    * Factory method for creating an account using the appropriate subclass.
    */
@@ -149,7 +148,6 @@ export abstract class ThirdPartyAccount implements IDbStorable {
  * Has not been claimed or rejected yet.
  */
 export class DiscoveredAccount extends ThirdPartyAccount {
-
   public static async deserialize(data: DiscoveredAccountSchema, existingInstance?: DiscoveredAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new DiscoveredAccount(site, data.userName);
@@ -202,7 +200,6 @@ export class DiscoveredAccount extends ThirdPartyAccount {
  * Account that has been claimed by the user after `Search`.
  */
 export class ClaimedAccount extends DiscoveredAccount {
-
   public static async deserialize(data: ClaimedAccountSchema, existingInstance?: ClaimedAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new ClaimedAccount(site, data.userName);
@@ -228,7 +225,6 @@ export class ClaimedAccount extends DiscoveredAccount {
  * Account that has been rejected by the user after `Search`.
  */
 export class RejectedAccount extends DiscoveredAccount {
-
   public static async deserialize(data: RejectedAccountSchema, existingInstance?: RejectedAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new RejectedAccount(site, data.userName);
@@ -256,7 +252,6 @@ export class RejectedAccount extends DiscoveredAccount {
  * This does not come from `Search`.
  */
 export class ManualAccount extends ThirdPartyAccount {
-
   public static async deserialize(data: ManualAccountSchema, existingInstance?: ManualAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new ManualAccount(site, data.userName);
