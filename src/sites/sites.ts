@@ -8,6 +8,7 @@ interface SherlockSite {
     regexCheck?: string,
     url: string,
     urlMain: string,
+    urlProbe?: string,
     username_claimed: string,
     username_unclaimed: string
 }

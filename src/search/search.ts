@@ -56,8 +56,16 @@ export const searchSites = async (usernames: string[]) => {
     for (const username of usernames) {
         for (const site in allSites) {
             try {
+
+            if (allSites[site].errorType !== "message") {   // DEBUG
+                continue
+            }
+            if (!allSites[site].urlProbe) {
+                continue
+            }
+
             const profileExists = await checkIfProfileExists(site, allSites[site], username)
-            
+
             if (profileExists) {
                 // append profile to foundProfiles SearchResultList
                 const profileUrl = allSites[site].url.replace("{}", username)
@@ -103,18 +111,25 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
     const regexCheck: string | undefined = site.regexCheck            // valid username regex for website - don't make request if invalid!
     const url: string = site.url
     const urlMain: string = site.urlMain
+    const urlProbe: string | undefined = site.urlProbe
     const username_claimed: string = site.username_claimed
     const username_unclaimed: string = site.username_unclaimed
 
     // Take url and replace '{}' with the username
-    const profileUrl = url.replace("{}", username_claimed)
+    let profileUrl = ""
+    if (urlProbe) {
+        profileUrl = urlProbe.replace("{}", username_unclaimed)
+    }
+    else {
+        profileUrl = url.replace("{}", username_unclaimed)
+    }
 
     let response
     switch (errorType) {
         case "status_code":
+            break
             console.log("Status Code!")
             // A 2XX status code (response.status) will be returned if the profile exists.
-            // CORS not cooperating with 'HEAD'
             response = await fetch(profileUrl, { method: 'HEAD' }, 5000)    // timeout after 5s
                                     .catch(error => {
                                         console.log("Error! - " + error)
@@ -127,11 +142,12 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
 
 
         case "message":
-            console.log("Message!")
+            console.log("Message!")            
             // A specific error message will be returned if the profile does not exist, specified by 'errorMsg'
             // Compare 'response' to 'errorMsg'
             // console.log(`${siteName} -- Checking if response message is '${errorMsg}'...`)
-            response = await fetch(profileUrl, { credentials: 'include' }, 5000)    // timeout after 5s
+            // response = await fetch(profileUrl, { credentials: 'include' }, 5000)    // timeout after 5s
+            response = await fetch(profileUrl, { }, 5000)    // timeout after 5s
                                     .then(r => {
                                         return r.text()
                                     })
@@ -142,11 +158,11 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
             
             if (typeof errorMsg === "string") {     // only one error message to check
                 // if the response failed, or the response includes the error message, profile doesn't exist
-                return (response === undefined) ? false : response.includes(errorMsg)
+                return !responseContainsError(response, errorMsg)
             }
             else {  // typeof errorMsg is a string[]
                 for (const msg in errorMsg) {
-                    if (! ((response === undefined) ? false : response.includes(msg)) ) {
+                    if (responseContainsError(response, msg)) {
                         // if the response failed, or the response includes one of the error messages, profile doesn't exist
                         return false
                     }
@@ -159,6 +175,7 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
 
 
         case "response_url":
+            break
             console.log("Response URL!")
             // A specific URL will be returned if the profile does not exist, specified by 'errorUrl'
             // Compare 'response' to 'errorUrl'
@@ -181,6 +198,15 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
     }
 
     return false
+}
+
+const responseContainsError = (response: string, errorMsg: string) => {
+    if (response === undefined) {
+        // response doesn't include errorMsg, but request clearly failed, so return true anyways since the profile doesn't exist
+        return true
+    }
+
+    return response.includes(errorMsg)
 }
 
 export default searchSites

@@ -1,766 +1,346 @@
 [
   [
-    "7Cups",
-    "status_code"
-  ],
-  [
-    "About.me",
-    "status_code"
-  ],
-  [
-    "Academia.edu",
-    "status_code"
-  ],
-  [
-    "Alik.cz",
-    "status_code"
-  ],
-  [
-    "Anobii",
-    "response_url"
-  ],
-  [
-    "Asciinema",
-    "status_code"
-  ],
-  [
-    "Audiojungle",
-    "status_code"
-  ],
-  [
-    "Avizo",
-    "response_url"
-  ],
-  [
-    "BLIP.fm",
-    "status_code"
-  ],
-  [
-    "BOOTH",
-    "response_url"
-  ],
-  [
-    "Bandcamp",
-    "status_code"
-  ],
-  [
-    "Bazar.cz",
-    "response_url"
-  ],
-  [
-    "Behance",
-    "status_code"
-  ],
-  [
-    "BitBucket",
-    "status_code"
-  ],
-  [
-    "Blogger",
-    "status_code"
-  ],
-  [
-    "BodyBuilding",
-    "response_url"
-  ],
-  [
-    "Bookcrossing",
-    "status_code"
-  ],
-  [
-    "BuyMeACoffee",
-    "status_code"
-  ],
-  [
-    "BuzzFeed",
-    "status_code"
-  ],
-  [
-    "CNET",
-    "status_code"
-  ],
-  [
-    "Carbonmade",
-    "response_url"
-  ],
-  [
-    "Championat",
-    "status_code"
-  ],
-  [
-    "Cloob",
-    "status_code"
-  ],
-  [
-    "CloudflareCommunity",
-    "status_code"
-  ],
-  [
-    "Codecademy",
-    "status_code"
-  ],
-  [
-    "Codechef",
-    "response_url"
-  ],
-  [
-    "Codepen",
-    "status_code"
-  ],
-  [
-    "Codewars",
-    "status_code"
-  ],
-  [
-    "ColourLovers",
-    "status_code"
-  ],
-  [
-    "Coroflot",
-    "status_code"
-  ],
-  [
-    "Cracked",
-    "response_url"
-  ],
-  [
-    "Crevado",
-    "status_code"
-  ],
-  [
-    "DEV Community",
-    "status_code"
-  ],
-  [
-    "DailyMotion",
-    "status_code"
-  ],
-  [
-    "Designspiration",
-    "status_code"
-  ],
-  [
-    "DeviantART",
-    "status_code"
-  ],
-  [
-    "Discogs",
-    "status_code"
-  ],
-  [
-    "Discuss.Elastic.co",
-    "status_code"
-  ],
-  [
-    "Disqus",
-    "status_code"
-  ],
-  [
-    "Docker Hub",
-    "status_code"
-  ],
-  [
-    "Etsy",
-    "status_code"
-  ],
-  [
-    "EyeEm",
-    "status_code"
-  ],
-  [
-    "F3.cool",
-    "status_code"
-  ],
-  [
-    "Facenama",
-    "response_url"
-  ],
-  [
-    "Fandom",
-    "status_code"
-  ],
-  [
-    "Flickr",
-    "status_code"
-  ],
-  [
-    "Flightradar24",
-    "status_code"
-  ],
-  [
-    "Flipboard",
-    "status_code"
-  ],
-  [
-    "FortniteTracker",
-    "status_code"
-  ],
-  [
-    "Freesound",
-    "status_code"
-  ],
-  [
-    "GDProfiles",
-    "status_code"
-  ],
-  [
-    "Gamespot",
-    "status_code"
-  ],
-  [
-    "GetMyUni",
-    "status_code"
-  ],
-  [
-    "Giphy",
-    "status_code"
-  ],
-  [
-    "GitHub",
-    "status_code"
-  ],
-  [
-    "Gitee",
-    "status_code"
-  ],
-  [
-    "GoodReads",
-    "status_code"
-  ],
-  [
-    "Gravatar",
-    "status_code"
-  ],
-  [
-    "GunsAndAmmo",
-    "status_code"
-  ],
-  [
-    "GuruShots",
-    "status_code"
-  ],
-  [
-    "HackTheBox",
-    "status_code"
-  ],
-  [
-    "Hackaday",
-    "status_code"
-  ],
-  [
-    "HubPages",
-    "status_code"
-  ],
-  [
-    "ImgUp.cz",
-    "status_code"
-  ],
-  [
-    "Imgur",
-    "status_code"
-  ],
-  [
-    "Instructables",
-    "status_code"
-  ],
-  [
-    "Issuu",
-    "status_code"
-  ],
-  [
-    "Itch.io",
-    "status_code"
-  ],
-  [
-    "Jimdo",
-    "status_code"
-  ],
-  [
-    "Kaggle",
-    "status_code"
-  ],
-  [
-    "Keybase",
-    "status_code"
-  ],
-  [
-    "LOR",
-    "status_code"
-  ],
-  [
-    "Launchpad",
-    "status_code"
-  ],
-  [
-    "LeetCode",
-    "status_code"
-  ],
-  [
-    "LiveJournal",
-    "status_code"
-  ],
-  [
-    "Lobsters",
-    "status_code"
-  ],
-  [
-    "Medium",
+    "3dnews",
     "message"
   ],
   [
-    "Memrise",
-    "status_code"
+    "AllTrails",
+    "message"
   ],
   [
-    "MixCloud",
-    "status_code"
+    "Apple Discussions",
+    "message"
   ],
   [
-    "Munzee",
-    "status_code"
+    "Archive.org",
+    "message"
   ],
   [
-    "MyAnimeList",
-    "status_code"
+    "AskFM",
+    "message"
   ],
   [
-    "MyMiniFactory",
-    "status_code"
+    "Atom Discussions",
+    "message"
   ],
   [
-    "Myspace",
-    "status_code"
+    "BitCoinForum",
+    "message"
   ],
   [
-    "Newgrounds",
-    "status_code"
+    "CapFriendly",
+    "message"
   ],
   [
-    "Nightbot",
-    "status_code"
+    "Career.habr",
+    "message"
   ],
   [
-    "NotABug.org",
-    "status_code"
+    "Cent",
+    "message"
   ],
   [
-    "OK",
-    "status_code"
+    "Chatujme.cz",
+    "message"
   ],
   [
-    "OpenStreetMap",
-    "status_code"
+    "Chess",
+    "message"
   ],
   [
-    "Opensource",
-    "status_code"
+    "Clozemaster",
+    "message"
   ],
   [
-    "Otzovik",
-    "status_code"
+    "Contently",
+    "message"
   ],
   [
-    "PSNProfiles.com",
-    "response_url"
+    "Dribbble",
+    "message"
   ],
   [
-    "Packagist",
-    "response_url"
+    "Duolingo",
+    "message"
   ],
   [
-    "Patreon",
-    "status_code"
+    "Ello",
+    "message"
   ],
   [
-    "Periscope",
-    "status_code"
+    "Euw",
+    "message"
   ],
   [
-    "Pinkbike",
-    "status_code"
+    "Football",
+    "message"
   ],
   [
-    "Pinterest",
-    "status_code"
+    "Freelance.habr",
+    "message"
   ],
   [
-    "PlayStore",
-    "status_code"
+    "Freelancer.com",
+    "message"
   ],
   [
-    "Pokemon Showdown",
-    "status_code"
+    "GitHub Support Community",
+    "message"
   ],
   [
-    "Polarsteps",
-    "status_code"
+    "Gumroad",
+    "message"
   ],
   [
-    "Polygon",
-    "status_code"
+    "HackerNews",
+    "message"
   ],
   [
-    "PromoDJ",
-    "status_code"
+    "HackerOne",
+    "message"
   ],
   [
-    "PyPi",
-    "status_code"
+    "HackerRank",
+    "message"
   ],
   [
-    "Rajce.net",
-    "status_code"
+    "House-Mixes.com",
+    "message"
   ],
   [
-    "Rate Your Music",
-    "status_code"
+    "Houzz",
+    "message"
   ],
   [
-    "Redbubble",
-    "status_code"
+    "Hubski",
+    "message"
   ],
   [
-    "Repl.it",
-    "status_code"
+    "ICQ",
+    "message"
   ],
   [
-    "ResearchGate",
-    "response_url"
+    "IFTTT",
+    "message"
   ],
   [
-    "RubyGems",
-    "status_code"
+    "Kali community",
+    "message"
   ],
   [
-    "Sbazar.cz",
-    "status_code"
+    "Kik",
+    "message"
   ],
   [
-    "Scratch",
-    "status_code"
+    "Kongregate",
+    "message"
   ],
   [
-    "ShitpostBot5000",
-    "status_code"
+    "Letterboxd",
+    "message"
   ],
   [
-    "Slack",
-    "status_code"
+    "Lichess",
+    "message"
   ],
   [
-    "SlideShare",
-    "status_code"
+    "LiveLeak",
+    "message"
   ],
   [
-    "Smule",
-    "status_code"
+    "Lolchess",
+    "message"
   ],
   [
-    "SoundCloud",
-    "status_code"
+    "NICommunityForum",
+    "message"
   ],
   [
-    "SourceForge",
-    "status_code"
+    "NameMC (Minecraft.net skins)",
+    "message"
   ],
   [
-    "Splits.io",
-    "status_code"
+    "NationStates Nation",
+    "message"
   ],
   [
-    "Sporcle",
-    "status_code"
+    "NationStates Region",
+    "message"
   ],
   [
-    "SportsRU",
-    "status_code"
+    "OurDJTalk",
+    "message"
   ],
   [
-    "Spotify",
-    "status_code"
+    "PCGamer",
+    "message"
   ],
   [
-    "Star Citizen",
-    "status_code"
+    "Pastebin",
+    "message"
   ],
   [
-    "SublimeForum",
-    "status_code"
+    "ProductHunt",
+    "message"
   ],
   [
-    "Tellonym.me",
-    "status_code"
+    "Quizlet",
+    "message"
   ],
   [
-    "TikTok",
-    "status_code"
+    "Quora",
+    "message"
   ],
   [
-    "TradingView",
-    "status_code"
+    "ReverbNation",
+    "message"
   ],
   [
-    "Trakt",
-    "status_code"
+    "Roblox",
+    "message"
   ],
   [
-    "TryHackMe",
-    "status_code"
+    "Scribd",
+    "message"
   ],
   [
-    "Twitch",
-    "status_code"
+    "Signal",
+    "message"
   ],
   [
-    "Ultimate-Guitar",
-    "status_code"
+    "Slashdot",
+    "message"
   ],
   [
-    "Unsplash",
-    "status_code"
+    "SoylentNews",
+    "message"
   ],
   [
-    "VSCO",
-    "status_code"
+    "SparkPeople",
+    "message"
   ],
   [
-    "Venmo",
-    "status_code"
+    "Speedrun.com",
+    "message"
   ],
   [
-    "Vero",
-    "status_code"
+    "Steam",
+    "message"
   ],
   [
-    "Vimeo",
-    "status_code"
+    "SteamGroup",
+    "message"
   ],
   [
-    "Warrior Forum",
-    "status_code"
+    "Steamid",
+    "message"
   ],
   [
-    "Wattpad",
-    "status_code"
+    "Strava",
+    "message"
   ],
   [
-    "WebNode",
-    "status_code"
+    "TETR.IO",
+    "message"
   ],
   [
-    "Whonix Forum",
-    "status_code"
+    "Telegram",
+    "message"
   ],
   [
-    "Windy",
-    "status_code"
+    "TrackmaniaLadder",
+    "message"
   ],
   [
-    "Wix",
-    "status_code"
+    "TrashboxRU",
+    "message"
   ],
   [
-    "WordPress",
-    "response_url"
+    "Trello",
+    "message"
   ],
   [
-    "WordPressOrg",
-    "status_code"
+    "TripAdvisor",
+    "message"
   ],
   [
-    "Xbox Gamertag",
-    "status_code"
+    "Typeracer",
+    "message"
   ],
   [
-    "YouPic",
-    "status_code"
+    "Velomania",
+    "message"
   ],
   [
-    "Zhihu",
-    "response_url"
+    "Virgool",
+    "message"
   ],
   [
-    "akniga",
-    "status_code"
+    "We Heart It",
+    "message"
   ],
   [
-    "aminoapp",
-    "status_code"
+    "Wikidot",
+    "message"
   ],
   [
-    "chaos.social",
-    "status_code"
+    "Wikipedia",
+    "message"
   ],
   [
-    "couchsurfing",
-    "status_code"
+    "YouNow",
+    "message"
   ],
   [
-    "d3RU",
-    "status_code"
+    "YouTube",
+    "message"
   ],
   [
-    "dailykos",
-    "status_code"
+    "allmylinks",
+    "message"
   ],
   [
-    "datingRU",
-    "status_code"
+    "babyRU",
+    "message"
   ],
   [
-    "devRant",
-    "response_url"
+    "babyblogRU",
+    "message"
   ],
   [
-    "drive2",
-    "status_code"
+    "forum_guns",
+    "message"
   ],
   [
-    "eGPU",
-    "status_code"
+    "forumhouseRU",
+    "message"
   ],
   [
-    "eintracht",
-    "status_code"
+    "hunting",
+    "message"
   ],
   [
-    "fixya",
-    "status_code"
+    "igromania",
+    "message"
   ],
   [
-    "fl",
-    "status_code"
+    "interpals",
+    "message"
   ],
   [
-    "geocaching",
-    "status_code"
+    "jeuxvideo",
+    "message"
   ],
   [
-    "gfycat",
-    "status_code"
+    "metacritic",
+    "message"
   ],
   [
-    "habr",
-    "status_code"
+    "opennet",
+    "message"
   ],
   [
-    "hackster",
-    "status_code"
-  ],
-  [
-    "iMGSRC.RU",
-    "response_url"
-  ],
-  [
-    "irecommend",
-    "status_code"
-  ],
-  [
-    "jbzd.com.pl",
-    "status_code"
-  ],
-  [
-    "kofi",
-    "response_url"
-  ],
-  [
-    "kwork",
-    "status_code"
-  ],
-  [
-    "labpentestit",
-    "response_url"
-  ],
-  [
-    "last.fm",
-    "status_code"
-  ],
-  [
-    "leasehackr",
-    "status_code"
-  ],
-  [
-    "livelib",
-    "status_code"
-  ],
-  [
-    "mastodon.cloud",
-    "status_code"
-  ],
-  [
-    "mastodon.social",
-    "status_code"
-  ],
-  [
-    "mastodon.technology",
-    "status_code"
-  ],
-  [
-    "mastodon.xyz",
-    "status_code"
-  ],
-  [
-    "mercadolivre",
-    "status_code"
-  ],
-  [
-    "mstdn.io",
-    "status_code"
-  ],
-  [
-    "nairaland.com",
-    "status_code"
-  ],
-  [
-    "nnRU",
-    "status_code"
-  ],
-  [
-    "note",
-    "status_code"
-  ],
-  [
-    "npm",
-    "status_code"
-  ],
-  [
-    "osu!",
-    "status_code"
-  ],
-  [
-    "pikabu",
-    "status_code"
-  ],
-  [
-    "pr0gramm",
-    "status_code"
-  ],
-  [
-    "prog.hu",
-    "response_url"
-  ],
-  [
-    "radio_echo_msk",
-    "status_code"
-  ],
-  [
-    "satsisRU",
-    "status_code"
-  ],
-  [
-    "social.tchncs.de",
-    "status_code"
-  ],
-  [
-    "spletnik",
-    "status_code"
-  ],
-  [
-    "toster",
-    "status_code"
-  ],
-  [
-    "uid",
-    "status_code"
+    "phpRU",
+    "message"
   ]
 ]
