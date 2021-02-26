@@ -8,6 +8,10 @@
     "message"
   ],
   [
+    "9GAG",
+    "status_code"
+  ],
+  [
     "AllTrails",
     "message"
   ],
@@ -68,6 +72,10 @@
     "message"
   ],
   [
+    "Countable",
+    "status_code"
+  ],
+  [
     "Dribbble",
     "message"
   ],
@@ -80,12 +88,12 @@
     "message"
   ],
   [
-    "Etsy",
-    "status_code"
-  ],
-  [
     "Euw",
     "message"
+  ],
+  [
+    "Facebook",
+    "status_code"
   ],
   [
     "Football",
@@ -192,7 +200,7 @@
     "status_code"
   ],
   [
-    "Otzovik",
+    "Oracle Community",
     "status_code"
   ],
   [
@@ -228,16 +236,20 @@
     "message"
   ],
   [
+    "Raidforums",
+    "status_code"
+  ],
+  [
+    "Reddit",
+    "status_code"
+  ],
+  [
     "ReverbNation",
     "message"
   ],
   [
     "Roblox",
     "message"
-  ],
-  [
-    "Scratch",
-    "status_code"
   ],
   [
     "Scribd",
@@ -312,12 +324,16 @@
     "message"
   ],
   [
+    "Twitter",
+    "status_code"
+  ],
+  [
     "Typeracer",
     "message"
   ],
   [
     "VK",
-    "response_code"
+    "status_code"
   ],
   [
     "Velomania",
@@ -344,10 +360,6 @@
     "message"
   ],
   [
-    "WordPressOrg",
-    "response_code"
-  ],
-  [
     "YouNow",
     "message"
   ],
@@ -358,6 +370,10 @@
   [
     "allmylinks",
     "message"
+  ],
+  [
+    "authorSTREAM",
+    "status_code"
   ],
   [
     "babyRU",
@@ -392,12 +408,12 @@
     "message"
   ],
   [
-    "labpentestit",
-    "response_url"
-  ],
-  [
     "metacritic",
     "message"
+  ],
+  [
+    "moikrug",
+    "status_code"
   ],
   [
     "opennet",

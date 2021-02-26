@@ -1,8 +1,12 @@
 import { search } from 'pouchdb-find';
-import searchSites from 'search/search';
+import { searchSites, SearchResult } from 'search/search';
 import { allSites } from './sites';
 
 export * from './sites';
 
-let usernames: string[] = ["blue"]
-searchSites(usernames)
+const findProfiles = async (usernames: string[]) => {
+    const foundProfiles: SearchResult[] = await searchSites(usernames)
+    console.log(foundProfiles)
+}
+
+findProfiles(["blue"])

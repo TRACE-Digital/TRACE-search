@@ -6,11 +6,11 @@
 
  /*             TODO:
 
- - Run test again to see success rate rn
  - Fix 'response_url' handling to prevent redirect and check original status code
  - Tinker with CORS settings for 'message' handling
- - Add successes to SearchResultList that is usable by ReactJS
- 
+ - Maybe add regex check?
+ - Meet w/ group and figure out format to send frontend
+
  */
 
  
@@ -26,9 +26,9 @@ export interface SearchResult {
     profileUrl: string
 }
 
-export interface SearchResultList {
-    [key: string]: SearchResult
-}
+// export interface SearchResultList {
+//     [key: string]: SearchResult
+// }
 
 
 
@@ -47,27 +47,37 @@ Access-Control-Allow-Credentials: 'expose'
     By default, sherlock.json has 298 sites (as of 2-25-21)
 */
 export const searchSites = async (usernames: string[]) => {
-    let foundProfiles: SearchResultList = {}
+    const foundProfiles: SearchResult[] = []
 
-    let pass = []
-    let fail = []
+    const pass: any[] = []
+    const fail: any[] = []
 
     // For each username, loop through each site to check if a profile exists
-    for (let username in usernames) {
-        for (let site in allSites) {
+    for (const username of usernames) {
+        for (const site in allSites) {
             try {
-            let profileExists = await checkIfProfileExists(site, allSites[site], username)
+            const profileExists = await checkIfProfileExists(site, allSites[site], username)
             
             if (profileExists) {
                 // append profile to foundProfiles SearchResultList
-                // TODO
+                const profileUrl = allSites[site].url.replace("{}", username)
+
+                const foundProfile: SearchResult = {
+                    "siteName": site,
+                    "siteUrl": allSites[site].urlMain,
+                    "username": username,
+                    "profileUrl": profileUrl,
+                }
+                
+                foundProfiles.push(foundProfile)
+                // DEBUG
                 pass.push([site, allSites[site].errorType])
             }
-            else {
+            else {   // DEBUG
                 fail.push([site, allSites[site].errorType])
             }
-
             console.log(`${site} -- profileExists: ${profileExists}\n====================`)
+
             } catch(error) {
                 // This will ignore any json items that are malformed
                 continue
@@ -87,14 +97,14 @@ export const searchSites = async (usernames: string[]) => {
 
 
 const checkIfProfileExists = async (siteName: string, site: Site, username: string) => {
-    let errorMsg: string | string[] | undefined = site.errorMsg
-    let errorType: string = site.errorType
-    let errorUrl: string | undefined = site.errorUrl
-    let regexCheck: string | undefined = site.regexCheck            // valid username regex for website - don't make request if invalid!
-    let url: string = site.url
-    let urlMain: string = site.urlMain
-    let username_claimed: string = site.username_claimed
-    let username_unclaimed: string = site.username_unclaimed
+    const errorMsg: string | string[] | undefined = site.errorMsg
+    const errorType: string = site.errorType
+    const errorUrl: string | undefined = site.errorUrl
+    const regexCheck: string | undefined = site.regexCheck            // valid username regex for website - don't make request if invalid!
+    const url: string = site.url
+    const urlMain: string = site.urlMain
+    const username_claimed: string = site.username_claimed
+    const username_unclaimed: string = site.username_unclaimed
 
     // Take url and replace '{}' with the username
     const profileUrl = url.replace("{}", username_claimed)
@@ -104,7 +114,6 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
         case "status_code":
             console.log("Status Code!")
             // A 2XX status code (response.status) will be returned if the profile exists.
-            // To speed things up, just use a 'HEAD' request (TODO)
             // CORS not cooperating with 'HEAD'
             response = await fetch(profileUrl, { method: 'HEAD' }, 5000)    // timeout after 5s
                                     .catch(error => {
@@ -123,8 +132,8 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
             // Compare 'response' to 'errorMsg'
             // console.log(`${siteName} -- Checking if response message is '${errorMsg}'...`)
             response = await fetch(profileUrl, { credentials: 'include' }, 5000)    // timeout after 5s
-                                    .then(response => {
-                                        return response.text()
+                                    .then(r => {
+                                        return r.text()
                                     })
                                     .catch(error => {
                                         console.log("Error! - " + error)
@@ -136,7 +145,7 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
                 return (response === undefined) ? false : response.includes(errorMsg)
             }
             else {  // typeof errorMsg is a string[]
-                for (let msg in errorMsg) {
+                for (const msg in errorMsg) {
                     if (! ((response === undefined) ? false : response.includes(msg)) ) {
                         // if the response failed, or the response includes one of the error messages, profile doesn't exist
                         return false
@@ -166,7 +175,7 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
                                 })
             
             // If response fails (undefined), return false. Otherwise, check the redirect url of the response. If that matches the expected redirect, profile doesn't exist. 
-            return (response === undefined) ? false : response.url != errorUrl
+            return (response === undefined) ? false : response.url !== errorUrl // TODO: triple equals or no? compare differently?
             return false
             break
     }

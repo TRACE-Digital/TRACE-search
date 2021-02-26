@@ -4,10 +4,6 @@
     "status_code"
   ],
   [
-    "9GAG",
-    "status_code"
-  ],
-  [
     "About.me",
     "status_code"
   ],
@@ -124,10 +120,6 @@
     "status_code"
   ],
   [
-    "Countable",
-    "status_code"
-  ],
-  [
     "Cracked",
     "response_url"
   ],
@@ -168,15 +160,15 @@
     "status_code"
   ],
   [
+    "Etsy",
+    "status_code"
+  ],
+  [
     "EyeEm",
     "status_code"
   ],
   [
     "F3.cool",
-    "status_code"
-  ],
-  [
-    "Facebook",
     "status_code"
   ],
   [
@@ -364,7 +356,7 @@
     "status_code"
   ],
   [
-    "Oracle Community",
+    "Otzovik",
     "status_code"
   ],
   [
@@ -416,10 +408,6 @@
     "status_code"
   ],
   [
-    "Raidforums",
-    "status_code"
-  ],
-  [
     "Rajce.net",
     "status_code"
   ],
@@ -429,10 +417,6 @@
   ],
   [
     "Redbubble",
-    "status_code"
-  ],
-  [
-    "Reddit",
     "status_code"
   ],
   [
@@ -449,6 +433,10 @@
   ],
   [
     "Sbazar.cz",
+    "status_code"
+  ],
+  [
+    "Scratch",
     "status_code"
   ],
   [
@@ -524,10 +512,6 @@
     "status_code"
   ],
   [
-    "Twitter",
-    "status_code"
-  ],
-  [
     "Ultimate-Guitar",
     "status_code"
   ],
@@ -580,6 +564,10 @@
     "response_url"
   ],
   [
+    "WordPressOrg",
+    "status_code"
+  ],
+  [
     "Xbox Gamertag",
     "status_code"
   ],
@@ -597,10 +585,6 @@
   ],
   [
     "aminoapp",
-    "status_code"
-  ],
-  [
-    "authorSTREAM",
     "status_code"
   ],
   [
@@ -684,6 +668,10 @@
     "status_code"
   ],
   [
+    "labpentestit",
+    "response_url"
+  ],
+  [
     "last.fm",
     "status_code"
   ],
@@ -713,10 +701,6 @@
   ],
   [
     "mercadolivre",
-    "status_code"
-  ],
-  [
-    "moikrug",
     "status_code"
   ],
   [
