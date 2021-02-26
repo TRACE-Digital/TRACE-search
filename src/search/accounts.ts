@@ -3,15 +3,20 @@
  * and third-party accounts.
  */
 
-import { DbResponse, getDb, IDbStorable, PouchDbId, toId } from 'db';
+import { DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId } from 'db';
 import {
   AccountSchema,
   ClaimedAccountSchema,
+  deserializeSite,
   DiscoveredAccountSchema,
   ManualAccountSchema,
   RejectedAccountSchema,
+  UnregisteredAccountSchema,
 } from 'db/schema';
 import { Site } from 'sites';
+
+/** Collection of accounts that have already been pulled out of the database. */
+export const accounts: { [key: string]: ThirdPartyAccount } = {};
 
 export enum AccountType {
   DISCOVERED = 'Discovered',
@@ -27,37 +32,82 @@ export enum AccountType {
 export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 /**
- * TODO: Figure out these constructors
- *
- * They make sense now, but I don't know if they'll work with
- * de-serialization from the database.
- *
- * Default constructor with a `deserialize()` method might be better.
- */
-
-/**
  * Account associated with a third-party `Site`.
  */
 export abstract class ThirdPartyAccount implements IDbStorable {
-  public readonly id: PouchDbId;
+
+  /**
+   * Factory method for creating an account using the appropriate subclass.
+   */
+  public static async factory(data: AccountSchema): Promise<ThirdPartyAccount> {
+    if (data.type === AccountType.DISCOVERED) {
+      return await DiscoveredAccount.deserialize(data as DiscoveredAccountSchema);
+    } else if (data.type === AccountType.CLAIMED) {
+      return await ClaimedAccount.deserialize(data as ClaimedAccountSchema);
+    } else if (data.type === AccountType.REJECTED) {
+      return await RejectedAccount.deserialize(data as RejectedAccountSchema);
+    } else if (data.type === AccountType.MANUAL) {
+      return await ManualAccount.deserialize(data as ManualAccountSchema);
+    } else if (data.type === AccountType.UNREGISTERED) {
+      return await UnregisteredAccount.deserialize(data as UnregisteredAccountSchema);
+    } else {
+      throw new Error(`Cannot deserialize unhandled account type '${data.type}'`);
+    }
+  }
+
+  /**
+   * Factory method for deserializing an account of any type.
+   *
+   * Also contains deserialization steps shared by all `ThirdPartyAccount`s.
+   *
+   * Derived classes MUST override this and call it with `instance` defined.
+   * Failure to do so will result in an infinite loop of:
+   *
+   * ```
+   * derived.deserialize() -> super.deserialize() -> factory() ->
+   * derived.deserialize() -> super.deserialize() -> factory() -> ...
+   * ```
+   */
+  public static async deserialize(data: AccountSchema, instance?: ThirdPartyAccount) {
+    throwIfIdMismatch(data, instance);
+
+    if (instance === undefined) {
+      // Caution: if a derived class doesn't override this or calls this without creating
+      // an instance, we'll recurse infinitely
+      instance = await ThirdPartyAccount.factory(data);
+    }
+
+    instance.id = data._id;
+    instance.rev = data._rev;
+    instance.type = data.type;
+    instance.createdAt = new Date(data.createdAt);
+    instance.userName = data.userName;
+    instance.site = deserializeSite(data);
+
+    accounts[instance.id] = instance;
+
+    return instance;
+  }
+
+  public id: PouchDbId;
   public rev: string = '';
 
   abstract type: AccountType;
   public createdAt: Date = new Date();
 
-  public readonly site: Site;
-  public readonly userName: string;
-  public readonly url: string;
+  public site: Site;
+  public userName: string;
+  public get url() {
+    // TODO: This is simple replacement for the Python format strings
+    // Need to make sure this works for everything
+    return this.site.url.replace('{}', this.userName);
+  }
 
-  constructor(site: Site, userName: string, idPrefix: string[] = []) {
+  constructor(site: Site, userName: string, idPrefix?: string) {
     this.site = site;
     this.userName = userName;
 
-    this.id = toId(idPrefix.slice().concat(['account', this.site.name, this.userName]));
-
-    // TODO: Simple replacement for the Python format strings
-    // Need to make sure this works for everything
-    this.url = this.site.url.replace('{}', this.userName);
+    this.id = toId(['account', this.site.name, this.userName], idPrefix);
   }
 
   /**
@@ -69,6 +119,9 @@ export abstract class ThirdPartyAccount implements IDbStorable {
   public async save(): Promise<DbResponse> {
     const db = await getDb();
     const result = await db.put(this.serialize());
+
+    console.debug(`Saving account ${this.id}...`);
+
     if (result.ok) {
       this.rev = result.rev;
       return result;
@@ -96,6 +149,20 @@ export abstract class ThirdPartyAccount implements IDbStorable {
  * Has not been claimed or rejected yet.
  */
 export class DiscoveredAccount extends ThirdPartyAccount {
+
+  public static async deserialize(data: DiscoveredAccountSchema, existingInstance?: DiscoveredAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new DiscoveredAccount(site, data.userName);
+
+    super.deserialize(data, instance);
+
+    instance.confidence = data.confidence;
+    instance.matchedFirstNames = data.matchedFirstNames;
+    instance.matchedLastNames = data.matchedLastNames;
+
+    return instance;
+  }
+
   public type = AccountType.DISCOVERED;
 
   public confidence: ConfidenceRating = 5;
@@ -103,27 +170,23 @@ export class DiscoveredAccount extends ThirdPartyAccount {
   public matchedLastNames: string[] = [];
 
   /**
-   * Convert this account into a `ClaimedAccount`.
+   * Return a claimed version of this account.
    */
   public claim(): ClaimedAccount {
-    this.type = AccountType.CLAIMED;
-
-    const modified = this as any;
-    modified.claimedAt = new Date();
-    return modified as ClaimedAccount;
+    // TODO: Figure out how to mark that this DiscoveredAccount has been claimed
+    // without messing up future serialization
+    // this.type = AccountType.CLAIMED;
+    return new ClaimedAccount(this.site, this.userName);
   }
 
   /**
-   * Reject and convert this account into a `RejectedAccount`.
-   *
-   * TODO: This doesn't really convert the type in Typescript's eyes yet
+   * Return a rejected version of this account.
    */
   public reject(): RejectedAccount {
-    this.type = AccountType.REJECTED;
-
-    const modified = this as any;
-    modified.rejectedAt = new Date();
-    return modified as RejectedAccount;
+    // TODO: Figure out how to mark that this DiscoveredAccount has been claimed
+    // without messing up future serialization
+    // this.type = AccountType.REJECTED;
+    return new RejectedAccount(this.site, this.userName);
   }
 
   public serialize(): DiscoveredAccountSchema {
@@ -139,6 +202,18 @@ export class DiscoveredAccount extends ThirdPartyAccount {
  * Account that has been claimed by the user after `Search`.
  */
 export class ClaimedAccount extends DiscoveredAccount {
+
+  public static async deserialize(data: ClaimedAccountSchema, existingInstance?: ClaimedAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new ClaimedAccount(site, data.userName);
+
+    super.deserialize(data, instance);
+
+    instance.claimedAt = new Date(data.claimedAt);
+
+    return instance;
+  }
+
   public type = AccountType.CLAIMED;
   public claimedAt: Date = new Date();
 
@@ -153,6 +228,18 @@ export class ClaimedAccount extends DiscoveredAccount {
  * Account that has been rejected by the user after `Search`.
  */
 export class RejectedAccount extends DiscoveredAccount {
+
+  public static async deserialize(data: RejectedAccountSchema, existingInstance?: RejectedAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new RejectedAccount(site, data.userName);
+
+    super.deserialize(data, instance);
+
+    instance.rejectedAt = new Date(data.rejectedAt);
+
+    return instance;
+  }
+
   public type = AccountType.REJECTED;
   public rejectedAt: Date = new Date();
 
@@ -169,6 +256,18 @@ export class RejectedAccount extends DiscoveredAccount {
  * This does not come from `Search`.
  */
 export class ManualAccount extends ThirdPartyAccount {
+
+  public static async deserialize(data: ManualAccountSchema, existingInstance?: ManualAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new ManualAccount(site, data.userName);
+
+    super.deserialize(data, instance);
+
+    instance.lastEditedAt = new Date(data.lastEditedAt);
+
+    return instance;
+  }
+
   public type = AccountType.MANUAL;
   public lastEditedAt: Date = new Date();
 
@@ -192,5 +291,19 @@ export class ManualAccount extends ThirdPartyAccount {
  * This implies the user name hasn't been registered on the site.
  */
 export class UnregisteredAccount extends ThirdPartyAccount {
+  public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new UnregisteredAccount(site, data.userName);
+
+    super.deserialize(data, instance);
+
+    return instance;
+  }
+
   public type = AccountType.UNREGISTERED;
+
+  public serialize(): UnregisteredAccountSchema {
+    const base = super.serialize() as UnregisteredAccountSchema;
+    return base;
+  }
 }

@@ -1,5 +1,5 @@
 import { allSites } from 'sites';
-import { getDb } from 'db';
+import { getDb, SearchDefinitionSchema, UTF_MAX } from 'db';
 import * as meta from 'meta';
 import { ClaimedAccount, DiscoveredAccount, SearchDefinition } from 'search';
 import deepEqual from 'deep-equal';
@@ -26,13 +26,11 @@ async function main() {
   search.start();
   console.log(`Progress: ${search.progress}%`);
   console.log(search.results);
-  console.log(search.resultsDict);
+  console.log(search.resultsMap);
 
-  // TODO: This isn't working as expected yet
-  // Claiming doesn't change the instanceof result
   const claimed = search.discoveredResults[0].claim();
+  console.log('Claim account');
   console.log(claimed);
-  console.log(typeof claimed);
   console.log(claimed instanceof ClaimedAccount);
   console.log(claimed instanceof DiscoveredAccount);
 
@@ -41,19 +39,23 @@ async function main() {
 
   console.log(searchDef.serialize());
   console.log(search.serialize());
+  console.log(search.discoveredResults[0].serialize());
   console.log(claimed.serialize());
 
   console.groupEnd();
   console.groupCollapsed('Test database store/retrieve');
 
   const db = await getDb();
+  console.log('Database:');
   console.log(db);
 
   const result = await searchDef.save();
+  console.log('Search definition save result:');
   console.log(result);
 
-  const retrieved = await db.get(searchDef.id);
+  const retrieved = await db.get<SearchDefinitionSchema>(searchDef.id);
 
+  console.log('Search definition serialization/retrieval:')
   console.log(searchDef.serialize());
   console.log(retrieved);
 
@@ -63,6 +65,17 @@ async function main() {
 
   console.assert(areEqual, 'Database: stored !== retrieved');
   console.log(`stored === retrieved: ${areEqual}`);
+
+  const allSearchDefs = await db.allDocs({
+    include_docs: true,
+    startkey: 'searchDef/',
+    endkey: `searchDef/${UTF_MAX}`
+  });
+  console.log(allSearchDefs);
+
+  const searchDefDeserialized = await SearchDefinition.deserialize(retrieved);
+  console.log('Search definition deserialized');
+  console.log(searchDefDeserialized);
 
   console.groupEnd();
 }

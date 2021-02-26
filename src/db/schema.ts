@@ -1,4 +1,5 @@
-import { AccountType, SearchState } from 'search';
+import { AccountType, ConfidenceRating, SearchState } from 'search';
+import { allSites, Site } from 'sites';
 import { PouchDbId } from './types';
 
 /**
@@ -9,19 +10,24 @@ export interface BaseSchema {
   _rev: string;
 }
 
-/**
- * Accounts
- */
+////  Accounts  ////
 
+/**
+ * Allow a site definition directly on the object or as a
+ * reference into the `allSites` map.
+ *
+ * See `deserializeSite()` for details.
+ */
 export interface AccountSchema extends BaseSchema {
   type: AccountType;
   createdAt: string;
-  siteName: string;
+  site?: Site; // TODO: Make this SiteSchema if we add functions to Site
+  siteName?: string;
   userName: string;
 }
 
 export interface DiscoveredAccountSchema extends AccountSchema {
-  confidence: number;
+  confidence: ConfidenceRating;
   matchedFirstNames: string[];
   matchedLastNames: string[];
 }
@@ -38,9 +44,26 @@ export interface ManualAccountSchema extends AccountSchema {
   lastEditedAt: string;
 }
 
+export interface UnregisteredAccountSchema extends AccountSchema {
+}
+
 /**
- * Search
+ * Deserialize the `site` or `siteName` packed in `AccountSchema`.
+ *
+ * `site` takes precedence over `siteName`.
  */
+export function deserializeSite(data: AccountSchema): Site {
+  if (data.site) {
+    return data.site;
+  } else if (data.siteName && data.siteName in allSites) {
+    return allSites[data.siteName];
+  } else {
+    console.error(data);
+    throw new Error(`Cannot deserialize account. No site definition found!`);
+  }
+}
+
+////  Search  ////
 
 export interface SearchDefinitionSchema extends BaseSchema {
   name: string;

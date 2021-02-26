@@ -3,11 +3,13 @@
  * TRACE searches.
  */
 
-import { IDbStorable, getDb, PouchDbId, SearchDefinitionSchema, SearchSchema, toId, DbResponse } from 'db';
+import { IDbStorable, getDb, PouchDbId, SearchDefinitionSchema, SearchSchema, toId, DbResponse, DbDocError, DiscoveredAccountSchema, throwIfIdMismatch, isDbDocError } from 'db';
 import { allSites, Site, SiteList } from 'sites';
-import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { accounts, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
+/** Collection of search definitions that have already been pulled out of the database. */
 const searchDefinitions: { [key: string]: SearchDefinition } = {};
+/** Collection of searches that have already been pulled out of the database. */
 const searches: { [key: string]: Search } = {};
 
 /**
@@ -16,7 +18,62 @@ const searches: { [key: string]: Search } = {};
 export class SearchDefinition implements IDbStorable {
   private static idForDefaultName = 0;
 
-  public readonly id: PouchDbId;
+  public static async deserialize(data: SearchDefinitionSchema, existingInstance?: SearchDefinition) {
+    throwIfIdMismatch(data, existingInstance);
+
+    const instance = existingInstance || new SearchDefinition(data.name, data.includedSiteNames);
+
+    // TODO: Trust the constructor to get this right? Yes, probably
+    // instance.includedSites
+
+    instance.id = data._id;
+    instance.name = data.name;
+    instance.rev = data._rev;
+    instance.createdAt = new Date(data.createdAt);
+    instance.lastEditedAt = new Date(data.lastEditedAt);
+    instance.userNames = data.userNames;
+    instance.firstNames = data.firstNames;
+    instance.lastNames = data.lastNames;
+
+    // IMPORTANT: Add our instance before we create search history so that
+    // each entry can look us up and won't try to go to the db
+    searchDefinitions[instance.id] = instance;
+
+    const db = await getDb();
+    const response = await db.bulkGet<SearchSchema>({
+      docs: data.historyIds.map(id => ({ id: id }))
+    });
+
+    // Clear the history so we don't have to worry about duplicates
+    instance.history.length = 0;
+
+    for (const result of response.results) {
+      // Assume we only got back a single revision
+      const doc = result.docs[0];
+
+      if (isDbDocError(doc)) {
+        console.warn(`Skipping search '${result.id}': ${doc.error}`);
+        continue;
+      }
+
+      if (result.id in searches) {
+        instance.history.push(searches[result.id]);
+      } else {
+        try {
+          const search = await Search.deserialize(doc.ok)
+          instance.history.push(search);
+        } catch(e) {
+          console.debug(result);
+          console.warn(`Skipping search '${result.id}'. Failed to deserialize: ${e}`);
+          continue;
+        }
+      }
+    }
+
+    return instance;
+  }
+
+  public id: PouchDbId;
   public rev: string = '';
 
   public name: string;
@@ -58,7 +115,7 @@ export class SearchDefinition implements IDbStorable {
     siteNames = siteNames || Object.keys(allSites);
     this.includedSites = siteNames.map(name => allSites[name]);
 
-    this.id = toId(['searchDef', this.createdAt, this.name]);
+    this.id = toId(['searchDef', this.createdAt.toJSON(), this.name]);
   }
 
   /**
@@ -69,6 +126,7 @@ export class SearchDefinition implements IDbStorable {
   public new() {
     const search = new Search(this);
     this.history.push(search);
+    search.save();
     return search;
   }
 
@@ -96,6 +154,9 @@ export class SearchDefinition implements IDbStorable {
   public async save(): Promise<DbResponse> {
     const db = await getDb();
     const result = await db.put(this.serialize());
+
+    console.debug(`Saving search definition ${this.id}...`);
+
     if (result.ok) {
       this.rev = result.rev;
       return result;
@@ -126,7 +187,67 @@ export class SearchDefinition implements IDbStorable {
  */
 export class Search implements IDbStorable {
 
-  public readonly id: PouchDbId;
+  public static async deserialize(data: SearchSchema, existingInstance?: Search) {
+    throwIfIdMismatch(data, existingInstance);
+
+    const db = await getDb();
+
+    // We need the search definition to construct a new search
+    let definition: SearchDefinition;
+    if (existingInstance) {
+      definition = existingInstance.definition;
+    } else if (data.definitionId in searchDefinitions) {
+      definition = searchDefinitions[data.definitionId];
+    } else {
+      const definitionSchema = await db.get<SearchDefinitionSchema>(data.definitionId);
+      definition = await SearchDefinition.deserialize(definitionSchema);
+
+      // Deserializing the search definition should create the instance for us
+      const search = searches[data._id];
+      console.assert(search, `SearchDefinition.deserialize() did not create search '${data._id}'!`);
+      return search;
+    }
+
+    const instance = existingInstance || new Search(definition);
+
+    instance.id = data._id;
+    instance.rev = data._rev;
+    instance.definition = definition;
+    instance.state = data.state;
+    instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
+    instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
+
+    const response = await db.bulkGet<DiscoveredAccountSchema>({
+      docs: data.resultIds.map(id => ({ id: id }))
+    });
+
+    for (const result of response.results) {
+      // Assume we only got back a single revision
+      const doc = result.docs[0];
+
+      if (isDbDocError(doc)) {
+        console.warn(`Skipping document '${result.id}': ${doc.error}`);
+        continue;
+      }
+
+      if (result.id in accounts) {
+        instance.storeResult(accounts[result.id]);
+      } else {
+        try {
+          const account = await ThirdPartyAccount.deserialize(doc.ok);
+          instance.storeResult(account);
+        } catch(e) {
+          console.debug(result);
+          console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
+          continue;
+        }
+      }
+    }
+
+    return instance;
+  }
+
+  public id: PouchDbId;
   public rev: string = '';
 
   public state = SearchState.CREATED;
@@ -142,7 +263,7 @@ export class Search implements IDbStorable {
   }
 
   /**
-   * `resultsDict` is the best structure for storing and checking results
+   * `resultsMap` is the best structure for storing and checking results
    * internally during search, but is kind of messy to iterate over after.
    *
    * Provide flattened alternatives that make it easier to get the data.
@@ -153,7 +274,7 @@ export class Search implements IDbStorable {
    * If it's too memory intensive, we can reevaluate.
    */
   public results: ThirdPartyAccount[] = [];
-  public resultsDict: SearchResults = {};
+  public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
   public get discoveredResults() {
@@ -167,8 +288,7 @@ export class Search implements IDbStorable {
     this.definition = definition;
 
     // Copy the definition ID and add our pieces
-    const idBase = JSON.parse(this.definition.id);
-    this.id = toId(idBase.concat(['search', new Date()]));
+    this.id = toId(['search', new Date().toJSON()], this.definition.id);
   }
 
   /**
@@ -231,35 +351,26 @@ export class Search implements IDbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected doSearch() {
-    const resultIdPrefix = JSON.parse(this.id).concat('searchResult');
+    const resultIdPrefix = toId(['searchResult'], this.id);
 
     for (const site of this.definition.includedSites) {
       for (const userName of this.definition.userNames) {
         // Ignore sites that we already have results for
-        if (site.name in this.resultsDict) {
-          if (this.definition.name in this.resultsDict[site.name]) {
+        if (site.name in this.resultsMap) {
+          if (userName in this.resultsMap[site.name]) {
             continue;
           }
-        }
-
-        if (site.name === 'default') {
-          console.log(site);
         }
 
         console.log(`Checking ${site.name}...`);
 
         const account = new DiscoveredAccount(site, userName, resultIdPrefix);
+        account.save();
 
         // TODO: Actually search
 
-        // Store in multiple formats. See note above member initialization
-        this.results.push(account);
-        this.resultsDict[site.name] = this.resultsDict[site.name] || {};
-        this.resultsDict[site.name][userName] = account;
-        this.resultsBySite[site.name] = this.resultsBySite[site.name] || [];
-        this.resultsBySite[site.name].push(account);
-        this.resultsByUser[userName] = this.resultsByUser[userName] || [];
-        this.resultsByUser[userName].push(account);
+        // Store in multiple formats. See note above result* member initialization
+        this.storeResult(account);
       }
     }
 
@@ -285,6 +396,32 @@ export class Search implements IDbStorable {
   }
 
   /**
+   * Store the resulting account where it needs to go.
+   *
+   * Won't overwrite/duplicate accounts whose keys already appear in `resultsMap`
+   * (noop for those).
+   */
+  protected storeResult(account: ThirdPartyAccount) {
+    const site = account.site;
+
+    // If it's in the map, assume it's everywhere
+    // Prevents pushing duplicates into `results`
+    if (site.name in this.resultsMap) {
+      if (account.userName in this.resultsMap[site.name]) {
+        return;
+      }
+    }
+
+    this.results.push(account);
+    this.resultsMap[site.name] = this.resultsMap[site.name] || {};
+    this.resultsMap[site.name][account.userName] = account;
+    this.resultsBySite[site.name] = this.resultsBySite[site.name] || [];
+    this.resultsBySite[site.name].push(account);
+    this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
+    this.resultsByUser[account.userName].push(account);
+  }
+
+  /**
    * Save/update this search in the database.
    *
    * Don't call this unless you've made changes!
@@ -293,6 +430,9 @@ export class Search implements IDbStorable {
   public async save(): Promise<DbResponse> {
     const db = await getDb();
     const result = await db.put(this.serialize());
+
+    console.debug(`Saving search ${this.id}...`);
+
     if (result.ok) {
       this.rev = result.rev;
       return result;
@@ -335,7 +475,7 @@ export enum SearchState {
  * since we can match on multiple user names, so we nest the
  * usernames.
  *
- * But the nesting makes iteration hard.
+ * But the nesting makes iteration hard. See `Search.results` for a flattened version.
  */
 export interface SearchResults {
   [siteName: string]: {
