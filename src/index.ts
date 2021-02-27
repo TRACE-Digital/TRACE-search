@@ -20,16 +20,18 @@ async function main() {
 
   console.log(searchDef);
 
-  const search = searchDef.new();
+  const search = await searchDef.new();
   console.log(`Progress: ${search.progress}%`);
 
-  search.start();
+  await search.start();
   console.log(`Progress: ${search.progress}%`);
   console.log(search.results);
   console.log(search.resultsMap);
 
-  const claimed = search.discoveredResults[0].claim();
-  console.log('Claim account');
+  const claimed = await search.discoveredResults[0].claim();
+  console.log('Original account');
+  console.log(search.discoveredResults[0]);
+  console.log('Claimed account');
   console.log(claimed);
   console.log(claimed instanceof ClaimedAccount);
   console.log(claimed instanceof DiscoveredAccount);
@@ -80,6 +82,7 @@ async function main() {
   console.groupEnd();
 }
 
+// tslint:disable-next-line:no-floating-promises
 main();
 
 // Top level exports that we want to be publicly visible

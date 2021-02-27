@@ -1,4 +1,4 @@
-import { AccountType, ConfidenceRating, SearchState } from 'search';
+import { AccountType, ConfidenceRating, DiscoveredAccountAction, SearchState } from 'search';
 import { allSites, Site } from 'sites';
 import { PouchDbId } from './types';
 
@@ -30,6 +30,7 @@ export interface DiscoveredAccountSchema extends AccountSchema {
   confidence: ConfidenceRating;
   matchedFirstNames: string[];
   matchedLastNames: string[];
+  actionTaken: DiscoveredAccountAction;
 }
 
 export interface ClaimedAccountSchema extends DiscoveredAccountSchema {

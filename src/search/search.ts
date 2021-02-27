@@ -145,10 +145,10 @@ export class SearchDefinition implements IDbStorable {
    *
    * The search must still be started via `start()`.
    */
-  public new() {
+  public async new() {
     const search = new Search(this);
     this.history.push(search);
-    search.save();
+    await search.save();
     return search;
   }
 
@@ -327,7 +327,7 @@ export class Search implements IDbStorable {
   /**
    * Start the search.
    */
-  public start() {
+  public async start() {
     let logAction = '';
 
     if (this.state === SearchState.CREATED) {
@@ -346,13 +346,20 @@ export class Search implements IDbStorable {
     // TODO: This is synchronous right now
     // Should probably devise something async
     try {
-      this.doSearch();
+      await this.doSearch();
+
+      console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+
+      this.state = SearchState.COMPLETED;
     } catch (e) {
       console.error(`Search failed!:`);
       console.error(e);
 
-      this.fail();
+      this.state = SearchState.FAILED;
     }
+
+    this.endedAt = new Date();
+    await this.save();
 
     console.groupEnd();
   }
@@ -360,7 +367,7 @@ export class Search implements IDbStorable {
   /**
    * Cancel the search.
    */
-  public cancel() {
+  public async cancel() {
     let logState = '';
 
     if (this.state === SearchState.IN_PROGRESS) {
@@ -374,8 +381,11 @@ export class Search implements IDbStorable {
     console.log(`Cancelling ${logState} search...`);
 
     this.state = SearchState.CANCELLED;
+    this.endedAt = new Date();
 
     // TODO: Interrupt doSearch() if we make it async
+
+    await this.save();
   }
 
   /**
@@ -383,7 +393,7 @@ export class Search implements IDbStorable {
    *
    * This is incremental. It won't duplicate sites that already have results.
    */
-  protected doSearch() {
+  protected async doSearch() {
     const resultIdPrefix = toId(['searchResult'], this.id);
 
     for (const site of this.definition.includedSites) {
@@ -397,35 +407,15 @@ export class Search implements IDbStorable {
 
         console.log(`Checking ${site.name}...`);
 
-        const account = new DiscoveredAccount(site, userName, resultIdPrefix);
-        account.save();
-
         // TODO: Actually search
+
+        const account = new DiscoveredAccount(site, userName, resultIdPrefix);
+        await account.save();
 
         // Store in multiple formats. See note above result* member initialization
         this.storeResult(account);
       }
     }
-
-    this.complete();
-  }
-
-  /**
-   * Mark this search as completed.
-   */
-  protected complete() {
-    console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
-
-    this.state = SearchState.COMPLETED;
-    this.endedAt = new Date();
-  }
-
-  /**
-   * Mark this search as failed.
-   */
-  protected fail() {
-    this.state = SearchState.FAILED;
-    this.endedAt = new Date();
   }
 
   /**

@@ -18,19 +18,6 @@ import { Site } from 'sites';
 /** Collection of accounts that have already been pulled out of the database. */
 export const accounts: { [key: string]: ThirdPartyAccount } = {};
 
-export enum AccountType {
-  DISCOVERED = 'Discovered',
-  CLAIMED = 'Claimed',
-  REJECTED = 'Rejected',
-  MANUAL = 'Manual',
-  UNREGISTERED = 'Unregistered',
-}
-
-/**
- * Rating from 0-10 with 10 being highly confident.
- */
-export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-
 /**
  * Account associated with a third-party `Site`.
  */
@@ -89,7 +76,6 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     if (instance && data._id.endsWith(instance.id)) {
       instance.id = data._id;
     }
-
     throwIfIdMismatch(data, instance);
 
     // IMPORTANT: if a derived class doesn't override deserialize() or calls this
@@ -172,11 +158,12 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     const site = deserializeSite(data);
     const instance = existingInstance || new DiscoveredAccount(site, data.userName);
 
-    super.deserialize(data, instance);
+    await super.deserialize(data, instance);
 
     instance.confidence = data.confidence;
     instance.matchedFirstNames = data.matchedFirstNames;
     instance.matchedLastNames = data.matchedLastNames;
+    instance.actionTaken = data.actionTaken;
 
     return instance;
   }
@@ -186,25 +173,80 @@ export class DiscoveredAccount extends ThirdPartyAccount {
   public confidence: ConfidenceRating = 5;
   public matchedFirstNames: string[] = [];
   public matchedLastNames: string[] = [];
+  public actionTaken = DiscoveredAccountAction.NONE;
 
   /**
    * Return a claimed version of this account.
+   *
+   * TODO: This is a little unstable
    */
-  public claim(): ClaimedAccount {
-    // TODO: Figure out how to mark that this DiscoveredAccount has been claimed
-    // without messing up future serialization
-    // this.type = AccountType.CLAIMED;
-    return new ClaimedAccount(this.site, this.userName);
+  public async claim(): Promise<ClaimedAccount> {
+    if (this.actionTaken === DiscoveredAccountAction.CLAIMED) {
+      throw new Error(`'${this.id}' has already been claimed!`);
+    }
+
+    const account = new ClaimedAccount(this.site, this.userName);
+
+    // TODO: Check the database too?
+    if (account.id in accounts) {
+      throw new Error(`Account with ${account.id} already exists!`);
+    }
+
+    // TODO: This is a little dangerous since we have to manually
+    // copy any ClaimedAccount properties and we lose the typing
+    const schema = this.serialize() as ClaimedAccountSchema;
+    schema.claimedAt = new Date().toJSON();
+
+    // Reset anything that'll be invalid on the new account
+    schema._id = account.id;
+    schema._rev = '';
+    schema.type = account.type;
+
+    // Copy over the base account's properties
+    await ClaimedAccount.deserialize(schema, account);
+
+    this.actionTaken = DiscoveredAccountAction.CLAIMED;
+    await this.save();
+    await account.save();
+
+    return account;
   }
 
   /**
    * Return a rejected version of this account.
+   *
+   * TODO: This is a little unstable
    */
-  public reject(): RejectedAccount {
-    // TODO: Figure out how to mark that this DiscoveredAccount has been claimed
-    // without messing up future serialization
-    // this.type = AccountType.REJECTED;
-    return new RejectedAccount(this.site, this.userName);
+  public async reject(): Promise<RejectedAccount> {
+    if (this.actionTaken === DiscoveredAccountAction.REJECTED) {
+      throw new Error(`'${this.id}' has already been rejected!`);
+    }
+
+    const account = new RejectedAccount(this.site, this.userName);
+
+    // TODO: Check the database too?
+    if (account.id in accounts) {
+      throw new Error(`Account with ${account.id} already exists!`);
+    }
+
+    // TODO: This is a little dangerous since we have to manually
+    // copy any RejectedAccount properties and we lose the typing
+    const schema = this.serialize() as RejectedAccountSchema;
+    schema.rejectedAt = new Date().toJSON();
+
+    // Reset anything that'll be invalid on the new account
+    schema._id = account.id;
+    schema._rev = '';
+    schema.type = account.type;
+
+    // Copy over the base account's properties
+    await RejectedAccount.deserialize(schema, account);
+
+    this.actionTaken = DiscoveredAccountAction.REJECTED;
+    await this.save();
+    await account.save();
+
+    return account;
   }
 
   public serialize(): DiscoveredAccountSchema {
@@ -212,6 +254,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     base.confidence = this.confidence;
     base.matchedFirstNames = this.matchedFirstNames;
     base.matchedLastNames = this.matchedLastNames;
+    base.actionTaken = this.actionTaken;
     return base;
   }
 }
@@ -224,7 +267,7 @@ export class ClaimedAccount extends DiscoveredAccount {
     const site = deserializeSite(data);
     const instance = existingInstance || new ClaimedAccount(site, data.userName);
 
-    super.deserialize(data, instance);
+    await super.deserialize(data, instance);
 
     instance.claimedAt = new Date(data.claimedAt);
 
@@ -249,7 +292,7 @@ export class RejectedAccount extends DiscoveredAccount {
     const site = deserializeSite(data);
     const instance = existingInstance || new RejectedAccount(site, data.userName);
 
-    super.deserialize(data, instance);
+    await super.deserialize(data, instance);
 
     instance.rejectedAt = new Date(data.rejectedAt);
 
@@ -276,7 +319,7 @@ export class ManualAccount extends ThirdPartyAccount {
     const site = deserializeSite(data);
     const instance = existingInstance || new ManualAccount(site, data.userName);
 
-    super.deserialize(data, instance);
+    await super.deserialize(data, instance);
 
     instance.lastEditedAt = new Date(data.lastEditedAt);
 
@@ -310,7 +353,7 @@ export class UnregisteredAccount extends ThirdPartyAccount {
     const site = deserializeSite(data);
     const instance = existingInstance || new UnregisteredAccount(site, data.userName);
 
-    super.deserialize(data, instance);
+    await super.deserialize(data, instance);
 
     return instance;
   }
@@ -321,4 +364,29 @@ export class UnregisteredAccount extends ThirdPartyAccount {
     const base = super.serialize() as UnregisteredAccountSchema;
     return base;
   }
+}
+
+/**
+ * Rating from 0-10 with 10 being highly confident.
+ */
+export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
+export enum AccountType {
+  DISCOVERED = 'Discovered',
+  CLAIMED = 'Claimed',
+  REJECTED = 'Rejected',
+  MANUAL = 'Manual',
+  UNREGISTERED = 'Unregistered',
+}
+
+/**
+ * Decision that a user made on a `DiscoveredAccount`.
+ *
+ * This is stored with the original `DiscoveredAccount` so
+ * that we can tell what happened when we view history.
+ */
+export enum DiscoveredAccountAction {
+  NONE = 'None',
+  CLAIMED = 'Claimed',
+  REJECTED = 'Rejected'
 }
