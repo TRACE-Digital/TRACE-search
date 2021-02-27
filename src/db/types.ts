@@ -17,6 +17,7 @@ export type PouchDbId = string;
  * https://docs.couchdb.org/en/latest/ddocs/views/collation.html#string-ranges
  */
 export const UTF_MAX = '\ufff0';
+export const ID_SEPARATOR = '/';
 
 /**
  * Convert `value` into a PouchDB document ID.
@@ -27,25 +28,11 @@ export function toId(value: string[], prefix?: PouchDbId): PouchDbId {
   if (prefix) {
     value = [prefix].concat(value);
   }
-  // return value.map(v => JSON.stringify(v.replace('/', '\\/'))).join('/');
-  return value.join('/');
+  // return value.map(v => JSON.stringify(v.replace(ID_SEPARATOR, `\\${ID_SEPARATOR}`))).join(ID_SEPARATOR);
+  return value.join(ID_SEPARATOR);
 }
 
 export type DbResponse = PouchDB.Core.Response;
-
-/** Name this type from `bulkGet()` so we can use it. */
-export interface DbDocError {
-  error: PouchDB.Core.Error;
-}
-
-/**
- * Type guard for narrowing type on `bulkGet()` response.
- *
- * https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards
- */
-export function isDbDocError<T>(doc: PouchDB.Core.BulkGetResponse<T>['results'][0]['docs'][0]): doc is DbDocError {
-  return (doc as DbDocError).error !== undefined;
-}
 
 export interface IDbStorable {
   id: PouchDbId;

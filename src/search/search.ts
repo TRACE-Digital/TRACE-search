@@ -11,12 +11,12 @@ import {
   SearchSchema,
   toId,
   DbResponse,
-  DbDocError,
-  DiscoveredAccountSchema,
   throwIfIdMismatch,
-  isDbDocError,
+  ID_SEPARATOR,
+  AccountSchema,
+  UTF_MAX,
 } from 'db';
-import { allSites, Site, SiteList } from 'sites';
+import { allSites, Site } from 'sites';
 import { accounts, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
 /** Collection of search definitions that have already been pulled out of the database. */
@@ -52,31 +52,41 @@ export class SearchDefinition implements IDbStorable {
     searchDefinitions[instance.id] = instance;
 
     const db = await getDb();
-    const response = await db.bulkGet<SearchSchema>({
-      docs: data.historyIds.map(id => ({ id })),
+    const response = await db.allDocs<SearchSchema>({
+      include_docs: true,
+      startkey: instance.id + ID_SEPARATOR,
+      endkey: toId(['search', UTF_MAX], instance.id),
     });
+    console.debug(response);
 
     // Clear the history so we don't have to worry about duplicates
     instance.history.length = 0;
 
-    for (const result of response.results) {
-      // Assume we only got back a single revision
-      const doc = result.docs[0];
+    for (const row of response.rows) {
+      const doc = row.doc;
 
-      if (isDbDocError(doc)) {
-        console.warn(`Skipping search '${result.id}': ${doc.error}`);
+      if (doc === undefined) {
+        console.error('Received undefined document! Did you pass include_docs: true?');
         continue;
       }
 
-      if (result.id in searches) {
-        instance.history.push(searches[result.id]);
+      // TODO: See if there is a way to restrict the query better
+      // Query will also match search results since their key is an extension of ours
+      // Skip these by checking a field that only Search will have
+      if (doc.definitionId === undefined) {
+        continue;
+      }
+
+      if (doc._id in searches) {
+        instance.history.push(searches[doc._id]);
       } else {
         try {
-          const search = await Search.deserialize(doc.ok);
+          const search = await Search.deserialize(doc);
           instance.history.push(search);
         } catch (e) {
-          console.debug(result);
-          console.warn(`Skipping search '${result.id}'. Failed to deserialize: ${e}`);
+          console.debug(doc);
+          console.debug(e);
+          console.warn(`Skipping search '${doc._id}'.\nFailed to deserialize:\n${e}`);
           continue;
         }
       }
@@ -164,10 +174,10 @@ export class SearchDefinition implements IDbStorable {
    * Each call will create a revision and take up space.
    */
   public async save(): Promise<DbResponse> {
+    console.debug(`Saving search definition ${this.id}...`);
+
     const db = await getDb();
     const result = await db.put(this.serialize());
-
-    console.debug(`Saving search definition ${this.id}...`);
 
     if (result.ok) {
       this.rev = result.rev;
@@ -189,7 +199,6 @@ export class SearchDefinition implements IDbStorable {
       userNames: this.userNames,
       firstNames: this.firstNames,
       lastNames: this.lastNames,
-      historyIds: this.history.map(execution => execution.id),
     };
   }
 }
@@ -228,28 +237,41 @@ export class Search implements IDbStorable {
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
-    const response = await db.bulkGet<DiscoveredAccountSchema>({
-      docs: data.resultIds.map(id => ({ id })),
+    const response = await db.allDocs<AccountSchema>({
+      include_docs: true,
+      startkey: instance.id + ID_SEPARATOR,
+      endkey: toId(['searchResult', UTF_MAX], instance.id),
     });
 
-    for (const result of response.results) {
-      // Assume we only got back a single revision
-      const doc = result.docs[0];
+    // Clear the results so we don't have to worry about duplicates
+    instance.results.length = 0;
 
-      if (isDbDocError(doc)) {
-        console.warn(`Skipping document '${result.id}': ${doc.error}`);
+    for (const row of response.rows) {
+      const doc = row.doc;
+
+      if (doc === undefined) {
+        console.error('Received undefined document! Did you pass include_docs: true?');
         continue;
       }
 
-      if (result.id in accounts) {
-        instance.storeResult(accounts[result.id]);
+      // TODO: See if there is a way to restrict the query better
+      // Query will also match any new objects whose key is an extension of ours
+      // We don't really need this yet since we don't have any objects that do this,
+      // but still be safe and skip these by checking a field that only accounts should have
+      if (doc.userName === undefined) {
+        continue;
+      }
+
+      if (doc._id in accounts) {
+        instance.storeResult(accounts[doc._id]);
       } else {
         try {
-          const account = await ThirdPartyAccount.deserialize(doc.ok);
+          const account = await ThirdPartyAccount.deserialize(doc);
           instance.storeResult(account);
         } catch (e) {
-          console.debug(result);
-          console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
+          console.debug(doc);
+          console.debug(e);
+          console.warn(`Skipping account '${doc._id}'.\nFailed to deserialize:\n${e}`);
           continue;
         }
       }
@@ -439,10 +461,10 @@ export class Search implements IDbStorable {
    * Each call will create a revision and take up space.
    */
   public async save(): Promise<DbResponse> {
+    console.debug(`Saving search ${this.id}...`);
+
     const db = await getDb();
     const result = await db.put(this.serialize());
-
-    console.debug(`Saving search ${this.id}...`);
 
     if (result.ok) {
       this.rev = result.rev;
@@ -461,7 +483,6 @@ export class Search implements IDbStorable {
       startedAt: this.startedAt ? this.startedAt.toJSON() : null,
       endedAt: this.endedAt ? this.endedAt.toJSON() : null,
       definitionId: this.definition.id,
-      resultIds: this.results.map(result => result.id),
     };
   }
 }

@@ -86,17 +86,15 @@ export abstract class ThirdPartyAccount implements IDbStorable {
      *  data._id: searchResult/account/definitely-not-example.com/account/example.com/user1
      *  instance._id: account/example.com/user1
      */
-    if (instance && data._id.includes(instance.id)) {
+    if (instance && data._id.endsWith(instance.id)) {
       instance.id = data._id;
     }
 
     throwIfIdMismatch(data, instance);
 
-    if (instance === undefined) {
-      // Caution: if a derived class doesn't override this or calls this without creating
-      // an instance, we'll recurse infinitely
-      instance = await ThirdPartyAccount.factory(data);
-    }
+    // IMPORTANT: if a derived class doesn't override deserialize() or calls this
+    // without creating an instance, we'll recurse infinitely
+    instance = instance || (await ThirdPartyAccount.factory(data));
 
     instance.id = data._id;
     instance.rev = data._rev;
@@ -138,10 +136,10 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    * Each call will create a revision and take up space.
    */
   public async save(): Promise<DbResponse> {
+    console.debug(`Saving account ${this.id}...`);
+
     const db = await getDb();
     const result = await db.put(this.serialize());
-
-    console.debug(`Saving account ${this.id}...`);
 
     if (result.ok) {
       this.rev = result.rev;

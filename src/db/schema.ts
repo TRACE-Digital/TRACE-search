@@ -73,7 +73,6 @@ export interface SearchDefinitionSchema extends BaseSchema {
   userNames: string[];
   firstNames: string[];
   lastNames: string[];
-  historyIds: PouchDbId[];
 }
 
 export interface SearchSchema extends BaseSchema {
@@ -81,5 +80,4 @@ export interface SearchSchema extends BaseSchema {
   startedAt: string | null;
   endedAt: string | null;
   definitionId: PouchDbId;
-  resultIds: PouchDbId[];
 }
