@@ -4,94 +4,102 @@
  */
 
 
- /*             TODO:
 
- - Fix 'response_url' handling to prevent redirect and check original status code
- - Tinker with CORS settings for 'message' handling
- - Maybe add regex check?
- - Meet w/ group and figure out format to send frontend
 
- */
 
+/*                                  TODO:
+
+    - Fix 'response_url' handling to prevent redirect and check original status code
+    - Tinker with CORS settings for 'message' handling
+    - Maybe add regex check?
+    - Meet w/ group and figure out format to send frontend
+
+
+    - no vpn!
+
+*/
+
+/* Need for CORS:
+
+    Access-Control-Allow-Origin: <ORIGIN>
+    Access-Control-Allow-Headers: 'include'
+    Access-Control-Allow-Credentials: 'expose'
+*/
  
+
+
+
+
 import { allSites, Site, SiteList } from 'sites';
 
 import fetch from './fetchWithTimeout'      // fetch(url, options, timeout_ms)
 
 export interface SearchResult {
-    // enter needed fields here
     siteName: string
     siteUrl: string
     username: string
     profileUrl: string
 }
 
-// export interface SearchResultList {
-//     [key: string]: SearchResult
-// }
-
-
-
-/* Need for CORS:
-
-Access-Control-Allow-Origin: <ORIGIN>
-Access-Control-Allow-Headers: 'include'
-Access-Control-Allow-Credentials: 'expose'
-*/
-
-/*
-    Searches our compiled list of sites for the username(s) provided
-    Usernames must be provided in list form:
-        ["cohenchris", "jmcker", ...]
-    
-    By default, sherlock.json has 298 sites (as of 2-25-21)
-*/
+const problematic = ['2Dimensions', '3dnews', 'AllTrails', 'Ask Fedora', 'BOOTH', 'Carbonmade', 'Chess', 'Clozemaster', 'Football', 'Freesound', 'NameMC (Minecraft.net skins)', 'Naver', 'Nightbot', 'Otzovik', 'PSNProfiles.com', 'Packagist', 'Plug.DJ', 'ProductHunt', 'Raidforums', 'Scratch', 'Smashcast', 'Spotify', 'Tinder', 'TrackmaniaLadder', 'TryHackMe', 'Twitter', 'VK', 'Virgool', 'WordPress', 'Zhihu', 'authorSTREAM', 'igromania', 'labpentestit', 'opennet', 'prog.hu', 'svidbook', 'Anobii', 'Steamid', 'Xbox Gamertag', 'Hubski', 'Myspace', 'satsisRU']
+ /**
+  * Searches our compiled list of sites for the username(s) provided
+  * Usernames must be provided in list form:
+  *     ["cohenchris", "jmcker", ...]
+  * By default, sherlock.json has 298 sites (as of 2-25-21)
+  * @param usernames an array of usernames to search for
+  */
 export const searchSites = async (usernames: string[]) => {
     const foundProfiles: SearchResult[] = []
 
     const pass: any[] = []
     const fail: any[] = []
 
-    // For each username, loop through each site to check if a profile exists
-    for (const username of usernames) {
+
+    // For each username, check each site for an existing profile
+    // for (const username of usernames) { // DEBUG
         for (const site in allSites) {
             try {
 
-            if (allSites[site].errorType !== "message") {   // DEBUG
-                continue
-            }
-            if (!allSites[site].urlProbe) {
+            if (!problematic.includes(site)) {      // DEBUG
                 continue
             }
 
-            const profileExists = await checkIfProfileExists(site, allSites[site], username)
+            const profileExists = await checkIfProfileExists(allSites[site], allSites[site].username_claimed)
+            const profileNotExists = await checkIfProfileExists(allSites[site], allSites[site].username_unclaimed)
 
-            if (profileExists) {
-                // append profile to foundProfiles SearchResultList
-                const profileUrl = allSites[site].url.replace("{}", username)
+            if (!profileExists || profileNotExists) {
+                fail.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+            }
+            else {
+                pass.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+            }
 
-                const foundProfile: SearchResult = {
-                    "siteName": site,
-                    "siteUrl": allSites[site].urlMain,
-                    "username": username,
-                    "profileUrl": profileUrl,
-                }
-                
-                foundProfiles.push(foundProfile)
-                // DEBUG
-                pass.push([site, allSites[site].errorType])
-            }
-            else {   // DEBUG
-                fail.push([site, allSites[site].errorType])
-            }
-            console.log(`${site} -- profileExists: ${profileExists}\n====================`)
+            // if (profileExists) {
+            //     // append profile to foundProfiles array
+            //     const profileUrl = allSites[site].url.replace("{}", username)
+
+            //     const foundProfile: SearchResult = {
+            //         "siteName": site,
+            //         "siteUrl": allSites[site].urlMain,
+            //         "username": username,
+            //         "profileUrl": profileUrl,
+            //     }
+
+            //     foundProfiles.push(foundProfile)
+            //     pass.push([site, allSites[site].errorType])     // DEBUG
+            // }
+            // else {   // DEBUG
+            //     fail.push([site, allSites[site].errorType])
+            // }
+            // console.log(`${site} -- profileExists: ${profileExists}\n====================`)     // DEBUG
 
             } catch(error) {
                 // This will ignore any json items that are malformed
                 continue
             }
         }
-    }
+    // }    // DEBUG
 
 
     console.log("PASSING:")
@@ -103,60 +111,69 @@ export const searchSites = async (usernames: string[]) => {
     return foundProfiles
 }
 
+/**
+ * This function sends a request to the website to search for a specified username.
+ * The format of the request is based off of the fields in the site JSON argument
+ * @param site JSON with data corresponding to the site currently being searched
+ * @param username username to search for
+ */
+const checkIfProfileExists = async (site: Site, username: string) => {
+    const errorType: string = site.errorType                                // status_code, message, or response_url
+    const url: string = site.url                                            // url for website profile page
+    const urlMain: string = site.urlMain                                    // url for website home page
+    const username_claimed: string = site.username_claimed                  // username that is claimed on the website
+    const username_unclaimed: string = site.username_unclaimed              // username that is not claimed on the website
+    const errorMsg: string | string[] | undefined = site.errorMsg           // if errorType = message, this message will pop up if the profile doesn't exist
+    const regexCheck: string | undefined = site.regexCheck                  // todo
+    const errorUrl: string | undefined = site.errorUrl                      // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist
+    const urlProbe: string | undefined = site.urlProbe                      // alternate profile page test url for sites where profiles aren't publicly facing 
+    const noPeriod: string | undefined = site.noPeriod                      // todo (never used?)
+    const headers: {} | undefined = site.headers                            // todo
+    const request_head_only: boolean | undefined = site.request_head_only   // for status_code errorType website -- use a GET request instead of a HEAD request
 
-const checkIfProfileExists = async (siteName: string, site: Site, username: string) => {
-    const errorMsg: string | string[] | undefined = site.errorMsg
-    const errorType: string = site.errorType
-    const errorUrl: string | undefined = site.errorUrl
-    const regexCheck: string | undefined = site.regexCheck            // valid username regex for website - don't make request if invalid!
-    const url: string = site.url
-    const urlMain: string = site.urlMain
-    const urlProbe: string | undefined = site.urlProbe
-    const username_claimed: string = site.username_claimed
-    const username_unclaimed: string = site.username_unclaimed
 
-    // Take url and replace '{}' with the username
-    let profileUrl = ""
-    if (urlProbe) {
-        profileUrl = urlProbe.replace("{}", username_unclaimed)
-    }
-    else {
-        profileUrl = url.replace("{}", username_unclaimed)
-    }
+    // Take required profile page URL template and replace '{}' with the username
+    const profileUrl = (urlProbe === undefined) ? url.replace("{}", username) : urlProbe.replace("{}", username)
+
+    // Based on JSON data, find request method
+    const requestHeaders = findRequestHeaders(errorType, headers, request_head_only)
+    console.log(`${site.url} -- ${errorType} -- `)
+    console.log(requestHeaders)
 
     let response
     switch (errorType) {
         case "status_code":
-            break
-            console.log("Status Code!")
             // A 2XX status code (response.status) will be returned if the profile exists.
-            response = await fetch(profileUrl, { method: 'HEAD' }, 5000)    // timeout after 5s
-                                    .catch(error => {
-                                        console.log("Error! - " + error)
+            // To save time, use a HEAD request (unless explicitly told not to)
+
+            response = await fetch(profileUrl, requestHeaders, 5000)    // timeout after 5s
+                                    .catch((error: any) => {
+                                        console.log("ERROR! - " + error)
                                         return undefined
                                     })
 
-            // If response is undefined, profile is not found. Otherwise, check if response code is 2XX. If so, profile exists.
+            // If response is undefined, say profile is not found.
+            // Otherwise, check if response code is 2XX. If so, profile exists.
             return (response === undefined) ? false : (response.status >= 200 && response.status < 300)
             break
 
 
         case "message":
-            console.log("Message!")            
-            // A specific error message will be returned if the profile does not exist, specified by 'errorMsg'
-            // Compare 'response' to 'errorMsg'
-            // console.log(`${siteName} -- Checking if response message is '${errorMsg}'...`)
+            // 'errorMsg' will be on the page if the profile does not exist
             // response = await fetch(profileUrl, { credentials: 'include' }, 5000)    // timeout after 5s
-            response = await fetch(profileUrl, { }, 5000)    // timeout after 5s
-                                    .then(r => {
+            response = await fetch(profileUrl, requestHeaders, 5000)    // timeout after 5s
+                                    .then((r: any) => {
                                         return r.text()
                                     })
-                                    .catch(error => {
-                                        console.log("Error! - " + error)
+                                    .catch((error: any) => {
+                                        console.log("ERROR! - " + error)
                                         return undefined
                                     })
-            
-            if (typeof errorMsg === "string") {     // only one error message to check
+
+            if (errorMsg === undefined) { // edge case
+                return false
+            }
+            else if (typeof errorMsg === "string") {     // only one error message to check
                 // if the response failed, or the response includes the error message, profile doesn't exist
                 return !responseContainsError(response, errorMsg)
             }
@@ -175,38 +192,63 @@ const checkIfProfileExists = async (siteName: string, site: Site, username: stri
 
 
         case "response_url":
-            break
-            console.log("Response URL!")
-            // A specific URL will be returned if the profile does not exist, specified by 'errorUrl'
-            // Compare 'response' to 'errorUrl'
-            // TODO: prevent redirect, inspect code for previous
-            // console.log(`${siteName} -- Checking if response URL is '${errorUrl}'`)
-            // if (response) {
-            //     console.log(`profileExists: ${response.url != errorUrl}`)
-            //     console.log(`======================`)
-            // }
-            response = await fetch(profileUrl, {}, 5000)  // timeout after 5s
-                                .catch(error => {
-                                    console.log("Error! - " + error)
+            console.log("Response URL!")    // DEBUG
+            // Server will respond with 'errorUrl' the profile does not exist
+
+            // TODO: prevent redirect, inspect code for previous status_code
+
+            response = await fetch(profileUrl, requestHeaders, 5000)  // timeout after 5s
+                                .catch((error: any) => {
+                                    console.log("ERROR! - " + error)
                                     return undefined
                                 })
             
-            // If response fails (undefined), return false. Otherwise, check the redirect url of the response. If that matches the expected redirect, profile doesn't exist. 
-            return (response === undefined) ? false : response.url !== errorUrl // TODO: triple equals or no? compare differently?
+            // If request fails (undefined), return false.
+            // Otherwise, check the redirect url of the response. If that matches the expected 'errorUrl', profile doesn't exist.
+            return (response === undefined) ? false : response.url !== errorUrl
             return false
             break
     }
 
-    return false
+    return false    // malformed json entry - errorType needs to be one of (status_code, message, response_url)
 }
 
-const responseContainsError = (response: string, errorMsg: string) => {
+/**
+ * This function simply checks the response body for a specified error message
+ * @param response 
+ * @param errorMsg 
+ */
+const responseContainsError = (response: string | undefined, errorMsg: string) => {
     if (response === undefined) {
         // response doesn't include errorMsg, but request clearly failed, so return true anyways since the profile doesn't exist
         return true
     }
 
     return response.includes(errorMsg)
+}
+
+/**
+ * 
+ * @param errorType 
+ * @param request_head_only 
+ */
+const findRequestHeaders = (errorType: string, headers: {} | undefined, request_head_only: boolean | undefined) => {
+    let requestHeaders = headers
+    let requestType = 'GET'
+
+    if (errorType == "status_code") {
+        if (request_head_only === undefined || request_head_only === true) {    // request_head_only needs to explicitly set as false to make request method 'GET'
+            requestType = 'HEAD'
+        }
+    }
+
+
+    return { 
+                method: requestType,
+                ...headers
+            }
+    
+    throw Error('findRequestHeaders - malformed request!')      // should never get here
 }
 
 export default searchSites
