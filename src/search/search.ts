@@ -12,6 +12,7 @@
     - Maybe add regex check?
     - Meet w/ group and figure out format to send to frontend
     - Find logo URL if the frontend isn't?
+    - Fix Twitter
 
 
     Inform users to:
