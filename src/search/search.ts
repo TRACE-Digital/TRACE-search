@@ -29,7 +29,6 @@
 
 
 
-
 import { allSites, Site, SiteList } from 'sites';
 
 import fetch from './fetchWithTimeout'      // fetch(url, options, timeout_ms)
@@ -41,8 +40,9 @@ export interface SearchResult {
     profileUrl: string
 }
 
-const problematic = ['2Dimensions', '3dnews', 'AllTrails', 'Ask Fedora', 'BOOTH', 'Carbonmade', 'Chess', 'Clozemaster', 'Football', 'Freesound', 'NameMC (Minecraft.net skins)', 'Naver', 'Nightbot', 'Otzovik', 'PSNProfiles.com', 'Packagist', 'Plug.DJ', 'ProductHunt', 'Raidforums', 'Scratch', 'Smashcast', 'Spotify', 'Tinder', 'TrackmaniaLadder', 'TryHackMe', 'Twitter', 'VK', 'Virgool', 'WordPress', 'Zhihu', 'authorSTREAM', 'igromania', 'labpentestit', 'opennet', 'prog.hu', 'svidbook', 'Anobii', 'Steamid', 'Xbox Gamertag', 'Hubski', 'Myspace', 'satsisRU']
- /**
+
+
+/**
   * Searches our compiled list of sites for the username(s) provided
   * Usernames must be provided in list form:
   *     ["cohenchris", "jmcker", ...]
@@ -61,38 +61,39 @@ export const searchSites = async (usernames: string[]) => {
         for (const site in allSites) {
             try {
 
-            if (!problematic.includes(site)) {      // DEBUG
-                continue
-            }
+                if (allSites[site].omit) {
+                    // if specified to omit, skip over the site
+                    continue
+                }
 
-            const profileExists = await checkIfProfileExists(allSites[site], allSites[site].username_claimed)
-            const profileNotExists = await checkIfProfileExists(allSites[site], allSites[site].username_unclaimed)
+                const profileExists = await checkIfProfileExists(allSites[site], allSites[site].username_claimed)
+                const profileNotExists = await checkIfProfileExists(allSites[site], allSites[site].username_unclaimed)
 
-            if (!profileExists || profileNotExists) {
-                fail.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
-            }
-            else {
-                pass.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
-            }
+                if (!profileExists || profileNotExists) {
+                    fail.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+                }
+                else {
+                    pass.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+                }
 
-            // if (profileExists) {
-            //     // append profile to foundProfiles array
-            //     const profileUrl = allSites[site].url.replace("{}", username)
+                // if (profileExists) {
+                //     // append profile to foundProfiles array
+                //     const profileUrl = allSites[site].url.replace("{}", username)
 
-            //     const foundProfile: SearchResult = {
-            //         "siteName": site,
-            //         "siteUrl": allSites[site].urlMain,
-            //         "username": username,
-            //         "profileUrl": profileUrl,
-            //     }
+                //     const foundProfile: SearchResult = {
+                //         "siteName": site,
+                //         "siteUrl": allSites[site].urlMain,
+                //         "username": username,
+                //         "profileUrl": profileUrl,
+                //     }
 
-            //     foundProfiles.push(foundProfile)
-            //     pass.push([site, allSites[site].errorType])     // DEBUG
-            // }
-            // else {   // DEBUG
-            //     fail.push([site, allSites[site].errorType])
-            // }
-            // console.log(`${site} -- profileExists: ${profileExists}\n====================`)     // DEBUG
+                //     foundProfiles.push(foundProfile)
+                //     pass.push([site, allSites[site].errorType])     // DEBUG
+                // }
+                // else {   // DEBUG
+                //     fail.push([site, allSites[site].errorType])
+                // }
+                // console.log(`${site} -- profileExists: ${profileExists}\n====================`)     // DEBUG
 
             } catch(error) {
                 // This will ignore any json items that are malformed
@@ -130,6 +131,7 @@ const checkIfProfileExists = async (site: Site, username: string) => {
     const noPeriod: string | undefined = site.noPeriod                      // todo (never used?)
     const headers: {} | undefined = site.headers                            // todo
     const request_head_only: boolean | undefined = site.request_head_only   // for status_code errorType website -- use a GET request instead of a HEAD request
+    const omit: boolean | undefined = site.omit                             // tells program to not process the site
 
 
     // Take required profile page URL template and replace '{}' with the username
@@ -137,8 +139,6 @@ const checkIfProfileExists = async (site: Site, username: string) => {
 
     // Based on JSON data, find request method
     const requestHeaders = findRequestHeaders(errorType, headers, request_head_only)
-    console.log(`${site.url} -- ${errorType} -- `)
-    console.log(requestHeaders)
 
     let response
     switch (errorType) {
@@ -169,7 +169,7 @@ const checkIfProfileExists = async (site: Site, username: string) => {
                                         console.log("ERROR! - " + error)
                                         return undefined
                                     })
-
+            
             if (errorMsg === undefined) { // edge case
                 return false
             }
@@ -178,7 +178,7 @@ const checkIfProfileExists = async (site: Site, username: string) => {
                 return !responseContainsError(response, errorMsg)
             }
             else {  // typeof errorMsg is a string[]
-                for (const msg in errorMsg) {
+                for (const msg of errorMsg) {
                     if (responseContainsError(response, msg)) {
                         // if the response failed, or the response includes one of the error messages, profile doesn't exist
                         return false
@@ -192,7 +192,6 @@ const checkIfProfileExists = async (site: Site, username: string) => {
 
 
         case "response_url":
-            console.log("Response URL!")    // DEBUG
             // Server will respond with 'errorUrl' the profile does not exist
 
             // TODO: prevent redirect, inspect code for previous status_code
@@ -202,10 +201,13 @@ const checkIfProfileExists = async (site: Site, username: string) => {
                                     console.log("ERROR! - " + error)
                                     return undefined
                                 })
-            
+ 
+            // a couple of websites have the errorUrl including the searched username. Edge case
+            const modifiedErrorUrl = errorUrl?.replace("{}", username)
+
             // If request fails (undefined), return false.
             // Otherwise, check the redirect url of the response. If that matches the expected 'errorUrl', profile doesn't exist.
-            return (response === undefined) ? false : response.url !== errorUrl
+            return (response === undefined) ? false : response.url !== modifiedErrorUrl
             return false
             break
     }

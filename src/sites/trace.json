@@ -1,8 +1,107 @@
 {
-  "VK": {
+  "2Dimensions": {
+    "omit": true
+  },
+  "3dnews": {
+    "omit": true
+  },
+  "AllTrails": {
+    "headers": {
+      "credentials": "include"
+    }
+  },
+  "Anobii": {
+    "errorUrl": "https://www.anobii.com/stream"
+  },
+  "Ask Fedora": {
+    "username_claimed": "franciscod"
+  },
+  "BOOTH": {
+    "errorUrl": "https://booth.pm/en"
+  },
+  "Carbonmade": {
     "errorType": "status_code"
+  },
+  "Chess": {
+    "errorType": "status_code"
+  },
+  "Clozemaster": {
+    "errorType": "response_url",
+    "errorUrl": "https://www.clozemaster.com/dashboard"
+  },
+  "Football": {
+    "errorType": "status_code"
+  },
+  "NameMC (Minecraft.net skins)": {
+    "errorMsg": [
+      "Status: Available",
+      "Status: Too Long"
+    ],
+    "username_unclaimed": "fdkhajkj"
+  },
+  "Naver": {
+    "omit": true
+  },
+  "Nightbot": {
+    "request_head_only": false
+  },
+  "Otzovik": {
+    "omit": true
+  },
+  "PSNProfiles.com": {
+    "username_unclaimed": "dslakjfas"
+  },
+  "Plug.DJ": {
+    "omit": true
+  },
+  "ProductHunt": {
+    "errorType": "status_code"
+  },
+  "Smashcast": {
+    "omit": true
+  },
+  "Spotify": {
+    "errorType": "message",
+    "errorMsg": "<title>Spotify – Web Player</title>"
+  },
+  "Tinder": {
+    "headers": {
+      "User-Agent": "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)"
+    }
+  },
+  "Twitter": {
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:50.0) Gecko/20100101 Firefox/50.0"
+    },
+    "errorType": "message",
+    "errorMsg": "Page not found"
+  },
+  "VK": {
+    "errorType": "message",
+    "errorMsg": "https://vk.com/images/error404.png"
+  },
+  "WordPress": {
+    "errorUrl": "https://wordpress.com/typo/?subdomain={}"
   },
   "WordPressOrg": {
     "errorType": "status_code"
+  },
+  "Zhihu": {
+    "errorType": "status_code"
+  },
+  "igromania": {
+    "omit": true
+  },
+  "labpentestit": {
+    "errorUrl": "https://lab.pentestit.ru/"
+  },
+  "opennet": {
+    "omit": true
+  },
+  "prog.hu": {
+    "omit": true
+  },
+  "svidbook": {
+    "username_claimed": "Balumba"
   }
 }
