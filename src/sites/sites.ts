@@ -21,11 +21,11 @@ interface SherlockSiteList {
 }
 
 interface TraceSite {
-  errorType?: string,            // status_code, message, or response_url
-  url?: string,                  // url for website profile page
-  urlMain?: string,              // url for website home page
-  username_claimed?: string,     // username that is claimed on the website
-  username_unclaimed?: string,   // username that is not claimed on the website
+  errorType?: string,           // status_code, message, or response_url
+  url?: string,                 // url for website profile page
+  urlMain?: string,             // url for website home page
+  username_claimed?: string,    // username that is claimed on the website
+  username_unclaimed?: string,  // username that is not claimed on the website
   errorMsg?: string | string[], // if errorType = message, this message will pop up if the profile doesn't exist
   regexCheck?: string,          // regex for valid usernames on the website
   errorUrl?: string,            // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist

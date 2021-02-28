@@ -3,36 +3,6 @@
  * TRACE searches.
  */
 
-
-
-
-
-/*                                  TODO:
-
-    - Maybe add regex check?
-    - Meet w/ group and figure out format to send to frontend
-    - Find logo URL if the frontend isn't?
-    - Fix Twitter
-
-
-    Inform users to:
-        Disable Enhanced Privacy Protection on Firefox for TRACE
-        Enable 3rd party cookies for TRACE
-        Disable VPN
-
-*/
-
-/* Need for CORS:
-
-    Access-Control-Allow-Origin: <ORIGIN>
-    Access-Control-Allow-Headers: 'include'
-    Access-Control-Allow-Credentials: 'expose'
-*/
- 
-
-
-
-
 import { allSites, Site, SiteList } from 'sites';
 
 import fetch from './fetchWithTimeout'      // fetch(url, options, timeout_ms = 10000)
@@ -47,12 +17,12 @@ export interface SearchResult {
 
 
 /**
-  * Searches our compiled list of sites for the username(s) provided
-  * Usernames must be provided in list form:
-  *     ["cohenchris", "jmcker", ...]
-  * By default, sherlock.json has 298 sites (as of 2-25-21)
-  * @param usernames an array of usernames to search for
-  */
+ * Searches our compiled list of sites for the username(s) provided
+ * Usernames must be provided in list form:
+ *     ["cohenchris", "jmcker", ...]
+ * By default, sherlock.json has 298 sites (as of 2-25-21)
+ * @param usernames an array of usernames to search for
+ */
 export const searchSites = async (usernames: string[]) => {
     const foundProfiles: SearchResult[] = []
 
@@ -254,7 +224,7 @@ const responseContainsError = (response: string | undefined, errorMsg: string) =
 const findRequestHeaders = (errorType: string, headers: {} | undefined, request_head_only: boolean | undefined) => {
     let requestType = 'GET'
 
-    if (errorType == "status_code") {
+    if (errorType === "status_code") {
         if (request_head_only === undefined || request_head_only === true) {    // request_head_only needs to explicitly set as false to make request method 'GET'
             requestType = 'HEAD'
         }
