@@ -35,6 +35,7 @@ const foundProfiles: SearchResult[] = await searchSites(usernames);
 - [ ] Figure out what the noPeriod field in sherlock.json means
 - [ ] Clean up code, refactor, simplify, increase readability, etc.
 - [ ] Find logo URL if the frontend isn't?
+    - [ ] Async get? This could tie into the dynamically loading array
 
 
 - [ ] Meet w/ group and figure out format to send to frontend

@@ -15,6 +15,9 @@ export interface SearchResult {
 }
 
 
+const TESTING = true        // when true, tests claimed and unclaimed usernames for all sites
+const DEBUG = true          // debugging output when testing with normal usernames
+
 
 /**
  * Searches our compiled list of sites for the username(s) provided
@@ -29,6 +32,38 @@ export const searchSites = async (usernames: string[]) => {
     const pass: any[] = []
     const fail: any[] = []
 
+    if (TESTING) {
+        for (const site in allSites) {
+            const profileExists = await checkIfProfileExists(allSites[site], allSites[site].username_claimed)
+            const profileNotExists = await checkIfProfileExists(allSites[site], allSites[site].username_unclaimed)
+
+            if (!profileExists || profileNotExists) {
+                fail.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+            }
+            else {
+                pass.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
+            }
+        }
+
+        console.log("PASSING:")
+        console.log(pass)
+
+        console.log("FAILING")
+        console.log(fail)
+
+        // Placeholder so TS doesn't scream at me
+        const ret_val: SearchResult[] = [{
+            "siteName": "TESTING ENABLED",
+            "siteUrl": "TESTING ENABLED",
+            "username": "TESTING ENABLED",
+            "profileUrl": "TESTING ENABLED",
+        }]
+
+        return ret_val
+    }
+
+
+
 
     // For each username, check each site for an existing profile
     for (const username of usernames) {
@@ -39,18 +74,6 @@ export const searchSites = async (usernames: string[]) => {
                     continue
                 }
 
-                // TESTING
-                /*
-                    const profileExists = await checkIfProfileExists(allSites[site], allSites[site].username_claimed)
-                    const profileNotExists = await checkIfProfileExists(allSites[site], allSites[site].username_unclaimed)
-
-                    if (!profileExists || profileNotExists) {
-                        fail.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
-                    }
-                    else {
-                        pass.push([site, allSites[site].errorType, `profileExists: ${profileExists}`, `profileNotExists: ${profileNotExists}`])
-                    }
-                */
 
                 const profileExists = await checkIfProfileExists(allSites[site], username)
 
@@ -66,26 +89,30 @@ export const searchSites = async (usernames: string[]) => {
                     }
 
                     foundProfiles.push(foundProfile)
-                    // pass.push([site, allSites[site].errorType])     // DEBUG
+                    if (DEBUG) {
+                        pass.push([site, allSites[site].errorType])
+                    }
                 }
-                // else {   // DEBUG
-                //     fail.push([site, allSites[site].errorType])
-                // }
-                // console.log(`${site} -- profileExists: ${profileExists}\n====================`)     // DEBUG
+                else if (DEBUG) {
+                    fail.push([site, allSites[site].errorType])
+                }
 
             } catch(error) {
                 // This will ignore any json items that are malformed
+                console.log(error)
                 continue
             }
         }
     }
 
 
-    // console.log("PASSING:")
-    // console.log(pass)
+    if (DEBUG) {
+        console.log("PASSING:")
+        console.log(pass)
 
-    // console.log("FAILING")
-    // console.log(fail)
+        console.log("FAILING")
+        console.log(fail)
+    }
 
 
     return foundProfiles
