@@ -38,9 +38,7 @@ describe('search definition', () => {
     const searchDef = new SearchDefinition(undefined, siteNames);
 
     for (const siteName of siteNames) {
-      expect(searchDef.includedSites).toContainEqual(
-        expect.objectContaining({ name: siteName })
-      );
+      expect(searchDef.includedSites).toContainEqual(expect.objectContaining({ name: siteName }));
     }
 
     expect(searchDef.includedSites).toHaveLength(siteNames.length);
@@ -57,16 +55,12 @@ describe('search definition', () => {
     expect(console.warn).toBeCalledTimes(INVALID_SITE_NAMES.length);
 
     for (const siteName of VALID_SITE_NAMES) {
-      expect(searchDef.includedSites).toContainEqual(
-        expect.objectContaining({ name: siteName })
-      );
+      expect(searchDef.includedSites).toContainEqual(expect.objectContaining({ name: siteName }));
     }
 
     expect(searchDef.includedSites).not.toContainEqual(undefined);
     for (const siteName of INVALID_SITE_NAMES) {
-      expect(searchDef.includedSites).not.toContainEqual(
-        expect.objectContaining({ name: siteName })
-      );
+      expect(searchDef.includedSites).not.toContainEqual(expect.objectContaining({ name: siteName }));
     }
 
     expect(searchDef.includedSites).toHaveLength(VALID_SITE_NAMES.length);

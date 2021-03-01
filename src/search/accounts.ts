@@ -388,5 +388,5 @@ export enum AccountType {
 export enum DiscoveredAccountAction {
   NONE = 'None',
   CLAIMED = 'Claimed',
-  REJECTED = 'Rejected'
+  REJECTED = 'Rejected',
 }
