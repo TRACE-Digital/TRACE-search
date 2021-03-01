@@ -7,6 +7,7 @@
  * }
  */
 import PouchDB from 'pouchdb';
+import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 
 let _localDb: PouchDB.Database | null = null;
@@ -31,7 +32,9 @@ async function setupDb() {
   }
 
   // If you need a fresh db
-  // await _devNukeDb();
+  await _devNukeDb();
+
+  console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
 
   _localDb = new PouchDB(DB_NAME);
   console.debug(_localDb);
