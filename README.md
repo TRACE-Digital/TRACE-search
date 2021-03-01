@@ -13,10 +13,6 @@ To start:
 ```sh
 npm start
 # Open the browser to localhost:8000
-
-# OR
-
-node dist/trace-search.js
 ```
 
 To create a production build:
@@ -31,10 +27,24 @@ To create a development build:
 npm run build-dev
 ```
 
-## Running ##
+## Testing ##
 
 ```sh
-npm run build-dev && node dist/trace-search.js
+npm test                # Full test suite
+npm test --verbose      # Full test suite with more info
+npm test -- -h          # Show Jest CLI help
+npm test -- --watch     # Re-run affected tests when source code changes are detected
+npm test -- -t search   # Run tests that contain 'search'
+
+# Run only a certain test file
+npm test -- src/tests/search.test.ts
+```
+
+## Helpful Scripts ##
+
+```sh
+npm run lint    # Run the linter
+npm run format  # Run the code formatter
 ```
 
 ## Publishing ##
