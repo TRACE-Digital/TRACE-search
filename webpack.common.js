@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const app = require('./package.json');
+const webpackDefines = require('./webpack.defines');
 
 // Add this plugin so that we can use baseUrl in tsconfig.json
 // https://github.com/TypeStrong/ts-loader#baseurl--paths-module-resolution
@@ -39,12 +40,7 @@ const config = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ['**/*', '!index.html'],
     }),
-    new webpack.DefinePlugin({
-      __NAME__: JSON.stringify(app.name),
-      __VERSION__: JSON.stringify(app.version),
-      __DESCRIPTION__: JSON.stringify(app.description),
-      __BUILT_AT__: JSON.stringify(new Date().toJSON()),
-    }),
+    new webpack.DefinePlugin(webpackDefines),
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
