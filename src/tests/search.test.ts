@@ -96,4 +96,17 @@ describe('search definition', () => {
     expect(searchDef.lastRun).toBeNull();
     expect(searchDef.lastRunAt).toBeNull();
   });
+
+  it('deserializes with no search history', async () => {
+    const searchDef = new SearchDefinition('Test Search', VALID_SITE_NAMES);
+    searchDef.firstNames.push('Bob');
+    searchDef.lastNames.push('Alice');
+    searchDef.userNames.push('balice');
+
+    const serialized = searchDef.serialize();
+    const deserialized = await SearchDefinition.deserialize(serialized);
+
+    expect(deserialized).toEqual(searchDef);
+    expect(deserialized.serialize()).toEqual(serialized);
+  });
 });
