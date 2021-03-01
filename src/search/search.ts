@@ -135,7 +135,13 @@ export class SearchDefinition implements IDbStorable {
     this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
 
     siteNames = siteNames || Object.keys(allSites);
-    this.includedSites = siteNames.map(siteName => allSites[siteName]);
+    for (const siteName of siteNames) {
+      if (siteName in allSites) {
+        this.includedSites.push(allSites[siteName]);
+      } else {
+        console.warn(`Could not add site '${siteName}'. No definition found!`);
+      }
+    }
 
     this.id = toId(['searchDef', this.createdAt.toJSON(), this.name]);
   }
