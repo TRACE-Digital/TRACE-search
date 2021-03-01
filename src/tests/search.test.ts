@@ -1,4 +1,4 @@
-import { SearchDefinition } from 'search';
+import { Search, SearchDefinition } from 'search';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
@@ -97,7 +97,7 @@ describe('search definition', () => {
     expect(searchDef.lastRunAt).toBeNull();
   });
 
-  it('deserializes with no search history', async () => {
+  it('deserializes without search history', async () => {
     const searchDef = new SearchDefinition('Test Search', VALID_SITE_NAMES);
     searchDef.firstNames.push('Bob');
     searchDef.lastNames.push('Alice');
@@ -108,5 +108,78 @@ describe('search definition', () => {
 
     expect(deserialized).toEqual(searchDef);
     expect(deserialized.serialize()).toEqual(serialized);
+  });
+
+  it('saves', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    let lastRev = searchDef.rev;
+
+    const result = await searchDef.save();
+
+    expect(result).toBeDefined();
+    expect(result.ok).toBeTruthy();
+    expect(result.id).toEqual(searchDef.id);
+
+    expect(result.rev).not.toEqual(lastRev);
+    lastRev = result.rev;
+  });
+
+  it('saves multiple times', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    let lastRev = searchDef.rev;
+
+    for (let i = 0; i < 2; i++) {
+      const result = await searchDef.save();
+
+      expect(result).toBeDefined();
+      expect(result.ok).toBeTruthy();
+      expect(result.id).toEqual(searchDef.id);
+
+      expect(searchDef.rev).not.toEqual(lastRev);
+      lastRev = searchDef.rev;
+    }
+  });
+
+  it('produces a new search', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+
+    expect(search).toBeDefined();
+    expect(search.definition).toBe(searchDef);
+    expect(search.id).toContain(searchDef.id);
+
+    expect(searchDef.history).toHaveLength(1);
+    expect(searchDef.history).toContain(search);
+  });
+
+  it('deserializes with history', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+
+    await searchDef.save();
+
+    const serialized = searchDef.serialize();
+    const deserialized = await SearchDefinition.deserialize(serialized);
+
+    expect(deserialized).toEqual(searchDef);
+    expect(deserialized.serialize()).toEqual(serialized);
+  });
+});
+
+describe('search', () => {
+  let definition: SearchDefinition;
+
+  beforeAll(() => {
+    definition = new SearchDefinition(undefined, VALID_SITE_NAMES);
+  });
+
+  it('constructs', () => {
+    const search = new Search(definition);
+    expect(search).toBeDefined();
+  });
+
+  it('constructs from SearchDefinition.new()', async () => {
+    const search = await definition.new();
+    expect(search).toBeDefined();
   });
 });
