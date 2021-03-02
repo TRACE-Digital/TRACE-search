@@ -12,7 +12,8 @@
     "target": "es5",
     "allowJs": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": ["./src/**/*"],
   "exclude": ["./node_modules/**/*"]
