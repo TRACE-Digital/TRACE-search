@@ -89,8 +89,26 @@ async function main() {
 main();
 
 // Top level exports that we want to be publicly visible
-export { allSites as supportedSites } from 'sites';
+// Name each explicitly so that JavaScript has an easier time with them
+export { allSites, supportedSites, unsupportedSites } from 'sites';
 export { VERSION as version } from 'meta';
+export {
+  AccountType,
+  ClaimedAccount,
+  DiscoveredAccount,
+  DiscoveredAccountAction,
+  ManualAccount,
+  RejectedAccount,
+  Search,
+  SearchDefinition,
+  SearchState,
+  ThirdPartyAccount,
+  UnregisteredAccount,
+  accounts,
+  searchDefinitions,
+  searchResults,
+  searches,
+} from 'search';
 
 // Top level types that we want to be publicly visible
 export * from 'search';

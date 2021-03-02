@@ -229,7 +229,7 @@ describe('search', () => {
     definition = new SearchDefinition(undefined, VALID_SITE_NAMES);
     await definition.save();
 
-    expect(definition.id).toBeInDatabase();
+    await expect(definition.id).toBeInDatabase();
   });
 
   it('constructs', () => {
@@ -247,7 +247,7 @@ describe('search', () => {
     const search = await definition.new();
 
     expect(search.rev.length).toBeGreaterThan(0);
-    expect(search.id).toBeInDatabase();
+    await expect(search.id).toBeInDatabase();
   });
 
   it('saves', async () => {
