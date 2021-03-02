@@ -23,7 +23,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'umd',
-    library: 'traceSearch',
+    library: 'TraceSearch',
     umdNamedDefine: true,
     globalObject: 'this', // Support DOM and Node https://webpack.js.org/configuration/output/#outputglobalobject
   },

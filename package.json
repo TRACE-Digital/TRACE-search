@@ -22,6 +22,7 @@
     "build-dev": "webpack --config webpack.dev.js",
     "build-prod": "webpack --config webpack.prod.js",
     "test": "jest",
+    "test-debug": "node --inspect ./node_modules/.bin/jest --runInBand --detectOpenHandles",
     "coverage": "jest --coverage",
     "format": "prettier --write .",
     "lint": "tslint -p tsconfig.json"

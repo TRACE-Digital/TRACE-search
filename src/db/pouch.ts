@@ -9,6 +9,7 @@
 import PouchDB from 'pouchdb';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
+import { BUILD_TYPE } from 'meta';
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
@@ -37,7 +38,7 @@ async function setupDb() {
   console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
 
   _localDb = new PouchDB(DB_NAME);
-  console.debug(_localDb);
+  if (BUILD_TYPE !== 'test') console.debug(_localDb);
 
   // Typing module doesn't have .adapter since its unofficial, but you can
   // check what it is in the other log output

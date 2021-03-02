@@ -1,7 +1,16 @@
 import { allSites } from 'sites';
 import { getDb, SearchDefinitionSchema, UTF_MAX } from 'db';
 import * as meta from 'meta';
-import { accounts, ClaimedAccount, DiscoveredAccount, Search, SearchDefinition, searchDefinitions, searches, ThirdPartyAccount } from 'search';
+import {
+  accounts,
+  ClaimedAccount,
+  DiscoveredAccount,
+  Search,
+  SearchDefinition,
+  searchDefinitions,
+  searches,
+  ThirdPartyAccount,
+} from 'search';
 import deepEqual from 'deep-equal';
 
 async function main() {
@@ -19,6 +28,8 @@ async function main() {
   searchDef.userNames.push('test');
 
   console.log(searchDef);
+
+  await searchDef.save();
 
   const search = await searchDef.new();
   console.log(`Progress: ${search.progress}%`);
@@ -48,25 +59,6 @@ async function main() {
   console.groupCollapsed('Test database store/retrieve');
 
   const db = await getDb();
-  console.log('Database:');
-  console.log(db);
-
-  const result = await searchDef.save();
-  console.log('Search definition save result:');
-  console.log(result);
-
-  const retrieved = await db.get<SearchDefinitionSchema>(searchDef.id);
-
-  console.log('Search definition serialization/retrieval:');
-  console.log(searchDef.serialize());
-  console.log(retrieved);
-
-  // Comparing JSON.stringify() results depends on the order of keys
-  // Rely on the deep-equals library instead
-  const areEqual = deepEqual(searchDef.serialize(), retrieved);
-
-  console.assert(areEqual, 'Database: stored !== retrieved');
-  console.log(`stored === retrieved: ${areEqual}`);
 
   const allSearchDefs = await db.allDocs({
     include_docs: true,
@@ -74,10 +66,6 @@ async function main() {
     endkey: `searchDef/${UTF_MAX}`,
   });
   console.log(allSearchDefs);
-
-  const searchDefDeserialized = await SearchDefinition.deserialize(retrieved);
-  console.log('Search definition deserialized');
-  console.log(searchDefDeserialized);
 
   console.groupEnd();
   console.group('Test loading');

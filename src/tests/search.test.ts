@@ -1,16 +1,14 @@
-import { _devNukeDb } from 'db';
-import { Search, SearchDefinition, searchDefinitions } from 'search';
+import { getDb, _devNukeDb } from 'db';
+import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
 
 beforeEach(async () => {
-  console.log('Clean database');
   await _devNukeDb();
 });
 
 describe('search definition', () => {
-
   it('constructs with no args', () => {
     const searchDef = new SearchDefinition();
     expect(searchDef).toBeDefined();
@@ -102,11 +100,33 @@ describe('search definition', () => {
     expect(searchDef.lastEditedAt).toBeDefined();
   });
 
+  it('returns only completed searches', async () => {
+    const searchDef = new SearchDefinition(undefined, []);
+    const search1 = await searchDef.new();
+    const search2 = await searchDef.new();
+
+    search1.state = SearchState.COMPLETED;
+
+    expect(searchDef.completedHistory).toHaveLength(1);
+    expect(searchDef.completedHistory[0]).toBe(search1);
+  });
+
   it('handles requests for lastRun with 0 runs', () => {
     const searchDef = new SearchDefinition();
 
     expect(searchDef.lastRun).toBeNull();
     expect(searchDef.lastRunAt).toBeNull();
+  });
+
+  it('returns the last started search execution', async () => {
+    const searchDef = new SearchDefinition(undefined, []);
+    const search = await searchDef.new();
+
+    search.state = SearchState.COMPLETED;
+    search.startedAt = new Date();
+
+    expect(searchDef.lastRun).toBe(search);
+    expect(searchDef.lastRunAt).toBe(search.startedAt);
   });
 
   it('deserializes without search history', async () => {
@@ -205,8 +225,11 @@ describe('search definition', () => {
 describe('search', () => {
   let definition: SearchDefinition;
 
-  beforeAll(() => {
+  beforeEach(async () => {
     definition = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await definition.save();
+
+    expect(definition.id).toBeInDatabase();
   });
 
   it('constructs', () => {
@@ -217,5 +240,53 @@ describe('search', () => {
   it('constructs from SearchDefinition.new()', async () => {
     const search = await definition.new();
     expect(search).toBeDefined();
+    expect(search.id).toContain(definition.id);
+  });
+
+  it('saves automatically when created', async () => {
+    const search = await definition.new();
+
+    expect(search.rev.length).toBeGreaterThan(0);
+    expect(search.id).toBeInDatabase();
+  });
+
+  it('saves', async () => {
+    const search = await definition.new();
+    let lastRev = search.rev;
+
+    const result = await search.save();
+
+    expect(result).toBeDefined();
+    expect(result.ok).toBeTruthy();
+    expect(result.id).toEqual(search.id);
+
+    expect(result.rev).not.toEqual(lastRev);
+    lastRev = result.rev;
+  });
+
+  it('saves multiple times', async () => {
+    const search = await definition.new();
+    let lastRev = search.rev;
+
+    for (let i = 0; i < 2; i++) {
+      const result = await search.save();
+
+      expect(result).toBeDefined();
+      expect(result.ok).toBeTruthy();
+      expect(result.id).toEqual(search.id);
+
+      expect(search.rev).not.toEqual(lastRev);
+      lastRev = search.rev;
+    }
+  });
+
+  it('deserializes without results', async () => {
+    const search = await definition.new();
+
+    const serialized = search.serialize();
+    const deserialized = await Search.deserialize(serialized);
+
+    expect(deserialized).toEqual(search);
+    expect(deserialized.serialize()).toEqual(serialized);
   });
 });

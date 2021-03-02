@@ -38,6 +38,9 @@ npm test -- -t search   # Run tests that contain 'search'
 
 # Run only a certain test file
 npm test -- src/tests/search.test.ts
+
+# If tests get stuck
+npm run test-debug
 ```
 
 ## Helpful Scripts ##

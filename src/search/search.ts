@@ -12,12 +12,10 @@ import {
   toId,
   DbResponse,
   throwIfIdMismatch,
-  ID_SEPARATOR,
-  AccountSchema,
   UTF_MAX,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { accounts, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
 /** Collection of search definitions that have already been pulled out of the database. */
 export const searchDefinitions: { [key: string]: SearchDefinition } = {};
@@ -43,7 +41,7 @@ export class SearchDefinition implements IDbStorable {
     const response = await db.allDocs<SearchDefinitionSchema>({
       include_docs: true,
       startkey: toId(['searchDef'], idPrefix),
-      endkey: toId(['searchDef', UTF_MAX], idPrefix)
+      endkey: toId(['searchDef', UTF_MAX], idPrefix),
     });
     console.debug(response);
 
@@ -109,10 +107,6 @@ export class SearchDefinition implements IDbStorable {
     for (const result of results) {
       instance.history.push(result);
     }
-
-    console.log('here');
-    console.log(instance.history);
-    console.log(results);
 
     return instance;
   }
@@ -300,13 +294,20 @@ export class Search implements IDbStorable {
     } else if (data.definitionId in searchDefinitions) {
       definition = searchDefinitions[data.definitionId];
     } else {
-      const definitionSchema = await db.get<SearchDefinitionSchema>(data.definitionId);
-      definition = await SearchDefinition.deserialize(definitionSchema);
+      try {
+        const definitionSchema = await db.get<SearchDefinitionSchema>(data.definitionId);
+        definition = await SearchDefinition.deserialize(definitionSchema);
+      } catch (e) {
+        console.debug(e);
+        throw new Error(`Failed to deserialize search definition '${data.definitionId}': ${e}`);
+      }
 
       // Deserializing the search definition should create the instance for us
-      const search = searches[data._id];
-      console.assert(search, `SearchDefinition.deserialize() did not create search '${data._id}'!`);
-      return search;
+      if (!(data._id in searches)) {
+        throw new Error(`SearchDefinition.deserialize() did not create search '${data._id}'!`);
+      }
+
+      return searches[data._id];
     }
 
     const instance = existingInstance || new Search(definition);
@@ -318,8 +319,10 @@ export class Search implements IDbStorable {
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
+    searches[instance.id] = instance;
+
     // Load the search results, but don't load them into the global accounts map
-    const prefix = toId(['searchResult'], instance.id)
+    const prefix = toId(['searchResult'], instance.id);
     const results = await ThirdPartyAccount.loadAll(prefix);
 
     for (const result of results) {
@@ -500,6 +503,11 @@ export class Search implements IDbStorable {
    * Each call will create a revision and take up space.
    */
   public async save(): Promise<DbResponse> {
+    // Save our definition if it hasn't been saved yet
+    if (this.definition.rev.length === 0) {
+      await this.definition.save();
+    }
+
     console.debug(`Saving search ${this.id}...`);
 
     const db = await getDb();
