@@ -30,16 +30,16 @@ const foundProfiles: SearchResult[] = await searchSites(usernames);
 
 #### TODO
 - [ ] Figure out how to fix Twitter
-- [ ] To avoid a long wait, dynamically give the array of found profiles to the frontend
+- [x] To avoid a long wait, dynamically give the array of found profiles to the frontend
 - [ ] Maybe add regex check?
-- [ ] Figure out what the noPeriod field in sherlock.json means
+- [x] Figure out what the noPeriod field in sherlock.json means
 - [ ] Clean up code, refactor, simplify, increase readability, etc.
 - [ ] Find logo URL if the frontend isn't?
     - [ ] Async get? This could tie into the dynamically loading array
 
 
-- [ ] Meet w/ group and figure out format to send to frontend
-    - [ ] Add more fields to `SearchResult` interface, if need be
+- [x] Meet w/ group and figure out format to send to frontend
+    - [x] Add more fields to `SearchResult` interface, if need be
 - [ ] Inform users to:
     - [ ] Disable Enhanced Privacy Protection on Firefox for TRACE
     - [ ] Enable 3rd party cookies for TRACE

@@ -16,6 +16,7 @@ import {
 } from 'db';
 import { allSites, Site } from 'sites';
 import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { findAccount } from './searchMethods';
 
 /** Collection of search definitions that have already been pulled out of the database. */
 export const searchDefinitions: { [key: string]: SearchDefinition } = {};
@@ -446,8 +447,6 @@ export class Search implements IDbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected async doSearch() {
-    const resultIdPrefix = toId(['searchResult'], this.id);
-
     for (const site of this.definition.includedSites) {
       for (const userName of this.definition.userNames) {
         // Ignore sites that we already have results for
@@ -456,12 +455,16 @@ export class Search implements IDbStorable {
             continue;
           }
         }
+        else if (site.omit) {
+          // Skip over sites that we are explicitly told to omit
+          console.warn(`${site.name} omitted.`)
+          continue;
+        }
 
         console.log(`Checking ${site.name}...`);
 
-        // TODO: Actually search
-
-        const account = new DiscoveredAccount(site, userName, resultIdPrefix);
+        // Search for the account and store results
+        const account : ThirdPartyAccount = await findAccount(site, userName, this)
         await account.save();
 
         // Store in multiple formats. See note above result* member initialization
