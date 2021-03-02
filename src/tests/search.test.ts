@@ -1,9 +1,16 @@
-import { Search, SearchDefinition } from 'search';
+import { _devNukeDb } from 'db';
+import { Search, SearchDefinition, searchDefinitions } from 'search';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
 
+beforeEach(async () => {
+  console.log('Clean database');
+  await _devNukeDb();
+});
+
 describe('search definition', () => {
+
   it('constructs with no args', () => {
     const searchDef = new SearchDefinition();
     expect(searchDef).toBeDefined();
@@ -31,6 +38,11 @@ describe('search definition', () => {
 
     expect(searchDef.name).toStrictEqual(name);
     expect(searchDef.serialize().name).toStrictEqual(name);
+  });
+
+  it('accepts an empty subset of sites', () => {
+    const searchDef = new SearchDefinition(undefined, []);
+    expect(searchDef.includedSites).toHaveLength(0);
   });
 
   it('accepts a subset of all sites', () => {
@@ -163,6 +175,30 @@ describe('search definition', () => {
 
     expect(deserialized).toEqual(searchDef);
     expect(deserialized.serialize()).toEqual(serialized);
+  });
+
+  it('is stored in the cache during deserialization', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+
+    // TODO: Figure out how newly created definitions will end up in the cache
+    // It's possible that the changes feed will trigger on .save()
+    await SearchDefinition.deserialize(searchDef.serialize());
+
+    console.warn(searchDefinitions[searchDef.id]);
+
+    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
+  });
+
+  it('is stored in the cache during loadAll', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await searchDef.save();
+
+    expect(searchDefinitions).not.toContainEqual(searchDef);
+
+    const results = await SearchDefinition.loadAll();
+
+    expect(results).toContainEqual(searchDef);
+    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
   });
 });
 

@@ -3,7 +3,7 @@
  * and third-party accounts.
  */
 
-import { DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId } from 'db';
+import { DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId, UTF_MAX } from 'db';
 import {
   AccountSchema,
   ClaimedAccountSchema,
@@ -17,6 +17,8 @@ import { Site } from 'sites';
 
 /** Collection of accounts that have already been pulled out of the database. */
 export const accounts: { [key: string]: ThirdPartyAccount } = {};
+/** Collection of search results that have already been pulled out of the database. */
+export const searchResults: { [key: string]: ThirdPartyAccount } = {};
 
 /**
  * Account associated with a third-party `Site`.
@@ -39,6 +41,57 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     } else {
       throw new Error(`Cannot deserialize unhandled account type '${data.type}'`);
     }
+  }
+
+  /**
+   * Load all `Accounts`s from the database into
+   * the `accounts` map.
+   *
+   * Returns an array of the requested accounts. All loaded accounts
+   * (including ones not loaded by this request) can be accessed
+   * via `searches`.
+   */
+  public static async loadAll(idPrefix?: string) {
+    const db = await getDb();
+    const response = await db.allDocs<AccountSchema>({
+      include_docs: true,
+      startkey: toId(['account'], idPrefix),
+      endkey: toId(['account', UTF_MAX], idPrefix),
+    });
+
+    const results = [];
+    for (const row of response.rows) {
+      const doc = row.doc;
+
+      if (doc === undefined) {
+        console.error('Received undefined document! Did you pass include_docs: true?');
+        continue;
+      }
+
+      // TODO: See if there is a way to restrict the query better
+      // Query will also match any new objects whose key is an extension of ours
+      // We don't really need this yet since we don't have any objects that do this,
+      // but still be safe and skip these by checking a field that only accounts should have
+      if (doc.userName === undefined) {
+        continue;
+      }
+
+      if (doc._id in accounts) {
+        results.push(accounts[doc._id]);
+      } else {
+        try {
+          const account = await ThirdPartyAccount.deserialize(doc);
+          results.push(account);
+        } catch (e) {
+          console.debug(doc);
+          console.debug(e);
+          console.warn(`Skipping account '${doc._id}'.\nFailed to deserialize:\n${e}`);
+          continue;
+        }
+      }
+    }
+
+    return results;
   }
 
   /**
@@ -89,7 +142,11 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     instance.userName = data.userName;
     instance.site = deserializeSite(data);
 
-    accounts[instance.id] = instance;
+    if (instance.id.startsWith('search')) {
+      searchResults[instance.id] = instance;
+    } else {
+      accounts[instance.id] = instance;
+    }
 
     return instance;
   }

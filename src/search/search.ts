@@ -20,15 +20,66 @@ import { allSites, Site } from 'sites';
 import { accounts, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
 /** Collection of search definitions that have already been pulled out of the database. */
-const searchDefinitions: { [key: string]: SearchDefinition } = {};
+export const searchDefinitions: { [key: string]: SearchDefinition } = {};
 /** Collection of searches that have already been pulled out of the database. */
-const searches: { [key: string]: Search } = {};
+export const searches: { [key: string]: Search } = {};
 
 /**
  * Parameters that define a repeatable `Search`.
  */
 export class SearchDefinition implements IDbStorable {
   private static idForDefaultName = 0;
+
+  /**
+   * Load all `SearchDefinition`s from the database into
+   * the `searchDefinitions` map.
+   *
+   * Returns an array of the requested definitions. All loaded definitions
+   * (including ones not loaded by this request) can be accessed
+   * via `searchDefinitions`.
+   */
+  public static async loadAll(idPrefix?: string) {
+    const db = await getDb();
+    const response = await db.allDocs<SearchDefinitionSchema>({
+      include_docs: true,
+      startkey: toId(['searchDef'], idPrefix),
+      endkey: toId(['searchDef', UTF_MAX], idPrefix)
+    });
+    console.debug(response);
+
+    const results = [];
+    for (const row of response.rows) {
+      const doc = row.doc;
+
+      if (doc === undefined) {
+        console.error('Received undefined document! Did you pass include_docs: true?');
+        continue;
+      }
+
+      // TODO: See if there is a way to restrict the query better
+      // Query will also match searches since their key is an extension of ours
+      // Skip these by checking a field that only SearchDefinition will have
+      if (doc.includedSiteNames === undefined) {
+        continue;
+      }
+
+      if (doc._id in searchDefinitions) {
+        results.push(searchDefinitions[doc._id]);
+      } else {
+        try {
+          const searchDef = await SearchDefinition.deserialize(doc);
+          results.push(searchDef);
+        } catch (e) {
+          console.debug(doc);
+          console.debug(e);
+          console.warn(`Skipping search definition '${doc._id}'.\nFailed to deserialize:\n${e}`);
+          continue;
+        }
+      }
+    }
+
+    return results;
+  }
 
   public static async deserialize(data: SearchDefinitionSchema, existingInstance?: SearchDefinition) {
     throwIfIdMismatch(data, existingInstance);
@@ -51,46 +102,17 @@ export class SearchDefinition implements IDbStorable {
     // each entry can look us up and won't try to go to the db
     searchDefinitions[instance.id] = instance;
 
-    const db = await getDb();
-    const response = await db.allDocs<SearchSchema>({
-      include_docs: true,
-      startkey: instance.id + ID_SEPARATOR,
-      endkey: toId(['search', UTF_MAX], instance.id),
-    });
-    console.debug(response);
+    const results = await Search.loadAll(instance.id);
 
     // Clear the history so we don't have to worry about duplicates
     instance.history.length = 0;
-
-    for (const row of response.rows) {
-      const doc = row.doc;
-
-      if (doc === undefined) {
-        console.error('Received undefined document! Did you pass include_docs: true?');
-        continue;
-      }
-
-      // TODO: See if there is a way to restrict the query better
-      // Query will also match search results since their key is an extension of ours
-      // Skip these by checking a field that only Search will have
-      if (doc.definitionId === undefined) {
-        continue;
-      }
-
-      if (doc._id in searches) {
-        instance.history.push(searches[doc._id]);
-      } else {
-        try {
-          const search = await Search.deserialize(doc);
-          instance.history.push(search);
-        } catch (e) {
-          console.debug(doc);
-          console.debug(e);
-          console.warn(`Skipping search '${doc._id}'.\nFailed to deserialize:\n${e}`);
-          continue;
-        }
-      }
+    for (const result of results) {
+      instance.history.push(result);
     }
+
+    console.log('here');
+    console.log(instance.history);
+    console.log(results);
 
     return instance;
   }
@@ -213,6 +235,59 @@ export class SearchDefinition implements IDbStorable {
  * Single execution of a `SearchDefinition`.
  */
 export class Search implements IDbStorable {
+  /**
+   * This won't return anything unless you pass a searchDefinition prefix!
+   *
+   * Load all `Search`s from the database into
+   * the `searches` map.
+   *
+   * Returns an array of the requested searches. All loaded searches
+   * (including ones not loaded by this request) can be accessed
+   * via `searches`.
+   */
+  public static async loadAll(idPrefix?: string) {
+    const db = await getDb();
+    const response = await db.allDocs<SearchSchema>({
+      include_docs: true,
+      startkey: toId(['search'], idPrefix),
+      endkey: toId(['search', UTF_MAX], idPrefix),
+    });
+    console.debug(response);
+
+    const results = [];
+    for (const row of response.rows) {
+      const doc = row.doc;
+
+      if (doc === undefined) {
+        console.error('Received undefined document! Did you pass include_docs: true?');
+        continue;
+      }
+
+      // TODO: See if there is a way to restrict the query better
+      // Query will also match search results since their key is an extension of ours
+      // Skip these by checking a field that only Search will have
+      if (doc.definitionId === undefined) {
+        continue;
+      }
+
+      if (doc._id in searches) {
+        results.push(searches[doc._id]);
+      } else {
+        try {
+          const search = await Search.deserialize(doc);
+          results.push(search);
+        } catch (e) {
+          console.debug(doc);
+          console.debug(e);
+          console.warn(`Skipping search '${doc._id}'.\nFailed to deserialize:\n${e}`);
+          continue;
+        }
+      }
+    }
+
+    return results;
+  }
+
   public static async deserialize(data: SearchSchema, existingInstance?: Search) {
     throwIfIdMismatch(data, existingInstance);
 
@@ -243,44 +318,12 @@ export class Search implements IDbStorable {
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
-    const response = await db.allDocs<AccountSchema>({
-      include_docs: true,
-      startkey: instance.id + ID_SEPARATOR,
-      endkey: toId(['searchResult', UTF_MAX], instance.id),
-    });
+    // Load the search results, but don't load them into the global accounts map
+    const prefix = toId(['searchResult'], instance.id)
+    const results = await ThirdPartyAccount.loadAll(prefix);
 
-    // Clear the results so we don't have to worry about duplicates
-    instance.results.length = 0;
-
-    for (const row of response.rows) {
-      const doc = row.doc;
-
-      if (doc === undefined) {
-        console.error('Received undefined document! Did you pass include_docs: true?');
-        continue;
-      }
-
-      // TODO: See if there is a way to restrict the query better
-      // Query will also match any new objects whose key is an extension of ours
-      // We don't really need this yet since we don't have any objects that do this,
-      // but still be safe and skip these by checking a field that only accounts should have
-      if (doc.userName === undefined) {
-        continue;
-      }
-
-      if (doc._id in accounts) {
-        instance.storeResult(accounts[doc._id]);
-      } else {
-        try {
-          const account = await ThirdPartyAccount.deserialize(doc);
-          instance.storeResult(account);
-        } catch (e) {
-          console.debug(doc);
-          console.debug(e);
-          console.warn(`Skipping account '${doc._id}'.\nFailed to deserialize:\n${e}`);
-          continue;
-        }
-      }
+    for (const result of results) {
+      instance.storeResult(result);
     }
 
     return instance;

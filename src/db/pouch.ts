@@ -65,7 +65,7 @@ async function setupDb() {
 /**
  * Nuke the database.
  */
-async function _devNukeDb(dbName: string = DB_NAME) {
+export async function _devNukeDb(dbName: string = DB_NAME) {
   if (_localDb && _localDb.name === dbName) {
     await _localDb.destroy();
     _localDb = null;

@@ -1,7 +1,7 @@
 import { allSites } from 'sites';
 import { getDb, SearchDefinitionSchema, UTF_MAX } from 'db';
 import * as meta from 'meta';
-import { ClaimedAccount, DiscoveredAccount, SearchDefinition } from 'search';
+import { accounts, ClaimedAccount, DiscoveredAccount, Search, SearchDefinition, searchDefinitions, searches, ThirdPartyAccount } from 'search';
 import deepEqual from 'deep-equal';
 
 async function main() {
@@ -78,6 +78,21 @@ async function main() {
   const searchDefDeserialized = await SearchDefinition.deserialize(retrieved);
   console.log('Search definition deserialized');
   console.log(searchDefDeserialized);
+
+  console.groupEnd();
+  console.group('Test loading');
+
+  const searchDefLoadAll = await SearchDefinition.loadAll();
+  console.log(searchDefLoadAll);
+  console.log(searchDefinitions);
+
+  const searchLoadAll = await Search.loadAll(searchDef.id);
+  console.log(searchLoadAll);
+  console.log(searches);
+
+  const accountsLoadAll = await ThirdPartyAccount.loadAll();
+  console.log(accountsLoadAll);
+  console.log(accounts);
 
   console.groupEnd();
 }
