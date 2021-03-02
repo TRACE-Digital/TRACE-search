@@ -7,26 +7,38 @@
  * }
  */
 import PouchDB from 'pouchdb';
+import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
+import { BUILD_TYPE } from 'meta';
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
+_remoteDb = null;
 
 export const DB_NAME = 'trace';
+
+export async function getDb() {
+  if (_localDb) {
+    return _localDb;
+  }
+  return await setupDb();
+}
 
 /**
  * Initializes or returns the PouchDB instance.
  */
-export async function setupDb() {
+async function setupDb() {
   if (_localDb) {
     return _localDb;
   }
 
-  _localDb = new PouchDB(DB_NAME);
-  console.debug(_localDb);
-
   // If you need a fresh db
-  // await _devNukeDb();
+  await _devNukeDb();
+
+  console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
+
+  _localDb = new PouchDB(DB_NAME);
+  if (BUILD_TYPE !== 'test') console.debug(_localDb);
 
   // Typing module doesn't have .adapter since its unofficial, but you can
   // check what it is in the other log output
@@ -54,9 +66,12 @@ export async function setupDb() {
 /**
  * Nuke the database.
  */
-async function _devNukeDb() {
-  if (_localDb) {
+export async function _devNukeDb(dbName: string = DB_NAME) {
+  if (_localDb && _localDb.name === dbName) {
     await _localDb.destroy();
-    _localDb = new PouchDB(DB_NAME);
+    _localDb = null;
+  } else {
+    const db = new PouchDB(dbName);
+    await db.destroy();
   }
 }

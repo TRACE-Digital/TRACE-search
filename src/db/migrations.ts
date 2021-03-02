@@ -2,6 +2,8 @@ import PouchDB from 'pouchdb';
 import { VERSION } from 'meta';
 import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
 
+const VERSION_REGEXP = new RegExp('^[A-Za-z0-9.-]+$');
+
 /**
  * Apply database migrations to `db`.
  *
@@ -9,6 +11,11 @@ import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
  */
 export async function doMigrations(db: PouchDB.Database) {
   console.group('Starting migrations...');
+
+  // Prevent some basic errors in comparing versions
+  if (!VERSION_REGEXP.test(VERSION)) {
+    throw new Error(`Version '${VERSION}' contained invalid characters!`);
+  }
 
   // Default version
   let currentVersion = '0.0.0';

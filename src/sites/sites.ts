@@ -23,7 +23,9 @@ interface TraceSiteList {
   [key: string]: TraceSite;
 }
 
-export interface Site extends SherlockSite, TraceSite {}
+export interface Site extends SherlockSite, TraceSite {
+  name: string;
+}
 
 export interface SiteList {
   [key: string]: Site;
@@ -39,4 +41,14 @@ for (const siteName of Object.keys(trace)) {
   mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
 }
 
-export const allSites: SiteList = mergedSites as SiteList;
+// Store the name inside as well so we don't have to pass it separately
+for (const siteName of Object.keys(mergedSites)) {
+  mergedSites[siteName].name = siteName;
+}
+
+// TODO: Not really sure how this gets here, but it's a nested copy of
+// everything. Might need to check hasOwnProperty() or something
+// tslint:disable-next-line:no-string-literal
+delete mergedSites['default'];
+
+export const allSites = mergedSites as SiteList;
