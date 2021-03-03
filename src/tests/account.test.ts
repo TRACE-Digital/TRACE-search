@@ -9,7 +9,6 @@ import {
   UnregisteredAccount,
 } from 'search';
 import { allSites } from 'sites';
-import { getDb } from './pouchdb.mock';
 import { checkSaveResponse } from './util';
 
 const accountClasses: (typeof DiscoveredAccount | typeof ThirdPartyAccount)[] = [
@@ -135,5 +134,3 @@ for (const cls of accountClasses) {
     });
   });
 }
-
-console.log(getDb);
