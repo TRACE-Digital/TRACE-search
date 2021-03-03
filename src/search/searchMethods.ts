@@ -1,6 +1,6 @@
 import { toId } from 'db';
 import { Search } from 'search';
-import { allSites, Site, SiteList } from 'sites';
+import { Site } from 'sites';
 import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 import fetchWithTimeout from './fetchWithTimeout'      // fetchWithTimeout(url, options, timeout_ms = 10000)
 
@@ -16,15 +16,15 @@ import fetchWithTimeout from './fetchWithTimeout'      // fetchWithTimeout(url, 
 export const findAccount = async (site: Site, username: string, search: Search | null) : Promise<ThirdPartyAccount> => {
     const errorType: string = site.errorType                                // status_code, message, or response_url
     const url: string = site.url                                            // url for website profile page
-    const urlMain: string = site.urlMain                                    // url for website home page
+    //const urlMain: string = site.urlMain                                    // url for website home page
     const errorMsg: string | string[] | undefined = site.errorMsg           // if errorType = message, this message will pop up if the profile doesn't exist
-    const regexCheck: string | undefined = site.regexCheck                  // todo
+    //const regexCheck: string | undefined = site.regexCheck                  // todo
     const errorUrl: string | undefined = site.errorUrl                      // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist
     const urlProbe: string | undefined = site.urlProbe                      // alternate profile page test url for sites where profiles aren't publicly facing 
-    const noPeriod: string = site.noPeriod || "False"                       // todo (never used?)
+    //const noPeriod: string = site.noPeriod || "False"                       // todo (never used?)
     const headers: object = site.headers || {}                              // headers to send with the request if needed
     const request_head_only: boolean = site.request_head_only || true       // for status_code errorType website -- use a GET request instead of a HEAD request
-    const omit: boolean = site.omit || false                                // tells program to not process the site
+    //const omit: boolean = site.omit || false                                // tells program to not process the site
 
     // prefix id for database - return at the end
     const resultIdPrefix = search ? toId(['searchResult'], search.id) : undefined

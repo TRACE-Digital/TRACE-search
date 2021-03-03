@@ -10,11 +10,68 @@
       "credentials": "include"
     }
   },
+  "Reddit": {
+    "logoClass": "fa-reddit"
+  },
+  "Medium": {
+    "logoClass": "fa-medium"
+  },
+  "npm": {
+    "logoClass": "fa-npm"
+  },
+  "Telegram": {
+    "logoClass": "fa-telegram-plane"
+  },
+  "Apple Discussions": {
+    "logoClass": "fa-apple"
+  },
+  "Behance": {
+    "logoClass": "fa-behance"
+  },
+  "YouTube": {
+    "logoClass": "fa-youtube"
+  },
+  "Wikipedia": {
+    "logoClass": "fa-wikipedia-w"
+  },
+  "Facebook": {
+    "logoClass": "fa-facebook-square"
+  },
+  "Kaggle": {
+    "logoClass": "fa-kaggle"
+  },
+  "HackerRank": {
+    "logoClass": "fa-hackerrank"
+  },
+  "Codepen": {
+    "logoClass": "fa-codepen"
+  },
+  "Dribble": {
+    "logoClass": "fa-dribble"
+  },
+  "HackerNews": {
+    "logoClass": "fa-hacker-news"
+  },
+  "Pinterest": {
+    "logoClass": "fa-pinterest-square"
+  },
+  "Patreon": {
+    "logoClass": "fa-patreon"
+  },
+  "BitCoinForum": {
+    "logoClass": "fa-bitcoin"
+  },
+  "Trakt": {
+    "logoClass": "fa-film"
+  },
   "Anobii": {
     "errorUrl": "https://www.anobii.com/stream"
   },
   "Ask Fedora": {
     "username_claimed": "franciscod"
+  },
+  "BitBucket": {
+    "logoClass": "fa-bitbucket"
   },
   "BOOTH": {
     "errorUrl": "https://booth.pm/en"
@@ -32,11 +89,14 @@
   "Football": {
     "errorType": "status_code"
   },
+  "GitHub": {
+    "logoClass": "fa-github"
+  },
+  "GitLab": {
+    "logoClass": "fa-gitlab"
+  },
   "NameMC (Minecraft.net skins)": {
-    "errorMsg": [
-      "Status: Available",
-      "Status: Too Long"
-    ],
+    "errorMsg": ["Status: Available", "Status: Too Long"],
     "username_unclaimed": "fdkhajkj"
   },
   "Naver": {
@@ -61,15 +121,41 @@
     "omit": true
   },
   "Spotify": {
+    "logoClass": "fa-spotify",
     "errorType": "message",
     "errorMsg": "<title>Spotify – Web Player</title>"
+  },
+  "last.fm": {
+    "logoClass": "fa-lastfm"
+  },
+  "Twitch": {
+    "logoClass": "fa-twitch"
   },
   "Tinder": {
     "headers": {
       "User-Agent": "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)"
     }
   },
+  "TripAdvisor": {
+    "logoClass": "fa-tripadvisor"
+  },
+  "Quora": {
+    "logoClass": "fa-quora"
+  },
+  "Trello": {
+    "logoClass": "fa-trello"
+  },
+  "Wix": {
+    "logoClass": "fa-wix"
+  },
+  "Steam": {
+    "logoClass": "fa-steam"
+  },
+  "Xbox Gamertag": {
+    "logoClass": "fa-xbox"
+  },
   "Twitter": {
+    "logoClass": "fa-twitter-square",
     "headers": {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:50.0) Gecko/20100101 Firefox/50.0"
     },
@@ -85,6 +171,9 @@
   },
   "WordPressOrg": {
     "errorType": "status_code"
+  },
+  "Keybase": {
+    "logoClass": "fa-keybase"
   },
   "Zhihu": {
     "errorType": "status_code"

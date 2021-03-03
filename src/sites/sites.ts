@@ -33,7 +33,7 @@ interface TraceSite {
   noPeriod?: string,            // ???
   headers?: {},                 // headers to send with the request if needed
   request_head_only?: boolean   // for status_code errorType website -- use a GET request instead of a HEAD request
-  logoUrl?: string;             // URL to a logo icon (for use in frontend)
+  logoClass?: string;           // FontAwesome CSS class for the logo (for use in frontend)
   omit?: boolean                // tells program to not process the site
 }
 
@@ -63,6 +63,7 @@ for (const siteName of Object.keys(trace)) {
 // Store the name inside as well so we don't have to pass it separately
 for (const siteName of Object.keys(mergedSites)) {
   mergedSites[siteName].name = siteName;
+  mergedSites[siteName].logoClass = mergedSites[siteName].logoClass || "fa-question-circle"
 }
 
 // TODO: Not really sure how this gets here, but it's a nested copy of

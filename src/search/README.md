@@ -23,7 +23,7 @@ const foundProfiles: SearchResult[] = await searchSites(usernames);
   noPeriod?: string,            // ???
   headers?: {},                 // headers to send with the request if needed
   request_head_only?: boolean   // for status_code errorType website -- use a GET request instead of a HEAD request
-  logoUrl?: string;             // URL to a logo icon (for use in frontend)
+  logoClass?: string;           // FontAwesome CSS class for the logo (for use in frontend)
   omit?: boolean                // tells program to not process the site
 ```
 
@@ -31,11 +31,9 @@ const foundProfiles: SearchResult[] = await searchSites(usernames);
 #### TODO
 - [ ] Figure out how to fix Twitter
 - [x] To avoid a long wait, dynamically give the array of found profiles to the frontend
-- [ ] Maybe add regex check?
 - [x] Figure out what the noPeriod field in sherlock.json means
-- [ ] Clean up code, refactor, simplify, increase readability, etc.
-- [ ] Find logo URL if the frontend isn't?
-    - [ ] Async get? This could tie into the dynamically loading array
+- [x] Clean up code, refactor, simplify, increase readability, etc.
+- [x] Find logo URL if the frontend isn't?
 
 
 - [x] Meet w/ group and figure out format to send to frontend
