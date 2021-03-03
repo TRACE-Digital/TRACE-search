@@ -1,11 +1,12 @@
-import { getDb, _devNukeDb } from 'db';
+import { clearDb } from 'db';
 import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
+import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
 
 beforeEach(async () => {
-  await _devNukeDb();
+  await clearDb();
 });
 
 describe('search definition', () => {
@@ -148,12 +149,13 @@ describe('search definition', () => {
 
     const result = await searchDef.save();
 
-    expect(result).toBeDefined();
-    expect(result.ok).toBeTruthy();
-    expect(result.id).toEqual(searchDef.id);
+    checkSaveResponse(result, searchDef);
 
-    expect(result.rev).not.toEqual(lastRev);
+    expect(searchDef.rev).not.toEqual(lastRev);
     lastRev = result.rev;
+
+    // Save should put it in the cache
+    expect(searchDefinitions[searchDef.id]).toBe(searchDef);
   });
 
   it('saves multiple times', async () => {
@@ -163,12 +165,13 @@ describe('search definition', () => {
     for (let i = 0; i < 2; i++) {
       const result = await searchDef.save();
 
-      expect(result).toBeDefined();
-      expect(result.ok).toBeTruthy();
-      expect(result.id).toEqual(searchDef.id);
+      checkSaveResponse(result, searchDef);
 
       expect(searchDef.rev).not.toEqual(lastRev);
       lastRev = searchDef.rev;
+
+      // Save should put it in the cache
+      expect(searchDefinitions[searchDef.id]).toBe(searchDef);
     }
   });
 
@@ -203,8 +206,6 @@ describe('search definition', () => {
     // TODO: Figure out how newly created definitions will end up in the cache
     // It's possible that the changes feed will trigger on .save()
     await SearchDefinition.deserialize(searchDef.serialize());
-
-    console.warn(searchDefinitions[searchDef.id]);
 
     expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
   });
@@ -256,12 +257,13 @@ describe('search', () => {
 
     const result = await search.save();
 
-    expect(result).toBeDefined();
-    expect(result.ok).toBeTruthy();
-    expect(result.id).toEqual(search.id);
+    checkSaveResponse(result, search);
 
-    expect(result.rev).not.toEqual(lastRev);
+    expect(search.rev).not.toEqual(lastRev);
     lastRev = result.rev;
+
+    // Save should put it in the cache
+    expect(searches[search.id]).toBe(search);
   });
 
   it('saves multiple times', async () => {
@@ -271,12 +273,13 @@ describe('search', () => {
     for (let i = 0; i < 2; i++) {
       const result = await search.save();
 
-      expect(result).toBeDefined();
-      expect(result.ok).toBeTruthy();
-      expect(result.id).toEqual(search.id);
+      checkSaveResponse(result, search);
 
       expect(search.rev).not.toEqual(lastRev);
       lastRev = search.rev;
+
+      // Save should put it in the cache
+      expect(searches[search.id]).toBe(search);
     }
   });
 
