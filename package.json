@@ -35,6 +35,7 @@
   "dependencies": {
     "browser-or-node": "^1.3.0",
     "events": "^3.3.0",
+    "node-fetch": "^2.6.1",
     "pouchdb": "^7.2.2"
   },
   "devDependencies": {
