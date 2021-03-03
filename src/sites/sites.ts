@@ -17,6 +17,7 @@ interface SherlockSiteList {
 
 interface TraceSite {
   logoUrl: string;
+  prettyUrl: string;
 }
 
 interface TraceSiteList {
@@ -47,6 +48,11 @@ export const unsupportedSites: SiteList = {};
 // Store the name inside as well so we don't have to pass it separately
 for (const siteName of Object.keys(mergedSites)) {
   mergedSites[siteName].name = siteName;
+
+  if (mergedSites[siteName].urlMain) {
+    const url = new URL(mergedSites[siteName].urlMain);
+    mergedSites[siteName].prettyUrl = url.hostname;
+  }
 
   if (mergedSites[siteName].omit) {
     unsupportedSites[siteName] = mergedSites[siteName];
