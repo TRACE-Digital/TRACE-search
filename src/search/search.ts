@@ -3,6 +3,7 @@
  * TRACE searches.
  */
 
+import { EventEmitter } from 'events';
 import {
   IDbStorable,
   getDb,
@@ -347,6 +348,8 @@ export class Search implements IDbStorable {
     return Math.round((Object.values(this.results).length / this.definition.includedSites.length) * 100);
   }
 
+  public events = new EventEmitter();
+
   /**
    * `resultsMap` is the best structure for storing and checking results
    * internally during search, but is kind of messy to iterate over after.
@@ -359,6 +362,7 @@ export class Search implements IDbStorable {
    * If it's too memory intensive, we can reevaluate.
    */
   public results: ThirdPartyAccount[] = [];
+  public resultsById: SearchResultsById = {};
   public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
@@ -488,12 +492,15 @@ export class Search implements IDbStorable {
     }
 
     this.results.push(account);
+    this.resultsById[account.id] = account;
     this.resultsMap[site.name] = this.resultsMap[site.name] || {};
     this.resultsMap[site.name][account.userName] = account;
     this.resultsBySite[site.name] = this.resultsBySite[site.name] || [];
     this.resultsBySite[site.name].push(account);
     this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
     this.resultsByUser[account.userName].push(account);
+
+    this.events.emit('result', account.id);
   }
 
   /**
@@ -560,6 +567,10 @@ export interface SearchResults {
   [siteName: string]: {
     [userName: string]: ThirdPartyAccount;
   };
+}
+
+export interface SearchResultsById {
+  [id: string]: ThirdPartyAccount;
 }
 
 export interface SearchResultsBySite {
