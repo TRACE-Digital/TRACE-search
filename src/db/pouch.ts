@@ -25,6 +25,14 @@ export async function getDb() {
 }
 
 /**
+ * Remove all data in the database.
+ */
+export async function clearDb() {
+  await _devNukeDb();
+  console.log('Cleared database');
+}
+
+/**
  * Initializes or returns the PouchDB instance.
  */
 async function setupDb() {
@@ -33,7 +41,7 @@ async function setupDb() {
   }
 
   // If you need a fresh db
-  await _devNukeDb();
+  // await _devNukeDb();
 
   console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
 

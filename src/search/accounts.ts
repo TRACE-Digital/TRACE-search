@@ -186,6 +186,13 @@ export abstract class ThirdPartyAccount implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
+
+      if (this.id.startsWith('search')) {
+        searchResults[this.id] = this;
+      } else {
+        accounts[this.id] = this;
+      }
+
       return result;
     }
 

@@ -17,7 +17,7 @@ interface SherlockSiteList {
 
 interface TraceSite {
   logoUrl: string;
-  prettyUrl: string;
+  prettyUrl?: string;
 }
 
 interface TraceSiteList {
@@ -26,6 +26,7 @@ interface TraceSiteList {
 
 export interface Site extends SherlockSite, TraceSite {
   name: string;
+  tags: string[];
 }
 
 export interface SiteList {
@@ -42,6 +43,7 @@ for (const siteName of Object.keys(trace)) {
   mergedSites[siteName] = Object.assign({}, mergedSites[siteName], traceSites[siteName]);
 }
 
+const tagSet: { [tagName: string]: boolean } = {};
 export const supportedSites: SiteList = {};
 export const unsupportedSites: SiteList = {};
 
@@ -53,6 +55,11 @@ for (const siteName of Object.keys(mergedSites)) {
     const url = new URL(mergedSites[siteName].urlMain);
     mergedSites[siteName].prettyUrl = url.hostname;
   }
+
+  mergedSites[siteName].tags = mergedSites[siteName].tags || ['All Sites'];
+  mergedSites[siteName].tags.map((tag: string) => {
+    tagSet[tag] = true;
+  });
 
   if (mergedSites[siteName].omit) {
     unsupportedSites[siteName] = mergedSites[siteName];
@@ -71,6 +78,15 @@ delete supportedSites['default'];
 delete unsupportedSites['default'];
 
 /**
+ * All tags available on TRACE sites.
+ */
+export const tags = Object.keys(tagSet).sort();
+
+/**
  * Contains all sites, including unsupported ones.
  */
 export const allSites = mergedSites as SiteList;
+
+export function filterSitesByTags(sites: SiteList, tagsToInclude: string[]) {
+  return Object.values(sites).filter(site => site.tags.some(tag => tagsToInclude.includes(tag)));
+}

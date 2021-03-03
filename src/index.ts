@@ -11,7 +11,6 @@ import {
   searches,
   ThirdPartyAccount,
 } from 'search';
-import deepEqual from 'deep-equal';
 
 async function main() {
   console.log(`${meta.NAME} v${meta.VERSION}-${meta.BUILD_TYPE} built ${meta.BUILT_AT}`);
@@ -86,11 +85,12 @@ async function main() {
 }
 
 // tslint:disable-next-line:no-floating-promises
-main();
+// main();
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { allSites, supportedSites, unsupportedSites } from 'sites';
+export { getDb, clearDb } from 'db';
+export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
 export {
   AccountType,

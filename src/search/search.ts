@@ -16,7 +16,7 @@ import {
   UTF_MAX,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 
 /** Collection of search definitions that have already been pulled out of the database. */
 export const searchDefinitions: { [key: string]: SearchDefinition } = {};
@@ -204,6 +204,7 @@ export class SearchDefinition implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
+      searchDefinitions[this.id] = this;
       return result;
     }
 
@@ -500,6 +501,9 @@ export class Search implements IDbStorable {
     this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
     this.resultsByUser[account.userName].push(account);
 
+    // TODO: This doesn't belong here, but figure it out later
+    searchResults[account.id] = account;
+
     this.events.emit('result', account.id);
   }
 
@@ -522,6 +526,7 @@ export class Search implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
+      searches[this.id] = this;
       return result;
     }
 
