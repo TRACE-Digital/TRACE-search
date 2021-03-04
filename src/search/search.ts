@@ -344,10 +344,11 @@ export class Search implements IDbStorable {
 
   public definition: SearchDefinition;
   public get progress() {
-    if (this.definition.includedSites.length === 0) {
+    const denominator = this.definition.includedSites.length * this.definition.userNames.length;
+    if (denominator === 0) {
       return 100;
     }
-    return Math.round((Object.values(this.results).length / this.definition.includedSites.length) * 100);
+    return Math.round((Object.values(this.results).length / denominator) * 100);
   }
 
   public events = new EventEmitter();

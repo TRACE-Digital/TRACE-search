@@ -244,6 +244,49 @@ describe('search', () => {
     expect(search.id).toContain(definition.id);
   });
 
+  it('calculates progress correctly with no sites', async () => {
+    const searchDef = new SearchDefinition('Test search', []);
+    searchDef.userNames.push('test');
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with no user names', async () => {
+    const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES);
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with no sites or usernames', async () => {
+    const searchDef = new SearchDefinition('Test search', []);
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with multiple user names and sites', async () => {
+    const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES.slice(0, 2));
+    searchDef.userNames.push('test');
+    searchDef.userNames.push('test2');
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(0);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
   it('saves automatically when created', async () => {
     const search = await definition.new();
 

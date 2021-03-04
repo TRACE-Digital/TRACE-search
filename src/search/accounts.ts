@@ -179,7 +179,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    * Each call will create a revision and take up space.
    */
   public async save(): Promise<DbResponse> {
-    console.debug(`Saving account ${this.id}...`);
+    console.debug(`Saving ${this.type.toLowerCase()} account ${this.id}...`);
 
     const db = await getDb();
     const result = await db.put(this.serialize());
