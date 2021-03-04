@@ -13,6 +13,9 @@ module.exports = {
   moduleDirectories: ['node_modules', 'src'],
   testEnvironment: 'jsdom',
   transform: { '^.+\\.ts?$': 'ts-jest' },
-  setupFilesAfterEnv: ['<rootDir>/src/tests/extensions.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/tests/extensions.ts',
+    '<rootDir>/src/tests/pouchdb.mock.ts'
+  ],
   verbose: true,
 };

@@ -1,5 +1,5 @@
 import PouchDB from 'pouchdb';
-import { BaseSchema, DEFAULT_SETTINGS, getDb, ID_SEPARATOR, PouchDbId, SETTINGS_KEY, toId, _devNukeDb } from 'db';
+import { BaseSchema, DEFAULT_SETTINGS, getDb, ID_SEPARATOR, DB_OPTIONS, SETTINGS_KEY, toId, _devNukeDb } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
 
@@ -15,7 +15,7 @@ describe('PouchDB', () => {
   });
 
   it('does migrations', async () => {
-    const rawDb = new PouchDB('db.test.ts');
+    const rawDb = new PouchDB('db.test.ts', DB_OPTIONS);
     await doMigrations(rawDb);
   });
 

@@ -16,6 +16,15 @@ let _remoteDb: PouchDB.Database | null = null;
 _remoteDb = null;
 
 export const DB_NAME = 'trace';
+export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
+
+// Don't mess with the filesystem when we're testing
+// Assume that the test suite will add the pouchdb-adapter-memory for us
+if (BUILD_TYPE === 'test') {
+  // DB_NAME = Math.random().toString(36).substr(2, 5);
+  DB_OPTIONS.adapter = 'memory';
+  console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
+}
 
 export async function getDb() {
   if (_localDb) {
@@ -45,7 +54,7 @@ async function setupDb() {
 
   console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
 
-  _localDb = new PouchDB(DB_NAME);
+  _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
   if (BUILD_TYPE !== 'test') console.debug(_localDb);
 
   // Typing module doesn't have .adapter since its unofficial, but you can
@@ -79,7 +88,7 @@ export async function _devNukeDb(dbName: string = DB_NAME) {
     await _localDb.destroy();
     _localDb = null;
   } else {
-    const db = new PouchDB(dbName);
+    const db = new PouchDB(dbName, DB_OPTIONS);
     await db.destroy();
   }
 }
