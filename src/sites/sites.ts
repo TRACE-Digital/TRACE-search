@@ -71,8 +71,7 @@ for (const siteName of Object.keys(mergedSites)) {
   mergedSites[siteName].name = siteName;
 
   mergedSites[siteName].logoClass = mergedSites[siteName].logoClass || "fa-question-circle"
-  mergedSites[siteName].tags = mergedSites[siteName].tags || [];
-  mergedSites[siteName].tags.push('All Sites');
+  mergedSites[siteName].tags = mergedSites[siteName].tags || ['Untagged'];
   mergedSites[siteName].tags.map((tag: string) => {
     tagSet[tag] = true;
   });
