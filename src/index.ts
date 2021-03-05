@@ -1,5 +1,5 @@
 import { allSites } from 'sites';
-import { getDb, SearchDefinitionSchema, UTF_MAX } from 'db';
+import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
 import * as meta from 'meta';
 import {
   accounts,
@@ -84,12 +84,28 @@ async function main() {
   console.groupEnd();
 }
 
+async function testReplicate() {
+  try {
+    await setupReplication();
+  } catch (e) {
+    console.error(e);
+  }
+
+  setTimeout(async () => {
+    // await teardownReplication();
+    console.log('Replication stopped');
+  }, 3000);
+}
+
+// tslint:disable-next-line:no-floating-promises
+// testReplicate();
+
 // tslint:disable-next-line:no-floating-promises
 // main();
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { getDb, clearDb } from 'db';
+export { getDb, clearDb, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
 export {
