@@ -116,7 +116,6 @@ export async function setupReplication() {
   try {
     replicator = localDb.replicate.to(remoteDb, {
       live: true,
-      retry: true,
       since: 0
     }).on('active', () => {
       console.log('Replication is active');
@@ -143,6 +142,9 @@ export async function setupReplication() {
 
   _remoteDb = remoteDb;
   _replicator = replicator;
+
+  // Return as an object because something with the Promises gets messed up
+  return { 'TODO_replication': _replicator }
 }
 
 /**
