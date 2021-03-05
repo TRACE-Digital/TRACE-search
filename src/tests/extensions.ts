@@ -1,4 +1,5 @@
 import { getDb, PouchDbId } from 'db';
+import { dumpAllDocs } from './util';
 
 declare global {
   namespace jest {
@@ -15,24 +16,21 @@ expect.extend({
   async toBeInDatabase(id: PouchDbId, db?: PouchDB.Database) {
     db = db || (await getDb());
 
+    const allIds = (await dumpAllDocs(false)).map(row => row.id);
+    const allIdsStr = allIds.map(id => `  ${id}\n`);
+
     const exists = {
-      message: () => `expected '${id}' to be present in the database`,
+      message: () => `expected '${id}' to not be present in the database\n\nIDs present: \n${allIdsStr}`,
       pass: true,
     };
     const absent = {
-      message: () => `expected '${id}' to be present in the database`,
+      message: () => `expected '${id}' to be present in the database\n\nIDs present: \n${allIdsStr}`,
       pass: false,
     };
 
-    if (this.isNot) {
-      exists.pass = !exists.pass;
-      absent.pass = !absent.pass;
-    }
-
-    try {
-      await db.get(id);
+    if (allIds.includes(id)) {
       return exists;
-    } catch (e) {
+    } else {
       return absent;
     }
   },

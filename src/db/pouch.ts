@@ -10,6 +10,7 @@ import PouchDB from 'pouchdb';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
+import { accounts, searchDefinitions, searches } from 'search';
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
@@ -21,7 +22,6 @@ export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
 // Don't mess with the filesystem when we're testing
 // Assume that the test suite will add the pouchdb-adapter-memory for us
 if (BUILD_TYPE === 'test') {
-  // DB_NAME = Math.random().toString(36).substr(2, 5);
   DB_OPTIONS.adapter = 'memory';
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
 }
@@ -90,5 +90,12 @@ export async function _devNukeDb(dbName: string = DB_NAME) {
   } else {
     const db = new PouchDB(dbName, DB_OPTIONS);
     await db.destroy();
+  }
+
+  // Clear the caches as well
+  for (const cache of [accounts, searches, searchDefinitions]) {
+    for (const prop of Object.getOwnPropertyNames(cache)) {
+      delete cache[prop];
+    }
   }
 }

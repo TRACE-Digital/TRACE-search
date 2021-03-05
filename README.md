@@ -39,8 +39,8 @@ npm test -- -t search   # Run tests that contain 'search'
 # Run only a certain test file
 npm test -- src/tests/search.test.ts
 
-# If tests get stuck
-npm run test-debug
+npm run test-all        # Run all tests, including super long running ones
+npm run test-debug      # If tests get stuck
 ```
 
 ## Testing with External Project ##

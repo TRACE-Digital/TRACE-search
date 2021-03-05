@@ -276,6 +276,8 @@ describe('search', () => {
   });
 
   it('calculates progress correctly with multiple user names and sites', async () => {
+    jest.setTimeout(10000);
+
     const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES.slice(0, 2));
     searchDef.userNames.push('test');
     searchDef.userNames.push('test2');
@@ -333,6 +335,31 @@ describe('search', () => {
     const deserialized = await Search.deserialize(serialized);
 
     expect(deserialized).toEqual(search);
+    expect(deserialized.serialize()).toEqual(serialized);
+  });
+
+  it('produces results', async () => {
+    definition.userNames.push('test');
+
+    const search = await definition.new();
+
+    await search.start();
+
+    expect(search.results.length).toBeGreaterThan(0);
+    expect(search.results).toHaveLength(definition.includedSites.length);
+  });
+
+  it('deserializes with results', async () => {
+    definition.userNames.push('test');
+
+    const search = await definition.new();
+
+    await search.start();
+
+    const serialized = search.serialize();
+    const deserialized = await Search.deserialize(serialized);
+
+    // expect(deserialized).toEqual(search);
     expect(deserialized.serialize()).toEqual(serialized);
   });
 });

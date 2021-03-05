@@ -23,8 +23,8 @@
     "build-prod": "webpack --config webpack.prod.js",
     "test": "npm run test-quick -- --silent",
     "test-all": "jest",
-    "test-quick": "jest --testPathIgnorePatterns=.*\\.slow\\.test\\.ts",
-    "test-debug": "node --inspect ./node_modules/.bin/jest --runInBand --detectOpenHandles --testPathIgnorePatterns=.*\\.slow\\.ts",
+    "test-quick": "jest --testPathIgnorePatterns='.*\\.slow\\.test\\.ts' --verbose",
+    "test-debug": "node --inspect ./node_modules/.bin/jest --testPathIgnorePatterns='.*\\.slow\\.test\\.ts' --runInBand --detectOpenHandles",
     "coverage": "npm test -- --coverage",
     "format": "prettier --write .",
     "lint": "tslint -p tsconfig.json"

@@ -7,9 +7,7 @@ export async function dumpAllDocs(includeDocs = false) {
     include_docs: includeDocs,
   });
 
-  console.log(result);
-
-  return result;
+  return result.rows;
 }
 
 export function checkSaveResponse(response: PouchDB.Core.Response, item: IDbStorable) {
