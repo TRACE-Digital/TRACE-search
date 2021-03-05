@@ -1,5 +1,266 @@
 {
   "2Dimensions": {
-    "logoUrl": "https://turkstra.net/album/04292019/images/DSC_0310.JPG"
+    "omit": true
+  },
+  "3dnews": {
+    "omit": true
+  },
+  "AllTrails": {
+    "logoClass": "fa-question-circle",
+    "headers": {
+      "credentials": "include"
+    },
+    "tags": ["Sports"]
+  },
+  "Reddit": {
+    "logoClass": "fa-reddit",
+    "tags": ["Social Media"]
+  },
+  "Medium": {
+    "logoClass": "fa-medium",
+    "tags": ["Forum"]
+  },
+  "npm": {
+    "logoClass": "fa-npm",
+    "tags": ["Developers"]
+  },
+  "Telegram": {
+    "logoClass": "fa-telegram-plane",
+    "tags": ["Messaging"]
+  },
+  "Apple Discussions": {
+    "logoClass": "fa-apple",
+    "tags": ["Forum"]
+  },
+  "Behance": {
+    "logoClass": "fa-behance",
+    "tags": ["Social Media"]
+  },
+  "YouTube": {
+    "logoClass": "fa-youtube",
+    "tags": ["Entertainment"]
+  },
+  "Wikipedia": {
+    "logoClass": "fa-wikipedia-w",
+    "tags": ["Education"]
+  },
+  "Facebook": {
+    "logoClass": "fa-facebook-square",
+    "tags": ["Social Media"]
+  },
+  "Kaggle": {
+    "logoClass": "fa-kaggle",
+    "tags": ["Developers"]
+  },
+  "HackerRank": {
+    "logoClass": "fa-hackerrank",
+    "tags": ["Developers"]
+  },
+  "Codepen": {
+    "logoClass": "fa-codepen",
+    "tags": ["Developers"]
+  },
+  "Dribble": {
+    "logoClass": "fa-dribble",
+    "tags": ["Social Media"]
+  },
+  "HackerNews": {
+    "logoClass": "fa-hacker-news",
+    "tags": ["Developers","News"]
+  },
+  "Pinterest": {
+    "logoClass": "fa-pinterest-square",
+    "tags": ["Social Media"]
+  },
+  "Patreon": {
+    "logoClass": "fa-patreon",
+    "tags": ["Money"]
+  },
+  "BitCoinForum": {
+    "logoClass": "fa-bitcoin",
+    "tags": ["Money", "Forum"]
+  },
+  "Trakt": {
+    "logoClass": "fa-film",
+    "tags": ["Entertainment"]
+  },
+  "Anobii": {
+    "logoClass": "fa-question-circle",
+    "errorUrl": "https://www.anobii.com/stream",
+    "tags": ["Forum","Education"]
+  },
+  "Ask Fedora": {
+    "logoClass": "fa-question-circle",
+    "username_claimed": "franciscod",
+    "tags": ["Developers", "Forum"]
+  },
+  "BitBucket": {
+    "logoClass": "fa-bitbucket",
+    "tags": ["Developers"]
+  },
+  "BOOTH": {
+    "logoClass": "fa-question-circle",
+    "errorUrl": "https://booth.pm/en",
+    "tags": ["Shopping"]
+  },
+  "Carbonmade": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Social Media"]
+  },
+  "Chess": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Gaming"]
+  },
+  "Clozemaster": {
+    "logoClass": "fa-question-circle",
+    "errorType": "response_url",
+    "errorUrl": "https://www.clozemaster.com/dashboard",
+    "tags": ["Education"]
+  },
+  "Football": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Sports"]
+  },
+  "GitHub": {
+    "logoClass": "fa-github",
+    "tags": ["Developers"]
+  },
+  "GitLab": {
+    "logoClass": "fa-gitlab",
+    "tags": ["Developers"]
+  },
+  "NameMC (Minecraft.net skins)": {
+    "logoClass": "fa-question-circle",
+    "errorMsg": ["Status: Available", "Status: Too Long"],
+    "username_unclaimed": "fdkhajkj",
+    "tags": ["Gaming"]
+  },
+  "Naver": {
+    "omit": true
+  },
+  "Nightbot": {
+    "logoClass": "fa-question-circle",
+    "request_head_only": false,
+    "tags": ["Gaming"]
+  },
+  "Otzovik": {
+    "omit": true
+  },
+  "PSNProfiles.com": {
+    "logoClass": "fa-question-circle",
+    "username_unclaimed": "dslakjfas",
+    "tags": ["Gaming"]
+  },
+  "Plug.DJ": {
+    "omit": true
+  },
+  "ProductHunt": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Forum"]
+  },
+  "Smashcast": {
+    "omit": true
+  },
+  "Spotify": {
+    "logoClass": "fa-spotify",
+    "errorType": "message",
+    "errorMsg": "<title>Spotify – Web Player</title>",
+    "tags": ["Music"]
+  },
+  "last.fm": {
+    "logoClass": "fa-lastfm",
+    "tags": ["Music"]
+  },
+  "Twitch": {
+    "logoClass": "fa-twitch",
+    "tags": ["Gaming", "Entertainment", "Social Media"]
+  },
+  "Tinder": {
+    "logoClass": "fa-question-circle",
+    "headers": {
+      "User-Agent": "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)"
+    },
+    "tags": ["Social Media"]
+  },
+  "TripAdvisor": {
+    "logoClass": "fa-tripadvisor",
+    "tags": ["Travel"]
+  },
+  "Quora": {
+    "logoClass": "fa-quora",
+    "tags": ["Forum"]
+  },
+  "Trello": {
+    "logoClass": "fa-trello",
+    "tags": ["Organization"]
+  },
+  "Wix": {
+    "logoClass": "fa-wix",
+    "tags": ["Developers"]
+  },
+  "Steam": {
+    "logoClass": "fa-steam",
+    "tags": ["Gaming"]
+  },
+  "Xbox Gamertag": {
+    "logoClass": "fa-xbox",
+    "tags": ["Gaming"]
+  },
+  "Twitter": {
+    "logoClass": "fa-twitter-square",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:50.0) Gecko/20100101 Firefox/50.0"
+    },
+    "errorType": "message",
+    "errorMsg": "Page not found",
+    "tags": ["Social Media"]
+  },
+  "VK": {
+    "logoClass": "fa-question-circle",
+    "errorType": "message",
+    "errorMsg": "https://vk.com/images/error404.png",
+    "tags": ["Social Media"]
+  },
+  "WordPress": {
+    "logoClass": "fa-question-circle",
+    "errorUrl": "https://wordpress.com/typo/?subdomain={}",
+    "tags": ["Developers"]
+  },
+  "WordPressOrg": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Developers"]
+  },
+  "Keybase": {
+    "logoClass": "fa-keybase",
+    "tags": ["Developers", "Social Media"]
+  },
+  "Zhihu": {
+    "logoClass": "fa-question-circle",
+    "errorType": "status_code",
+    "tags": ["Forum"]
+  },
+  "igromania": {
+    "omit": true
+  },
+  "labpentestit": {
+    "logoClass": "fa-question-circle",
+    "errorUrl": "https://lab.pentestit.ru/",
+    "tags": ["Developers"]
+  },
+  "opennet": {
+    "omit": true
+  },
+  "prog.hu": {
+    "omit": true
+  },
+  "svidbook": {
+    "logoClass": "fa-question-circle",
+    "username_claimed": "Balumba",
+    "tags": ["Education"]
   }
 }

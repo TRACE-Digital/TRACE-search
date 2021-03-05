@@ -20,7 +20,7 @@ export async function doMigrations(db: PouchDB.Database) {
   // Default version
   let currentVersion = '0.0.0';
   try {
-    currentVersion = await db.get(SETTINGS_KEY);
+    currentVersion = (await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY)).version;
   } catch (e) {
     console.assert(e.name === 'not_found', 'Unknown error retrieving current version!');
   }

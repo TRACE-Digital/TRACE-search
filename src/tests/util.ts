@@ -1,4 +1,4 @@
-import { getDb } from 'db';
+import { getDb, IDbStorable } from 'db';
 
 export async function dumpAllDocs(includeDocs = false) {
   const db = await getDb();
@@ -7,7 +7,13 @@ export async function dumpAllDocs(includeDocs = false) {
     include_docs: includeDocs,
   });
 
-  console.log(result);
+  return result.rows;
+}
 
-  return result;
+export function checkSaveResponse(response: PouchDB.Core.Response, item: IDbStorable) {
+  expect(response).toBeDefined();
+  expect(response.ok).toBeTruthy();
+  expect(response.id).toEqual(item.id);
+
+  expect(item.rev).toEqual(response.rev);
 }

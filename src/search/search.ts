@@ -3,6 +3,7 @@
  * TRACE searches.
  */
 
+import { EventEmitter } from 'events';
 import {
   IDbStorable,
   getDb,
@@ -15,7 +16,8 @@ import {
   UTF_MAX,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { findAccount } from './searchMethods';
 
 /** Collection of search definitions that have already been pulled out of the database. */
 export const searchDefinitions: { [key: string]: SearchDefinition } = {};
@@ -203,6 +205,7 @@ export class SearchDefinition implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
+      searchDefinitions[this.id] = this;
       return result;
     }
 
@@ -341,11 +344,14 @@ export class Search implements IDbStorable {
 
   public definition: SearchDefinition;
   public get progress() {
-    if (this.definition.includedSites.length === 0) {
+    const denominator = this.definition.includedSites.length * this.definition.userNames.length;
+    if (denominator === 0) {
       return 100;
     }
-    return Math.round((Object.values(this.results).length / this.definition.includedSites.length) * 100);
+    return Math.round((Object.values(this.results).length / denominator) * 100);
   }
+
+  public events = new EventEmitter();
 
   /**
    * `resultsMap` is the best structure for storing and checking results
@@ -359,6 +365,7 @@ export class Search implements IDbStorable {
    * If it's too memory intensive, we can reevaluate.
    */
   public results: ThirdPartyAccount[] = [];
+  public resultsById: SearchResultsById = {};
   public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
@@ -446,8 +453,6 @@ export class Search implements IDbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected async doSearch() {
-    const resultIdPrefix = toId(['searchResult'], this.id);
-
     for (const site of this.definition.includedSites) {
       for (const userName of this.definition.userNames) {
         // Ignore sites that we already have results for
@@ -456,12 +461,16 @@ export class Search implements IDbStorable {
             continue;
           }
         }
+        else if (site.omit) {
+          // Skip over sites that we are explicitly told to omit
+          console.warn(`${site.name} omitted.`)
+          continue;
+        }
 
         console.log(`Checking ${site.name}...`);
 
-        // TODO: Actually search
-
-        const account = new DiscoveredAccount(site, userName, resultIdPrefix);
+        // Search for the account and store results
+        const account : ThirdPartyAccount = await findAccount(site, userName, this)
         await account.save();
 
         // Store in multiple formats. See note above result* member initialization
@@ -488,12 +497,18 @@ export class Search implements IDbStorable {
     }
 
     this.results.push(account);
+    this.resultsById[account.id] = account;
     this.resultsMap[site.name] = this.resultsMap[site.name] || {};
     this.resultsMap[site.name][account.userName] = account;
     this.resultsBySite[site.name] = this.resultsBySite[site.name] || [];
     this.resultsBySite[site.name].push(account);
     this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
     this.resultsByUser[account.userName].push(account);
+
+    // TODO: This doesn't belong here, but figure it out later
+    searchResults[account.id] = account;
+
+    this.events.emit('result', account.id);
   }
 
   /**
@@ -515,6 +530,7 @@ export class Search implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
+      searches[this.id] = this;
       return result;
     }
 
@@ -560,6 +576,10 @@ export interface SearchResults {
   [siteName: string]: {
     [userName: string]: ThirdPartyAccount;
   };
+}
+
+export interface SearchResultsById {
+  [id: string]: ThirdPartyAccount;
 }
 
 export interface SearchResultsBySite {

@@ -1,0 +1,33 @@
+2Dimensions:        omit because site no longer exists
+3dnews:             omit because russian characters are a pain to deal with
+AllTrails:          requires cookies for the error banner to pop up
+Anobii:             errorUrl wasn't defined
+Ask Fedora:         sherlock.json username_claimed no longer exists
+BOOTH:              current errorUrl is slightly different
+Carbonmade:         wrong errorType
+Chess:              wrong errorType
+Clozemaster:        wrong errorType
+Football:           wrong errorType
+Freesound:          works
+NameMC:             wrong errorMsg
+Naver:              Always throws 403 error when fetching from JS
+Nightbot:           Since this request uses an API endpoint to check for profile, it didn't like us sending a HEAD request
+Otzovik:            omit because site no longer exists
+PSNProfiles.com:    Example username was too long - response_url cut username off
+Packagist:          Logic tweaked when fixing PSNProfiles.com fixed this site as well
+Plug.DJ:            omit because site no longer exists
+ProductHunt:        wrong errorType
+Raidforums:         Logic tweaked when fixing PSNProfiles.com fixed this site as well
+Smashcast:          omit because site no longer exists
+Spotify:            Had to find something unique in the HTML for a page that doesn't exist (may not work all the time?)
+Tinder:             bug in code that mishandled errorMsg string arrays
+Twitter:            ??????????
+VK:                 wrong errorType
+WordPress:          errorUrl slightly malformed (needed https:// at beginning and {} at end)
+WordPressOrg:       wrong errorType
+Zhihu:              wrong errorType
+igormania:          omit because russian characters are a pain to deal with
+labpentestit:       actual errorUrl doesn't include the username
+opennet:            omit because russian characters are a pain to deal with
+prog.hu:            omit because the site works in a super weird way that is a pain to deal with (also not an important site)
+svidbook:           sherlock.json username_claimed didn't actually exist

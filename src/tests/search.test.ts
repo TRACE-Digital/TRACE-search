@@ -1,11 +1,12 @@
-import { getDb, _devNukeDb } from 'db';
+import { clearDb } from 'db';
 import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
+import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
 
 beforeEach(async () => {
-  await _devNukeDb();
+  await clearDb();
 });
 
 describe('search definition', () => {
@@ -148,12 +149,13 @@ describe('search definition', () => {
 
     const result = await searchDef.save();
 
-    expect(result).toBeDefined();
-    expect(result.ok).toBeTruthy();
-    expect(result.id).toEqual(searchDef.id);
+    checkSaveResponse(result, searchDef);
 
-    expect(result.rev).not.toEqual(lastRev);
+    expect(searchDef.rev).not.toEqual(lastRev);
     lastRev = result.rev;
+
+    // Save should put it in the cache
+    expect(searchDefinitions[searchDef.id]).toBe(searchDef);
   });
 
   it('saves multiple times', async () => {
@@ -163,12 +165,13 @@ describe('search definition', () => {
     for (let i = 0; i < 2; i++) {
       const result = await searchDef.save();
 
-      expect(result).toBeDefined();
-      expect(result.ok).toBeTruthy();
-      expect(result.id).toEqual(searchDef.id);
+      checkSaveResponse(result, searchDef);
 
       expect(searchDef.rev).not.toEqual(lastRev);
       lastRev = searchDef.rev;
+
+      // Save should put it in the cache
+      expect(searchDefinitions[searchDef.id]).toBe(searchDef);
     }
   });
 
@@ -203,8 +206,6 @@ describe('search definition', () => {
     // TODO: Figure out how newly created definitions will end up in the cache
     // It's possible that the changes feed will trigger on .save()
     await SearchDefinition.deserialize(searchDef.serialize());
-
-    console.warn(searchDefinitions[searchDef.id]);
 
     expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
   });
@@ -243,6 +244,51 @@ describe('search', () => {
     expect(search.id).toContain(definition.id);
   });
 
+  it('calculates progress correctly with no sites', async () => {
+    const searchDef = new SearchDefinition('Test search', []);
+    searchDef.userNames.push('test');
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with no user names', async () => {
+    const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES);
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with no sites or usernames', async () => {
+    const searchDef = new SearchDefinition('Test search', []);
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(100);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
+  it('calculates progress correctly with multiple user names and sites', async () => {
+    jest.setTimeout(10000);
+
+    const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES.slice(0, 2));
+    searchDef.userNames.push('test');
+    searchDef.userNames.push('test2');
+
+    const search = await searchDef.new();
+    expect(search.progress).toEqual(0);
+
+    await search.start();
+    expect(search.progress).toEqual(100);
+  });
+
   it('saves automatically when created', async () => {
     const search = await definition.new();
 
@@ -256,12 +302,13 @@ describe('search', () => {
 
     const result = await search.save();
 
-    expect(result).toBeDefined();
-    expect(result.ok).toBeTruthy();
-    expect(result.id).toEqual(search.id);
+    checkSaveResponse(result, search);
 
-    expect(result.rev).not.toEqual(lastRev);
+    expect(search.rev).not.toEqual(lastRev);
     lastRev = result.rev;
+
+    // Save should put it in the cache
+    expect(searches[search.id]).toBe(search);
   });
 
   it('saves multiple times', async () => {
@@ -271,12 +318,13 @@ describe('search', () => {
     for (let i = 0; i < 2; i++) {
       const result = await search.save();
 
-      expect(result).toBeDefined();
-      expect(result.ok).toBeTruthy();
-      expect(result.id).toEqual(search.id);
+      checkSaveResponse(result, search);
 
       expect(search.rev).not.toEqual(lastRev);
       lastRev = search.rev;
+
+      // Save should put it in the cache
+      expect(searches[search.id]).toBe(search);
     }
   });
 
@@ -287,6 +335,31 @@ describe('search', () => {
     const deserialized = await Search.deserialize(serialized);
 
     expect(deserialized).toEqual(search);
+    expect(deserialized.serialize()).toEqual(serialized);
+  });
+
+  it('produces results', async () => {
+    definition.userNames.push('test');
+
+    const search = await definition.new();
+
+    await search.start();
+
+    expect(search.results.length).toBeGreaterThan(0);
+    expect(search.results).toHaveLength(definition.includedSites.length);
+  });
+
+  it('deserializes with results', async () => {
+    definition.userNames.push('test');
+
+    const search = await definition.new();
+
+    await search.start();
+
+    const serialized = search.serialize();
+    const deserialized = await Search.deserialize(serialized);
+
+    // expect(deserialized).toEqual(search);
     expect(deserialized.serialize()).toEqual(serialized);
   });
 });
