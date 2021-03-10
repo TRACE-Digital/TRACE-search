@@ -1,0 +1,6 @@
+coverage:
+  range: 80...100
+  status:
+    only_pulls: true
+    project: off
+    patch: off
