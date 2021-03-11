@@ -66,7 +66,7 @@
   },
   "HackerNews": {
     "logoClass": "fa-hacker-news",
-    "tags": ["Developers","News"]
+    "tags": ["Developers", "News"]
   },
   "Pinterest": {
     "logoClass": "fa-pinterest-square",
@@ -87,7 +87,7 @@
   "Anobii": {
     "logoClass": "fa-question-circle",
     "errorUrl": "https://www.anobii.com/stream",
-    "tags": ["Forum","Education"]
+    "tags": ["Forum", "Education"]
   },
   "Ask Fedora": {
     "logoClass": "fa-question-circle",

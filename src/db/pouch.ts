@@ -22,8 +22,8 @@ export const REMOTE_DB_URL = 'https://couchdb.tracedigital.tk:6984/trace';
 export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {
   auth: {
     username: 'admin',
-    password: ''
-  }
+    password: '',
+  },
 };
 
 // Don't mess with the filesystem when we're testing
@@ -58,7 +58,7 @@ export const getRemoteDb = async () => {
   REMOTE_DB_OPTIONS.auth.password = REMOTE_DB_OPTIONS.auth.password || '';
   if (REMOTE_DB_OPTIONS.auth.password.length === 0) {
     console.warn('No remote database password is present!');
-  };
+  }
 
   try {
     _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
@@ -76,7 +76,7 @@ export const getRemoteDb = async () => {
   }
 
   return _remoteDb;
-}
+};
 
 /**
  * Remove all data in the local database and re-run setup.
@@ -108,7 +108,7 @@ export const resetRemoteDb = async () => {
 const resetDbCommon = async (db: PouchDB.Database) => {
   try {
     const result = await db.allDocs();
-    result.rows.map(async (row) => {
+    result.rows.map(async row => {
       await db.remove(row.id, row.value.rev);
     });
     console.log('Cleared database');
@@ -147,7 +147,7 @@ export const closeRemoteDb = async () => {
   } else {
     console.warn('Remote database was not open');
   }
-}
+};
 
 /**
  * Initializes the PouchDB instance.
@@ -192,7 +192,7 @@ const setupDb = async () => {
 export const setupReplication = async () => {
   if (_remoteDb && _replicator) {
     console.log('Replication already setup');
-    return { 'TODO_replication': _replicator };
+    return { TODO_replication: _replicator };
   }
 
   console.log('Setting up replication...');
@@ -204,26 +204,33 @@ export const setupReplication = async () => {
 
   let replicator;
   try {
-    replicator = localDb.replicate.to(remoteDb, {
-      live: true,
-      since: 0
-    }).on('active', () => {
-      console.log('Replication is active');
-    }).on('paused', (info) => {
-      console.log('Replication is paused');
-      console.debug(info);
-    }).on('denied', (info) => {
-      console.warn('Replication denied!');
-      console.warn(info);
-    }).on('change', (change) => {
-      console.log('Replicating change...');
-    }).on('complete', (info) => {
-      console.log('Replication complete');
-      console.log(info);
-    }).on('error', (e) => {
-      console.error('Replication error!');
-      console.error(e);
-    });
+    replicator = localDb.replicate
+      .to(remoteDb, {
+        live: true,
+        since: 0,
+      })
+      .on('active', () => {
+        console.log('Replication is active');
+      })
+      .on('paused', info => {
+        console.log('Replication is paused');
+        console.debug(info);
+      })
+      .on('denied', info => {
+        console.warn('Replication denied!');
+        console.warn(info);
+      })
+      .on('change', change => {
+        console.log('Replicating change...');
+      })
+      .on('complete', info => {
+        console.log('Replication complete');
+        console.log(info);
+      })
+      .on('error', e => {
+        console.error('Replication error!');
+        console.error(e);
+      });
   } catch (e) {
     throw new Error('Could not replicate to CouchDB!');
   }
@@ -233,7 +240,7 @@ export const setupReplication = async () => {
   _replicator = replicator;
 
   // Return as an object because something with the Promises gets messed up
-  return { 'TODO_replication': _replicator }
+  return { TODO_replication: _replicator };
 };
 
 /**
@@ -257,7 +264,7 @@ export const teardownReplication = async () => {
 
   // TODO: Should this go here?
   // await closeRemoteDb();
-}
+};
 
 /**
  * Clear the in-memory database caches.
@@ -269,7 +276,7 @@ const clearDbCache = () => {
       delete cache[prop];
     }
   }
-}
+};
 
 /**
  * Nuke the database.
