@@ -21,10 +21,6 @@ export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
 export const REMOTE_DB = 'https://couchdb.tracedigital.tk:6984/trace';
 export const REMOTE_DB_PASSWORD = '';
 
-if (REMOTE_DB_PASSWORD.length === 0) {
-  throw new Error('Fill out the database password in pouch.ts');
-}
-
 // Don't mess with the filesystem when we're testing
 // Assume that the test suite will add the pouchdb-adapter-memory for us
 if (BUILD_TYPE === 'test') {
@@ -93,6 +89,10 @@ export async function setupReplication() {
   if (_remoteDb && _replicator) {
     console.log('Replication already setup');
     return;
+  }
+
+  if (REMOTE_DB_PASSWORD.length === 0) {
+    throw new Error('Could not authenticate to CouchDB! No password is present');
   }
 
   console.log('Setting up replication...');
