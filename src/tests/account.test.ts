@@ -1,6 +1,7 @@
 import { resetDb } from 'db';
 import {
   accounts,
+  AccountType,
   ClaimedAccount,
   DiscoveredAccount,
   DiscoveredAccountAction,
@@ -181,6 +182,46 @@ describe('Accounts', () => {
 
           expect(rejected).toBeInstanceOf(RejectedAccount);
           expect(account.actionTaken).toEqual(DiscoveredAccountAction.REJECTED);
+        }
+      });
+
+      it('can be switched from rejected to claimed', async () => {
+        const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
+
+        if (account instanceof DiscoveredAccount) {
+          const rejected = await account.reject();
+          expect(rejected.type).toEqual(AccountType.REJECTED);
+          expect(rejected).toBeInstanceOf(RejectedAccount);
+
+          const claimed = await account.claim();
+          expect(claimed.type).toEqual(AccountType.CLAIMED);
+          expect(claimed).toBeInstanceOf(ClaimedAccount);
+
+          expect(account.actionTaken).toEqual(DiscoveredAccountAction.CLAIMED);
+
+          // Confirm that cache was overwritten
+          expect(accounts[rejected.id]).toBe(claimed);
+          expect(accounts[claimed.id]).toBe(claimed);
+        }
+      });
+
+      it('can be switched from claimed to rejected', async () => {
+        const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
+
+        if (account instanceof DiscoveredAccount) {
+          const claimed = await account.claim();
+          expect(claimed.type).toEqual(AccountType.CLAIMED);
+          expect(claimed).toBeInstanceOf(ClaimedAccount);
+
+          const rejected = await account.reject();
+          expect(rejected.type).toEqual(AccountType.REJECTED);
+          expect(rejected).toBeInstanceOf(RejectedAccount);
+
+          expect(account.actionTaken).toEqual(DiscoveredAccountAction.REJECTED);
+
+          // Confirm that cache was overwritten
+          expect(accounts[claimed.id]).toBe(rejected);
+          expect(accounts[rejected.id]).toBe(rejected);
         }
       });
     });
