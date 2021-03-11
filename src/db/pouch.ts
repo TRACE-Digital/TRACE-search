@@ -18,45 +18,149 @@ let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
-export const REMOTE_DB = 'https://couchdb.tracedigital.tk:6984/trace';
-export const REMOTE_DB_PASSWORD = '';
+export const REMOTE_DB_URL = 'https://couchdb.tracedigital.tk:6984/trace';
+export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {
+  auth: {
+    username: 'admin',
+    password: ''
+  }
+};
 
 // Don't mess with the filesystem when we're testing
 // Assume that the test suite will add the pouchdb-adapter-memory for us
 if (BUILD_TYPE === 'test') {
   DB_OPTIONS.adapter = 'memory';
+  REMOTE_DB_OPTIONS.adapter = 'memory';
+  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
+  REMOTE_DB_OPTIONS.auth.password = 'not needed';
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
 }
 
-export async function getDb() {
+/**
+ * Initialize or return the PouchDB instance.
+ */
+export const getDb = async () => {
   if (_localDb) {
     return _localDb;
   }
   return await setupDb();
-}
+};
 
 /**
- * Remove all data in the database.
+ * Initialize or return the remote database instance (i.e. CouchDB).
  */
-export async function clearDb() {
-  await _devNukeDb();
-  console.log('Cleared database');
-}
-
-/**
- * Initializes or returns the PouchDB instance.
- */
-async function setupDb() {
-  if (_localDb) {
-    return _localDb;
+export const getRemoteDb = async () => {
+  if (_remoteDb) {
+    return _remoteDb;
   }
 
+  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
+  REMOTE_DB_OPTIONS.auth.password = REMOTE_DB_OPTIONS.auth.password || '';
+  if (REMOTE_DB_OPTIONS.auth.password.length === 0) {
+    console.warn('No remote database password is present!');
+  };
+
+  try {
+    _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
+  } catch (e) {
+    throw new Error(`Could not connect to remote database!: ${e}`);
+  }
+
+  try {
+    const info = await _remoteDb.info();
+    console.debug('Remote database information:');
+    console.debug(info);
+  } catch (e) {
+    console.error(`Could not get remote database information!`);
+    throw e;
+  }
+
+  return _remoteDb;
+}
+
+/**
+ * Remove all data in the local database and re-run setup.
+ *
+ * This also clears the in-memory cache of all objects.
+ */
+export const resetDb = async () => {
+  const db = await getDb();
+  await resetDbCommon(db);
+  await setupDb();
+
+  clearDbCache();
+};
+
+/**
+ * Remove all data from the remote database.
+ *
+ * TODO: Figure out how to propagate this to any other synced devices
+ * and to fully remove the old documents from the CouchDB instance
+ */
+export const resetRemoteDb = async () => {
+  const db = await getRemoteDb();
+  await resetDbCommon(db);
+};
+
+/**
+ * Remove all documents in `db`.
+ */
+const resetDbCommon = async (db: PouchDB.Database) => {
+  try {
+    const result = await db.allDocs();
+    result.rows.map(async (row) => {
+      await db.remove(row.id, row.value.rev);
+    });
+    console.log('Cleared database');
+  } catch (e) {
+    throw new Error(`Could not clear database: ${e}`);
+  }
+};
+
+/**
+ * Close the local database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getDb()`.
+ */
+export const closeDb = async () => {
+  if (_localDb) {
+    await _localDb.close();
+    _localDb = null;
+    console.log('Closed local database');
+  } else {
+    console.warn('Local database was not open');
+  }
+};
+
+/**
+ * Close the remote database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getRemoteDb()`.
+ */
+export const closeRemoteDb = async () => {
+  if (_remoteDb) {
+    await _remoteDb.close();
+    _remoteDb = null;
+    console.log('Closed remote database');
+  } else {
+    console.warn('Remote database was not open');
+  }
+}
+
+/**
+ * Initializes the PouchDB instance.
+ */
+const setupDb = async () => {
   // If you need a fresh db
   // await _devNukeDb();
 
   console.debug(`Browser: ${isBrowser} \nNode: ${isNode} \nJSDOM: ${isJsDom()}`);
 
-  _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
+  if (_localDb === null) {
+    _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
+  }
   if (BUILD_TYPE !== 'test') console.debug(_localDb);
 
   // Typing module doesn't have .adapter since its unofficial, but you can
@@ -80,35 +184,21 @@ async function setupDb() {
   }
 
   return _localDb;
-}
+};
 
 /**
  * Setup replication to and from the remote CouchDB server.
  */
-export async function setupReplication() {
+export const setupReplication = async () => {
   if (_remoteDb && _replicator) {
     console.log('Replication already setup');
-    return;
-  }
-
-  if (REMOTE_DB_PASSWORD.length === 0) {
-    throw new Error('Could not authenticate to CouchDB! No password is present');
+    return { 'TODO_replication': _replicator };
   }
 
   console.log('Setting up replication...');
 
   const localDb = await getDb();
-  let remoteDb;
-  try {
-    remoteDb = new PouchDB(REMOTE_DB, {
-      auth: {
-        username: 'admin',
-        password: REMOTE_DB_PASSWORD,
-      }
-    });
-  } catch (e) {
-    throw new Error('Could not connect to CouchDB!');
-  }
+  const remoteDb = await getRemoteDb();
 
   console.log('Connected to remote database');
 
@@ -121,7 +211,7 @@ export async function setupReplication() {
       console.log('Replication is active');
     }).on('paused', (info) => {
       console.log('Replication is paused');
-      console.log(info);
+      console.debug(info);
     }).on('denied', (info) => {
       console.warn('Replication denied!');
       console.warn(info);
@@ -140,21 +230,17 @@ export async function setupReplication() {
 
   console.log('Replication setup');
 
-  _remoteDb = remoteDb;
   _replicator = replicator;
 
   // Return as an object because something with the Promises gets messed up
   return { 'TODO_replication': _replicator }
-}
+};
 
 /**
  * Stop replication.
  */
-export async function teardownReplication() {
+export const teardownReplication = async () => {
   console.log('Tearing down replication...');
-
-  const remoteDb = _remoteDb;
-  _remoteDb = null;
 
   try {
     if (_replicator) {
@@ -163,28 +249,24 @@ export async function teardownReplication() {
       console.log('Cancelled replication');
     }
   } catch (e) {
-    console.error('Could not cancel replication');
-    console.error(e);
+    throw new Error(`Could not cancel replication: ${e}`);
   }
 
-  if (remoteDb) {
-    try {
-      const result = await remoteDb.allDocs();
-      result.rows.map(async (row) => {
-        await remoteDb.remove(row.id, row.value.rev);
-      });
-      console.log('Cleaned remote database');
-    } catch (e) {
-      console.error('Could not clean up remote database');
-      console.error(e);
-    }
+  // TODO: Do this only when a user requests deletion
+  // await clearRemoteDb();
 
-    try {
-      await remoteDb.close();
-      console.log('Closed remote database');
-    } catch (e) {
-      console.error('Could not close remote database');
-      console.error(e);
+  // TODO: Should this go here?
+  // await closeRemoteDb();
+}
+
+/**
+ * Clear the in-memory database caches.
+ */
+const clearDbCache = () => {
+  // Clear the caches as well
+  for (const cache of [accounts, searches, searchDefinitions]) {
+    for (const prop of Object.getOwnPropertyNames(cache)) {
+      delete cache[prop];
     }
   }
 }
@@ -192,7 +274,7 @@ export async function teardownReplication() {
 /**
  * Nuke the database.
  */
-export async function _devNukeDb(dbName: string = DB_NAME) {
+async function _devNukeDb(dbName: string = DB_NAME) {
   if (_localDb && _localDb.name === dbName) {
     await _localDb.destroy();
     _localDb = null;
@@ -201,10 +283,5 @@ export async function _devNukeDb(dbName: string = DB_NAME) {
     await db.destroy();
   }
 
-  // Clear the caches as well
-  for (const cache of [accounts, searches, searchDefinitions]) {
-    for (const prop of Object.getOwnPropertyNames(cache)) {
-      delete cache[prop];
-    }
-  }
+  clearDbCache();
 }

@@ -1,4 +1,4 @@
-import { clearDb } from 'db';
+import { resetDb } from 'db';
 import {
   accounts,
   ClaimedAccount,
@@ -25,13 +25,15 @@ const USERNAME = 'test';
 const SITE_NAME = 'Wikipedia';
 const SITE = allSites[SITE_NAME];
 
+describe('Accounts', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
 for (const cls of accountClasses) {
   console.log(cls.name);
 
   describe(`${cls.name}`, () => {
-    beforeEach(async () => {
-      await clearDb();
-    });
 
     it('constructs', () => {
       const account = new cls(SITE, USERNAME);
@@ -184,3 +186,5 @@ for (const cls of accountClasses) {
     });
   });
 }
+
+});
