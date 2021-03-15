@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/TRACE-Digital/TRACE-search/branch/main/graph/badge.svg?token=WLKWAZBHEB)](https://codecov.io/gh/TRACE-Digital/TRACE-search)
+
 # TRACE Search #
 TRACE library for third-party account discovery.
 
