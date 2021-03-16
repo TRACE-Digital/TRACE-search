@@ -46,7 +46,7 @@ export const findAccount = async (site: Site, username: string, search: Search |
     switch (errorType) {
         case "status_code":
             // A 2XX status code (response.status) will be returned if the profile exists.
-            // To save time, use a HEAD request (unless explicitly told not to)
+            // To save time, use a HEAD request (unless explicitly told not to, or a name needs to be searched for in response body)
             const status_response = await fetchWithTimeout(profileUrl, requestHeaders)
                                     .catch((error: any) => {
                                         console.log(site.urlMain + " - ERROR! - " + error)
@@ -62,7 +62,6 @@ export const findAccount = async (site: Site, username: string, search: Search |
                 if (status_response) {
                     status_response_body = await status_response.text()
                 }
-                console.log("STATUS RESPONSE BODY")
                 matchedFirstNames = findNames(status_response_body, firstNames)
                 matchedLastNames = findNames(status_response_body, lastNames)
             }
@@ -101,7 +100,6 @@ export const findAccount = async (site: Site, username: string, search: Search |
 
             if (accountFound) { // if the account is found, also look for first and last names in the page
                 // message_response is already the body text. pass this into findNames
-                console.log("MESSAGE RESPONSE BODY")
                 matchedFirstNames = findNames(message_response, firstNames)
                 matchedLastNames = findNames(message_response, lastNames)
             }
@@ -129,7 +127,6 @@ export const findAccount = async (site: Site, username: string, search: Search |
                 if (url_response) {
                     url_response_body = await url_response.text()
                 }
-                console.log("URL RESPONSE BODY")
                 matchedFirstNames = findNames(url_response_body, firstNames)
                 matchedLastNames = findNames(url_response_body, lastNames)
             }
