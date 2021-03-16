@@ -224,7 +224,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
     await super.deserialize(data, instance);
 
-    instance.confidence = data.confidence;
+    // instance.confidence = data.confidence;
     instance.matchedFirstNames = data.matchedFirstNames;
     instance.matchedLastNames = data.matchedLastNames;
     instance.actionTaken = data.actionTaken;
@@ -234,10 +234,16 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
   public type = AccountType.DISCOVERED;
 
-  public confidence: ConfidenceRating = 5;
   public matchedFirstNames: string[] = [];
   public matchedLastNames: string[] = [];
   public actionTaken = DiscoveredAccountAction.NONE;
+
+  public get confidence(): ConfidenceRating {
+    // Found first names have a weight of 1
+    // Found last names have a weight of 2
+    // Max value of 10
+    return Math.min( (this.matchedFirstNames.length + (this.matchedLastNames.length * 2)), 10) as ConfidenceRating
+  }
 
   /**
    * Return a claimed version of this account.
@@ -315,7 +321,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
   public serialize(): DiscoveredAccountSchema {
     const base = super.serialize() as DiscoveredAccountSchema;
-    base.confidence = this.confidence;
+    // base.confidence = this.confidence;
     base.matchedFirstNames = this.matchedFirstNames;
     base.matchedLastNames = this.matchedLastNames;
     base.actionTaken = this.actionTaken;

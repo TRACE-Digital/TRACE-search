@@ -1,7 +1,7 @@
 import { toId } from 'db';
 import { Search } from 'search';
 import { Site } from 'sites';
-import { DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { ConfidenceRating, DiscoveredAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 import fetchWithTimeout from './fetchWithTimeout'      // fetchWithTimeout(url, options, timeout_ms = 10000)
 
 
@@ -202,7 +202,7 @@ const findNames = (response_body: string, names: string[]) : string[] => {
     let foundNames: string[] = []
 
     for (let name of names) {
-        if (response_body.includes(name)) {
+        if (response_body.toLowerCase().includes(name.toLowerCase())) {
             foundNames.push(name)
         }
     }
