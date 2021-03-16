@@ -3,15 +3,43 @@
     <head>
         <title>TRACE Search Test Page</title>
         <meta charset="utf-8">
+        <script src="trace-search.js"></script>
     </head>
     <body>
         <div id="app">
             Test page. Open the browser console.
         </div>
-        <script src="trace-search.js"></script>
+
+        <br>
+
+        <table>
+            <tr>
+                <td>Application version:</td>
+                <td id="version"></td>
+            </tr>
+            <tr>
+                <td>Minimum supported extension version:</td>
+                <td id="min_ext_version"></td>
+            </tr>
+            <tr>
+                <td>Extension version:</td>
+                <td id="ext_version"></td>
+            </tr>
+        </table>
+
         <script>
             /* Top level module should be exposed for use */
-            console.assert(TraceSearch.version);
+            console.assert(TraceSearch.VERSION);
+
+            // TODO: Update with the published extension links
+            const chromeLink = 'https://chrome.google.com/webstore/search/TRACE%20Digital?_category=extensions';
+            const firefoxLink = 'https://addons.mozilla.org/en-US/firefox/search/?q=TRACE%20Digital&type=extension';
+
+            document.getElementById('version').innerHTML = TraceSearch.VERSION;
+            document.getElementById('min_ext_version').innerHTML = TraceSearch.EXTENSION_MIN_VERSION;
+            document.getElementById('ext_version').innerHTML = TraceSearch.EXTENSION_VERSION || `
+                Not installed | <a href="${chromeLink}" target="blank">Chrome</a> | <a href="${firefoxLink}" target="blank">Firefox</a>
+            `;
         </script>
     </body>
 </html>

@@ -107,7 +107,7 @@ async function testReplicate() {
 // Name each explicitly so that JavaScript has an easier time with them
 export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
-export { VERSION as version } from 'meta';
+export { VERSION, EXTENSION_MIN_VERSION, EXTENSION_VERSION, checkExtensionVersion } from 'meta';
 export {
   AccountType,
   ClaimedAccount,
