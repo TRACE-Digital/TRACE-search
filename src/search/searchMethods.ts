@@ -165,7 +165,7 @@ const responseContainsError = (response: string | undefined, errorMsg: string) =
         return true
     }
 
-    return response.includes(errorMsg)
+    return response.toLowerCase().includes(errorMsg.toLowerCase())
 }
 
 
