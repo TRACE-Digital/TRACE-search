@@ -105,7 +105,7 @@ async function testReplicate() {
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { getDb, clearDb, setupReplication, teardownReplication } from 'db';
+export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
 export {

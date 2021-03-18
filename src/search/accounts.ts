@@ -257,9 +257,11 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
     const account = new ClaimedAccount(this.site, this.userName);
 
-    // TODO: Check the database too?
+    // TODO: Is this the desired behavior?
+    // If there's already an account with this id in the database,
+    // assume we're trying to update that account
     if (account.id in accounts) {
-      throw new Error(`Account with ${account.id} already exists!`);
+      account.rev = accounts[account.id].rev;
     }
 
     // TODO: This is a little dangerous since we have to manually
@@ -269,7 +271,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
     // Reset anything that'll be invalid on the new account
     schema._id = account.id;
-    schema._rev = '';
+    schema._rev = account.rev;
     schema.type = account.type;
 
     // Copy over the base account's properties
@@ -294,9 +296,11 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
     const account = new RejectedAccount(this.site, this.userName);
 
-    // TODO: Check the database too?
+    // TODO: Is this the desired behavior?
+    // If there's already an account with this id in the database,
+    // assume we're trying to update that account
     if (account.id in accounts) {
-      throw new Error(`Account with ${account.id} already exists!`);
+      account.rev = accounts[account.id].rev;
     }
 
     // TODO: This is a little dangerous since we have to manually
@@ -306,7 +310,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
     // Reset anything that'll be invalid on the new account
     schema._id = account.id;
-    schema._rev = '';
+    schema._rev = account.rev;
     schema.type = account.type;
 
     // Copy over the base account's properties

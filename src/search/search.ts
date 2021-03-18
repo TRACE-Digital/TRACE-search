@@ -460,17 +460,16 @@ export class Search implements IDbStorable {
           if (userName in this.resultsMap[site.name]) {
             continue;
           }
-        }
-        else if (site.omit) {
+        } else if (site.omit) {
           // Skip over sites that we are explicitly told to omit
-          console.warn(`${site.name} omitted.`)
+          console.warn(`${site.name} omitted.`);
           continue;
         }
 
         console.log(`Checking ${site.name}...`);
 
         // Search for the account and store results
-        const account : ThirdPartyAccount = await findAccount(site, userName, this)
+        const account: ThirdPartyAccount = await findAccount(site, userName, this);
         await account.save();
 
         // Store in multiple formats. See note above result* member initialization

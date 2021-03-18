@@ -1,4 +1,4 @@
-import { clearDb } from 'db';
+import { resetDb } from 'db';
 import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
 import { checkSaveResponse } from './util';
 
@@ -6,7 +6,7 @@ const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
 
 beforeEach(async () => {
-  await clearDb();
+  await resetDb();
 });
 
 describe('search definition', () => {
