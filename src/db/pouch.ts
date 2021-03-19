@@ -7,14 +7,19 @@
  * }
  */
 import PouchDB from 'pouchdb';
+import CryptoPouch from 'crypto-pouch';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
 import { accounts, searchDefinitions, searches } from 'search';
 
+PouchDB.plugin(CryptoPouch);
+
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
 let _replicator: PouchDB.Replication.Replication<any> | null = null;
+
+const ENCRYPTION_PASSWORD = ""
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
@@ -34,6 +39,10 @@ if (BUILD_TYPE === 'test') {
   REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
   REMOTE_DB_OPTIONS.auth.password = 'not needed';
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
+}
+
+if (ENCRYPTION_PASSWORD.length === 0) {
+  console.warn('No encryption password defined for PouchDB/CouchDB encryption!')
 }
 
 /**
@@ -62,6 +71,7 @@ export const getRemoteDb = async () => {
 
   try {
     _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
+    await _remoteDb.crypto(ENCRYPTION_PASSWORD)
   } catch (e) {
     throw new Error(`Could not connect to remote database!: ${e}`);
   }
@@ -99,6 +109,7 @@ export const resetDb = async () => {
  */
 export const resetRemoteDb = async () => {
   const db = await getRemoteDb();
+  db
   await resetDbCommon(db);
 };
 
@@ -160,6 +171,8 @@ const setupDb = async () => {
 
   if (_localDb === null) {
     _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
+    console.log("encrypting local db...")
+    await _localDb.crypto(ENCRYPTION_PASSWORD)
   }
   if (BUILD_TYPE !== 'test') console.debug(_localDb);
 
