@@ -7,6 +7,7 @@
  * }
  */
 import PouchDB from 'pouchdb';
+// @ts-ignore
 import CryptoPouch from 'crypto-pouch';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
@@ -19,7 +20,7 @@ let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
 let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
-const ENCRYPTION_PASSWORD = ""
+const ENCRYPTION_PASSWORD = "thisisatestthatdoesntreallymatterfornow"
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
@@ -71,6 +72,7 @@ export const getRemoteDb = async () => {
 
   try {
     _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
+    // @ts-ignore
     await _remoteDb.crypto(ENCRYPTION_PASSWORD)
   } catch (e) {
     throw new Error(`Could not connect to remote database!: ${e}`);
@@ -171,7 +173,7 @@ const setupDb = async () => {
 
   if (_localDb === null) {
     _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
-    console.log("encrypting local db...")
+    // @ts-ignore
     await _localDb.crypto(ENCRYPTION_PASSWORD)
   }
   if (BUILD_TYPE !== 'test') console.debug(_localDb);
