@@ -1,4 +1,6 @@
 import PouchDB from 'pouchdb';
+// @ts-ignore
+import CryptoPouch from 'crypto-pouch';
 import {
   BaseSchema,
   DEFAULT_SETTINGS,
@@ -14,6 +16,8 @@ import {
   resetDb,
   resetRemoteDb,
   closeRemoteDb,
+  ENCRYPTION_KEY,
+  _replicator,
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
@@ -43,6 +47,8 @@ describe('PouchDB', () => {
 
   it('does migrations', async () => {
     const rawDb = new PouchDB('db.test.ts', DB_OPTIONS);
+    // @ts-ignore
+    await rawDb.crypto(ENCRYPTION_KEY);
     await doMigrations(rawDb);
   });
 
@@ -144,18 +150,18 @@ describe('Memory <=> Memory Sync', () => {
   });
 
   it('completes setup', async () => {
-    const obj = await setupReplication();
-    expect(obj.TODO_replication).toBeDefined();
+    const rep = await setupReplication();
+    expect(rep.TODO_replication).toBeDefined();
   });
 
   it('is a singleton', async () => {
-    const obj = await setupReplication();
-    const obj2 = await setupReplication();
-    expect(obj2.TODO_replication).toBe(obj.TODO_replication);
+    const rep = await setupReplication();
+    const rep2 = await setupReplication();
+    expect(rep.TODO_replication).toBe(rep2.TODO_replication);
   });
 
   it('completes tear down', async () => {
-    const obj = await setupReplication();
+    const rep = await setupReplication();
     await teardownReplication();
   });
 
@@ -171,14 +177,16 @@ describe('Memory <=> Memory Sync', () => {
     // Create a promise that we can await so that the test doesn't end
     const finished = new Promise((resolve, reject) => {
       replicator
-        .on('change', change => {
+        .on('change', async change => {
           expect(change.docs.length).toBeGreaterThan(0);
 
           // Find our doc
           let found = null;
           for (const changedDoc of change.docs) {
-            if (changedDoc._id === doc._id) {
-              found = changedDoc;
+            const resolvedChangedDoc = await changedDoc;
+            if (resolvedChangedDoc._id === doc._id) {
+              found = await remoteDb.get(resolvedChangedDoc._id);
+              console.log(found);
               break;
             }
           }
@@ -192,6 +200,7 @@ describe('Memory <=> Memory Sync', () => {
         .on('paused', async () => {
           // Make sure the doc made it into the remote database
           const retrievedDoc = await remoteDb.get(doc._id);
+
           expect(retrievedDoc).toMatchObject(doc);
 
           // Complete the promise

@@ -17,14 +17,14 @@ import {
 } from 'db';
 import { allSites, Site } from 'sites';
 import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
-import { findAccount } from './searchMethods';
+import { findAccount } from './findAccount';
 
 /** Collection of search definitions that have already been pulled out of the database. */
 export const searchDefinitions: { [key: string]: SearchDefinition } = {};
 /** Collection of searches that have already been pulled out of the database. */
 export const searches: { [key: string]: Search } = {};
 
-const ENCRYPTION_PASSWORD = "sldadhfkashlfdks"
+const ENCRYPTION_PASSWORD = 'sldadhfkashlfdks';
 
 /**
  * Parameters that define a repeatable `Search`.

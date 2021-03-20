@@ -242,7 +242,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     // Found first names have a weight of 1
     // Found last names have a weight of 2
     // Max value of 10
-    return Math.min( (this.matchedFirstNames.length + (this.matchedLastNames.length * 2)), 10) as ConfidenceRating
+    return Math.min(this.matchedFirstNames.length + this.matchedLastNames.length * 2, 10) as ConfidenceRating;
   }
 
   /**
