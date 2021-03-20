@@ -3,13 +3,17 @@
 
 #### Import and Use
 ```typescript
-import { searchSites, SearchResult } from 'search/search';
-const usernames = ["cohenchris", "jmcker", ...];
-const foundProfiles: SearchResult[] = await searchSites(usernames);
+import { ThirdPartyAccount } from 'search/accounts';
+import { findAccount } from 'search/findAccount';
+
+const username = "cohenchris"
+const account: ThirdPartyAccount = await findAccount(site,      // Site object
+                                                     username,  // username to search for
+                                                     search);   // Search object
 ```
 
 
-#### trace.json fields
+#### Valid Fields for a Site Object
 ```typescript
   errorType?: string,           // status_code, message, or response_url
   url?: string,                 // url for website profile page
@@ -20,31 +24,37 @@ const foundProfiles: SearchResult[] = await searchSites(usernames);
   regexCheck?: string,          // regex for valid usernames on the website
   errorUrl?: string,            // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist
   urlProbe?: string,            // alternate profile page test url for sites where profiles aren't publicly facing 
-  noPeriod?: string,            // ???
+  noPeriod?: string,            // if "True", denotes that the username should not have a period in it (just use regexCheck instead)
   headers?: {},                 // headers to send with the request if needed
   request_head_only?: boolean   // for status_code errorType website -- use a GET request instead of a HEAD request
   logoClass?: string;           // FontAwesome CSS class for the logo (for use in frontend)
   omit?: boolean                // tells program to not process the site
 ```
 
+#### General Logic Flow
+- Based on Site Object fields such as `request_head_only`, `errorType`, `headers`, and whether or not the user would like to search for their name in the webpage, headers are put into a JSON
+  - `headers` are included directly
+  - Request method
+    - To save time, if `errorType` is `status_code`, use a 'HEAD' request (unless `request_head_only` says otherwise, or you need the response body to search for first/last names
+    - Otherwise, use a 'GET' request
+- If `errorType` is `status_code`,
+  - If the response code is 2XX, the account exists
+  - Otherwise, the account doesn't exist
+- If `errorType` is `message`,
+  - If the `message` field is present in the response body, the account exists
+  - Otherwise, the account doesn't exist
+- If `errorType` is `response_url`,
+  - If the request redirects you to the `errorUrl` field, the account does NOT exist
+  - Otherwise, the account exists
+- If the user specifies, search for the first/last names in the response body
+
 
 #### TODO
-- [ ] Figure out how to fix Twitter
-- [x] To avoid a long wait, dynamically give the array of found profiles to the frontend
-- [x] Figure out what the noPeriod field in sherlock.json means
-- [x] Clean up code, refactor, simplify, increase readability, etc.
-- [x] Find logo URL if the frontend isn't?
+- [ ] Figure out how to fix Twitter?
 
-
-- [x] Meet w/ group and figure out format to send to frontend
-    - [x] Add more fields to `SearchResult` interface, if need be
 - [ ] Inform users to:
     - [ ] Disable Enhanced Privacy Protection on Firefox for TRACE
     - [ ] Enable 3rd party cookies for TRACE
     - [ ] Disable VPN
     - [ ] Generally make exceptions for TRACE in their web browser
 - [ ] Go through Google Doc of sites to add to trace.json
-- [ ] CORS
-    - [ ] `Access-Control-Allow-Origin: <ORIGIN>`
-    - [ ] `Access-Control-Allow-Headers: 'include'`
-    - [ ] `Access-Control-Allow-Credentials: 'expose'`
