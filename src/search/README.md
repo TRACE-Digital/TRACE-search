@@ -22,7 +22,7 @@ const account: ThirdPartyAccount = await findAccount(site,      // Site object
   username_unclaimed?: string,  // username that is not claimed on the website
   errorMsg?: string | string[], // if errorType = message, this message will pop up if the profile doesn't exist
   regexCheck?: string,          // regex for valid usernames on the website
-  errorUrl?: string,            // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist
+  errorUrl?: string,            // if errorType = response_url, this is the url that the user will be redirected to if the profile doesn't exist
   urlProbe?: string,            // alternate profile page test url for sites where profiles aren't publicly facing 
   noPeriod?: string,            // if "True", denotes that the username should not have a period in it (just use regexCheck instead)
   headers?: {},                 // headers to send with the request if needed
