@@ -4,8 +4,14 @@ import { findAccount, ThirdPartyAccount, DiscoveredAccount } from 'search';
 const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
   const pass: any[] = [];
   const fail: any[] = [];
+  
+  const testSites = ['Codeforces', 'Code Sandbox', 'hackerearth', 'Chocolatey', 'Ebay', 'Instagram', 'CashApp', 'LinkTree', 'CampSite Bio', 'Sessionize', 'Untappd', 'Angel List', 'PlayStation', 'Tumblr', 'Crates.io']
 
   for (const site in allSites) {
+    if (!testSites.includes(allSites[site].name)) {
+      continue
+    }
+
     const username = shouldExist ? allSites[site].username_claimed : allSites[site].username_unclaimed;
 
     const profileExists: ThirdPartyAccount = await findAccount(allSites[site], username, null);

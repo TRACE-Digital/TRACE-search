@@ -3,7 +3,7 @@ import csv
 import json
 
 sheets = {
-    'sheet1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5B8RW3aFa--1VZf5Ix29fi9tZvCBjg9aOIBilrxqyHF94sNsKEafs0Se052C6Fos1vlHJI5Ln_3mT/pub?gid=0&single=true&output=csv'
+    'sheet1': ''
 } 
 
 for sheet in list(sheets.keys()):
@@ -12,14 +12,11 @@ for sheet in list(sheets.keys()):
         csvfile.write(response.content)
 
 def open_csv(path):
-    '''return a list of dictionaries
-    '''
     trace_json = {}
     with open(path, 'r') as file:
         next(file)
         reader = csv.DictReader(file)
         next(reader)
-        # simple way to do the replacements, but do you really need to do this?
 
         for row in reader:
             new_entry = {row['SITE NAME']: {k: [] if v == '[]' else v or None

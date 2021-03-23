@@ -262,5 +262,107 @@
     "logoClass": "fa-question-circle",
     "username_claimed": "Balumba",
     "tags": ["Education"]
+  },
+  "Codeforces": {
+    "urlMain": "https://codeforces.com/",
+    "url": "https://codeforces.com/profile/{}",
+    "username_claimed": "tourist",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "response_url",
+    "errorUrl": "https://codeforces.com/"
+  },
+  "Code Sandbox": {
+    "urlMain": "https://codesandbox.io/",
+    "url": "https://codesandbox.io/u/{}",
+    "username_claimed": "blue",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code",
+    "urlProbe": "https://codesandbox.io/api/v1/users/{}"
+  },
+  "hackerearth": {
+    "urlMain": "https://www.hackerearth.com/",
+    "url": "https://www.hackerearth.com/@{}",
+    "username_claimed": "demo69",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "Chocolatey": {
+    "urlMain": "https://chocolatey.org/",
+    "url": "https://chocolatey.org/profiles/{}",
+    "username_claimed": "red",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code",
+    "request_head_only": false
+  },
+  "Ebay": {
+    "urlMain": "https://www.ebay.com/",
+    "url": "https://www.ebay.com/usr/{}",
+    "logoClass": "fa-ebay",
+    "username_claimed": "blue",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "message",
+    "errorMsg": "eBay Profile - error"
+  },
+  "Instagram": {
+    "urlMain": "https://www.instagram.com/",
+    "url": "https://www.instagram.com/{}",
+    "logoClass": "fa-instagram",
+    "username_claimed": "arianagrande",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "message",
+    "errorMsg": "This profile does not exist",
+    "urlProbe": "https://www.instadp.com/profile/{}"
+  },
+  "CashApp": {
+    "urlMain": "https://cash.app/",
+    "url": "https://cash.app/${}",
+    "username_claimed": "cohenchris",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "LinkTree": {
+    "urlMain": "https://linktr.ee/",
+    "url": "https://linktr.ee/{}",
+    "username_claimed": "garyvee",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "CampSite Bio": {
+    "urlMain": "https://campsite.bio/",
+    "url": "https://campsite.bio/{}",
+    "username_claimed": "red",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "Sessionize": {
+    "urlMain": "https://sessionize.com/",
+    "url": "https://sessionize.com/{}",
+    "username_claimed": "chris",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "Untappd": {
+    "urlMain": "https://untappd.com/",
+    "url": "https://untappd.com/user/{}",
+    "logoClass": "fa-untappd",
+    "username_claimed": "demotrace",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "Tumblr": {
+    "urlMain": "https://www.tumblr.com/",
+    "url": "https://{}.tumblr.com",
+    "logoClass": "fa-tumblr-square",
+    "username_claimed": "blue",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code"
+  },
+  "Crates.io": {
+    "urlMain": "https://crates.io/",
+    "url": "https://crates.io/users/{}",
+    "username_claimed": "UnwrittenFun",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "status_code",
+    "urlProbe": "https://crates.io/api/v1/users/{}"
   }
 }
