@@ -48,18 +48,17 @@ npm run test-debug      # If tests get stuck
 ## Testing with External Project ##
 
 To test with an external project that consumes the library, you can:
-- Install NPM (TODO)
+- Install NPM
 - Link locally
 - Install from Git
 
 ### Install from NPM ###
 
-Once we have a smooth development cycle, this will be the best mechanism.
+Install the official version of the package published on NPM.
 
 ```sh
-# DOES NOT WORK YET
-# cd external-project
-# npm install trace-search
+cd external-project
+npm install trace-search
 ```
 
 ### Link Locally ###
@@ -114,8 +113,10 @@ npm run format  # Run the code formatter
 
 ## Publishing ##
 
-We don't have the NPM package set up yet, but we can test creating a package locally.
-
 ```sh
+# Test creating the package locally
 npm pack
+
+# Publish to NPM
+npm publish
 ```
