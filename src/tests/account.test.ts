@@ -1,20 +1,18 @@
 import { resetDb } from 'db';
 import {
-  accounts,
   AccountType,
   ClaimedAccount,
   DiscoveredAccount,
   DiscoveredAccountAction,
   ManualAccount,
   RejectedAccount,
-  searchResults,
   ThirdPartyAccount,
   UnregisteredAccount,
 } from 'search';
 import { allSites } from 'sites';
 import { checkSaveResponse } from './util';
 
-const accountClasses: (typeof DiscoveredAccount | typeof ThirdPartyAccount)[] = [
+const accountClasses: (typeof DiscoveredAccount | typeof ManualAccount | typeof UnregisteredAccount)[] = [
   DiscoveredAccount,
   ClaimedAccount,
   RejectedAccount,
@@ -99,7 +97,7 @@ describe('Accounts', () => {
         lastRev = result.rev;
 
         // Save should put it in the cache
-        expect(accounts[account.id]).toBe(account);
+        expect(ThirdPartyAccount.accountCache.get(account.id)).toBe(account);
       });
 
       it('saves multiple times', async () => {
@@ -115,8 +113,8 @@ describe('Accounts', () => {
           lastRev = account.rev;
 
           // Save should put it in the cache
-          expect(accounts[account.id]).toBe(account);
-          expect(searchResults[account.id]).toBeUndefined();
+          expect(ThirdPartyAccount.accountCache.get(account.id)).toBe(account);
+          expect(ThirdPartyAccount.resultCache.get(account.id)).toBeUndefined();
         }
       });
 
@@ -135,8 +133,8 @@ describe('Accounts', () => {
         lastRev = result.rev;
 
         // Save should put it in the cache
-        expect(searchResults[account.id]).toBe(account);
-        expect(accounts[account.id]).toBeUndefined();
+        expect(ThirdPartyAccount.resultCache.get(account.id)).toBe(account);
+        expect(ThirdPartyAccount.accountCache.get(account.id)).toBeUndefined();
       });
 
       it('saves multiple times', async () => {
@@ -155,7 +153,7 @@ describe('Accounts', () => {
           lastRev = account.rev;
 
           // Save should put it in the cache
-          expect(accounts[account.id]).toBe(account);
+          expect(ThirdPartyAccount.accountCache.get(account.id)).toBe(account);
         }
       });
 
@@ -200,8 +198,8 @@ describe('Accounts', () => {
           expect(account.actionTaken).toEqual(DiscoveredAccountAction.CLAIMED);
 
           // Confirm that cache was overwritten
-          expect(accounts[rejected.id]).toBe(claimed);
-          expect(accounts[claimed.id]).toBe(claimed);
+          expect(ThirdPartyAccount.accountCache.get(rejected.id)).toBe(claimed);
+          expect(ThirdPartyAccount.accountCache.get(claimed.id)).toBe(claimed);
         }
       });
 
@@ -220,8 +218,8 @@ describe('Accounts', () => {
           expect(account.actionTaken).toEqual(DiscoveredAccountAction.REJECTED);
 
           // Confirm that cache was overwritten
-          expect(accounts[claimed.id]).toBe(rejected);
-          expect(accounts[rejected.id]).toBe(rejected);
+          expect(ThirdPartyAccount.accountCache.get(claimed.id)).toBe(rejected);
+          expect(ThirdPartyAccount.accountCache.get(rejected.id)).toBe(rejected);
         }
       });
     });

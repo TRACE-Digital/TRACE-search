@@ -7,7 +7,6 @@ import {
   DiscoveredAccount,
   Search,
   SearchDefinition,
-  searchDefinitions,
   searches,
   ThirdPartyAccount,
 } from 'search';
@@ -71,11 +70,11 @@ async function main() {
 
   const searchDefLoadAll = await SearchDefinition.loadAll();
   console.log(searchDefLoadAll);
-  console.log(searchDefinitions);
+  console.log(SearchDefinition.cache.items);
 
   const searchLoadAll = await Search.loadAll(searchDef.id);
   console.log(searchLoadAll);
-  console.log(searches);
+  console.log(Search.cache.items);
 
   const accountsLoadAll = await ThirdPartyAccount.loadAll();
   console.log(accountsLoadAll);

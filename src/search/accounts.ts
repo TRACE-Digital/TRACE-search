@@ -3,7 +3,7 @@
  * and third-party accounts.
  */
 
-import { DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId, UTF_MAX } from 'db';
+import { DbCache, DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId, UTF_MAX } from 'db';
 import {
   AccountSchema,
   ClaimedAccountSchema,
@@ -24,6 +24,15 @@ export const searchResults: { [key: string]: ThirdPartyAccount } = {};
  * Account associated with a third-party `Site`.
  */
 export abstract class ThirdPartyAccount implements IDbStorable {
+  public static accountCache = new DbCache<ThirdPartyAccount>();
+  public static resultCache = new DbCache<ThirdPartyAccount>();
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.items;
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.items;
+  }
+
   /**
    * Factory method for creating an account using the appropriate subclass.
    */
@@ -45,11 +54,11 @@ export abstract class ThirdPartyAccount implements IDbStorable {
 
   /**
    * Load all `Accounts`s from the database into
-   * the `accounts` map.
+   * the `ThirdPartyAccount.accountCache`.
    *
    * Returns an array of the requested accounts. All loaded accounts
    * (including ones not loaded by this request) can be accessed
-   * via `searches`.
+   * via `ThirdPartyAccount.accountCache`.
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
@@ -76,8 +85,12 @@ export abstract class ThirdPartyAccount implements IDbStorable {
         continue;
       }
 
-      if (doc._id in accounts) {
-        results.push(accounts[doc._id]);
+      const existingAccount = ThirdPartyAccount.accountCache.get(doc._id);
+      const existingResult = ThirdPartyAccount.resultCache.get(doc._id);
+      if (existingAccount) {
+        results.push(existingAccount);
+      } else if (existingResult) {
+        results.push(existingResult);
       } else {
         try {
           const account = await ThirdPartyAccount.deserialize(doc);
@@ -143,9 +156,9 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     instance.site = deserializeSite(data);
 
     if (instance.id.startsWith('search')) {
-      searchResults[instance.id] = instance;
+      ThirdPartyAccount.resultCache.add(instance);
     } else {
-      accounts[instance.id] = instance;
+      ThirdPartyAccount.accountCache.add(instance);
     }
 
     return instance;
@@ -188,9 +201,9 @@ export abstract class ThirdPartyAccount implements IDbStorable {
       this.rev = result.rev;
 
       if (this.id.startsWith('search')) {
-        searchResults[this.id] = this;
+        ThirdPartyAccount.resultCache.add(this);
       } else {
-        accounts[this.id] = this;
+        ThirdPartyAccount.accountCache.add(this);
       }
 
       return result;
@@ -218,6 +231,13 @@ export abstract class ThirdPartyAccount implements IDbStorable {
  * Has not been claimed or rejected yet.
  */
 export class DiscoveredAccount extends ThirdPartyAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof DiscoveredAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof DiscoveredAccount);;
+  }
+
   public static async deserialize(data: DiscoveredAccountSchema, existingInstance?: DiscoveredAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new DiscoveredAccount(site, data.userName);
@@ -260,8 +280,9 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     // TODO: Is this the desired behavior?
     // If there's already an account with this id in the database,
     // assume we're trying to update that account
-    if (account.id in accounts) {
-      account.rev = accounts[account.id].rev;
+    const existing = ThirdPartyAccount.accountCache.get(account.id);
+    if (existing) {
+      account.rev = existing.rev;
     }
 
     // TODO: This is a little dangerous since we have to manually
@@ -299,8 +320,9 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     // TODO: Is this the desired behavior?
     // If there's already an account with this id in the database,
     // assume we're trying to update that account
-    if (account.id in accounts) {
-      account.rev = accounts[account.id].rev;
+    const existing = ThirdPartyAccount.accountCache.get(account.id);
+    if (existing) {
+      account.rev = existing.rev;
     }
 
     // TODO: This is a little dangerous since we have to manually
@@ -337,6 +359,13 @@ export class DiscoveredAccount extends ThirdPartyAccount {
  * Account that has been claimed by the user after `Search`.
  */
 export class ClaimedAccount extends DiscoveredAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof ClaimedAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof ClaimedAccount);;
+  }
+
   public static async deserialize(data: ClaimedAccountSchema, existingInstance?: ClaimedAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new ClaimedAccount(site, data.userName);
@@ -362,6 +391,13 @@ export class ClaimedAccount extends DiscoveredAccount {
  * Account that has been rejected by the user after `Search`.
  */
 export class RejectedAccount extends DiscoveredAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof RejectedAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof RejectedAccount);;
+  }
+
   public static async deserialize(data: RejectedAccountSchema, existingInstance?: RejectedAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new RejectedAccount(site, data.userName);
@@ -389,6 +425,13 @@ export class RejectedAccount extends DiscoveredAccount {
  * This does not come from `Search`.
  */
 export class ManualAccount extends ThirdPartyAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof ManualAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof ManualAccount);;
+  }
+
   public static async deserialize(data: ManualAccountSchema, existingInstance?: ManualAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new ManualAccount(site, data.userName);
@@ -423,6 +466,13 @@ export class ManualAccount extends ThirdPartyAccount {
  * This implies the user name hasn't been registered on the site.
  */
 export class UnregisteredAccount extends ThirdPartyAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);;
+  }
+
   public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
     const site = deserializeSite(data);
     const instance = existingInstance || new UnregisteredAccount(site, data.userName);
@@ -439,6 +489,17 @@ export class UnregisteredAccount extends ThirdPartyAccount {
     return base;
   }
 }
+
+/**
+ * TODO: Keep these updated for backwards compatibility by
+ * watching for changes on the the new caches.
+ */
+ThirdPartyAccount.accountCache.events.on('update', (id) => accounts[id] = ThirdPartyAccount.accountCache.get(id));
+ThirdPartyAccount.accountCache.events.on('remove', (id) => delete accounts[id]);
+ThirdPartyAccount.accountCache.events.on('clear', () => Object.getOwnPropertyNames(accounts).forEach(function (prop) { delete accounts[prop]; }));
+ThirdPartyAccount.resultCache.events.on('update', (id) => searchResults[id] = ThirdPartyAccount.resultCache.get(id));
+ThirdPartyAccount.resultCache.events.on('remove', (id) => delete searchResults[id]);
+ThirdPartyAccount.resultCache.events.on('clear', () => Object.getOwnPropertyNames(searchResults).forEach(function (prop) { delete searchResults[prop]; }))
 
 /**
  * Rating from 0-10 with 10 being highly confident.

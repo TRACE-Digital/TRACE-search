@@ -13,7 +13,7 @@
     "sherlock"
   ],
   "author": "TRACE Digital",
-  "license": "GPL-3.0+",
+  "license": "GPL-3.0",
   "scripts": {
     "start": "webpack serve --config webpack.dev.js",
     "prepare": "npm run build-prod",

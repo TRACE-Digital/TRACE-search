@@ -1,6 +1,4 @@
 import PouchDB from 'pouchdb';
-// @ts-ignore
-import CryptoPouch from 'crypto-pouch';
 import {
   BaseSchema,
   DEFAULT_SETTINGS,
@@ -17,7 +15,6 @@ import {
   resetRemoteDb,
   closeRemoteDb,
   ENCRYPTION_KEY,
-  _replicator,
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';

@@ -8,6 +8,7 @@ import { PouchDbId } from './types';
 export interface BaseSchema {
   _id: PouchDbId;
   _rev: string;
+  _deleted?: boolean;
 }
 
 ////  Accounts  ////

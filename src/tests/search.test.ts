@@ -1,5 +1,5 @@
 import { resetDb } from 'db';
-import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
+import { Search, SearchDefinition, SearchState } from 'search';
 import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
@@ -155,7 +155,7 @@ describe('search definition', () => {
     lastRev = result.rev;
 
     // Save should put it in the cache
-    expect(searchDefinitions[searchDef.id]).toBe(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toBe(searchDef);
   });
 
   it('saves multiple times', async () => {
@@ -171,7 +171,7 @@ describe('search definition', () => {
       lastRev = searchDef.rev;
 
       // Save should put it in the cache
-      expect(searchDefinitions[searchDef.id]).toBe(searchDef);
+      expect(SearchDefinition.cache.get(searchDef.id)).toBe(searchDef);
     }
   });
 
@@ -207,19 +207,20 @@ describe('search definition', () => {
     // It's possible that the changes feed will trigger on .save()
     await SearchDefinition.deserialize(searchDef.serialize());
 
-    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toEqual(searchDef);
   });
 
   it('is stored in the cache during loadAll', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
     await searchDef.save();
 
-    expect(searchDefinitions).not.toContainEqual(searchDef);
+    // Remove from cache since save() should have stored it
+    SearchDefinition.cache.remove(searchDef.id);
 
     const results = await SearchDefinition.loadAll();
 
     expect(results).toContainEqual(searchDef);
-    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toEqual(searchDef);
   });
 });
 
@@ -308,7 +309,7 @@ describe('search', () => {
     lastRev = result.rev;
 
     // Save should put it in the cache
-    expect(searches[search.id]).toBe(search);
+    expect(Search.cache.get(search.id)).toBe(search);
   });
 
   it('saves multiple times', async () => {
@@ -324,7 +325,7 @@ describe('search', () => {
       lastRev = search.rev;
 
       // Save should put it in the cache
-      expect(searches[search.id]).toBe(search);
+      expect(Search.cache.get(search.id)).toBe(search);
     }
   });
 

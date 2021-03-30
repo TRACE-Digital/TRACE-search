@@ -12,13 +12,13 @@ import CryptoPouch from 'crypto-pouch';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
-import { accounts, searchDefinitions, searches } from 'search';
+import { DbCache } from './cache';
 
 PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
-export let _replicator: PouchDB.Replication.Replication<any> | null = null;
+let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
 export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
 
@@ -100,7 +100,7 @@ export const resetDb = async () => {
   await resetDbCommon(db);
   await setupDb();
 
-  clearDbCache();
+  DbCache.clear();
 };
 
 /**
@@ -283,18 +283,6 @@ export const teardownReplication = async () => {
 };
 
 /**
- * Clear the in-memory database caches.
- */
-const clearDbCache = () => {
-  // Clear the caches as well
-  for (const cache of [accounts, searches, searchDefinitions]) {
-    for (const prop of Object.getOwnPropertyNames(cache)) {
-      delete cache[prop];
-    }
-  }
-};
-
-/**
  * Nuke the database.
  */
 async function _devNukeDb(dbName: string = DB_NAME) {
@@ -306,5 +294,5 @@ async function _devNukeDb(dbName: string = DB_NAME) {
     await db.destroy();
   }
 
-  clearDbCache();
+  DbCache.clear();
 }
