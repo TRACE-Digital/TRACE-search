@@ -157,10 +157,14 @@ export const findAccount = async (site: Site, username: string, search?: Search)
       }
 
       break;
+
+    default:
+      accountError = `Unsupported error type '${errorType}' for '${site.name}'`;
+      break;
   }
 
   if (accountError) {
-    console.log(site.urlMain + ' - ERROR! - ' + accountError);
+    console.log(`ERROR! - ${site.name} - ${profileUrl} - ${accountError}`);
 
     const failedAccount = new FailedAccount(site, username, resultIdPrefix);
     failedAccount.reason = accountError;
