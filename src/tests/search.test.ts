@@ -367,7 +367,10 @@ describe('search', () => {
 });
 
 describe('Internal Search', () => {
-  const invalidDomainSite: Site = {
+  const ERROR_TYPES = ['status_code', 'message', 'response_url'];
+
+  let site: Site;
+  const _baseSiteDoNotUse: Site = {
     name: 'Example',
     url: 'https://example.test/user',
     urlMain: 'https://example.test',
@@ -377,8 +380,14 @@ describe('Internal Search', () => {
     tags: []
   };
 
-  it('handles invalid DNS', async () => {
-    const result = await findAccount(invalidDomainSite, 'test');
+  beforeEach(() => {
+    site = JSON.parse(JSON.stringify(_baseSiteDoNotUse));
+  });
+
+  it('handles an unknown errorType', async () => {
+    site.errorType = 'not a valid errorType';
+
+    const result = await findAccount(site, 'test');
     expect(result).toBeInstanceOf(FailedAccount);
 
     if (result instanceof FailedAccount) {
@@ -387,4 +396,24 @@ describe('Internal Search', () => {
       expect(result.reason.length).toBeGreaterThan(0);
     }
   });
+
+  for (const errorType of ERROR_TYPES) {
+    describe(`Error type: ${errorType}`, () => {
+
+      beforeEach(() => {
+        site.errorType = errorType;
+      });
+
+      it('handles invalid DNS', async () => {
+        const result = await findAccount(site, 'test');
+        expect(result).toBeInstanceOf(FailedAccount);
+
+        if (result instanceof FailedAccount) {
+          console.log(result.reason);
+          expect(result.reason).toBeDefined();
+          expect(result.reason.length).toBeGreaterThan(0);
+        }
+      });
+    });
+  }
 });
