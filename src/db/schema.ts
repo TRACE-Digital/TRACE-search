@@ -42,16 +42,16 @@ export interface RejectedAccountSchema extends DiscoveredAccountSchema {
   rejectedAt: string;
 }
 
+// tslint:disable-next-line:no-empty-interface
+export interface UnregisteredAccountSchema extends DiscoveredAccountSchema {}
+
+export interface FailedAccountSchema extends DiscoveredAccountSchema {
+  reason: string;
+}
+
 export interface ManualAccountSchema extends AccountSchema {
   lastEditedAt: string;
   site: Site;
-}
-
-// tslint:disable-next-line:no-empty-interface
-export interface UnregisteredAccountSchema extends AccountSchema {}
-
-export interface FailedAccountSchema extends AccountSchema {
-  reason: string;
 }
 
 /**

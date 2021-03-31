@@ -1,7 +1,7 @@
 import { toId } from 'db';
 import { Search } from 'search';
 import { Site } from 'sites';
-import { ConfidenceRating, DiscoveredAccount, FailedAccount, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { DiscoveredAccount, FailedAccount, UnregisteredAccount } from './accounts';
 import fetchWithTimeout from './fetchWithTimeout'; // fetchWithTimeout(url, options, timeout_ms = 10000)
 
 /**
@@ -12,7 +12,7 @@ import fetchWithTimeout from './fetchWithTimeout'; // fetchWithTimeout(url, opti
  * @param username username to search for
  * @param search Parent search object
  */
-export const findAccount = async (site: Site, username: string, search?: Search): Promise<ThirdPartyAccount> => {
+export const findAccount = async (site: Site, username: string, search?: Search): Promise<DiscoveredAccount> => {
   const errorType: string = site.errorType; // status_code, message, or response_url
   const url: string = site.url; // url for website profile page
   // const urlMain: string = site.urlMain                                    // url for website home page

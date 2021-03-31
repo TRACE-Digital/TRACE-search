@@ -17,7 +17,7 @@ import {
   DbCache,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import { DiscoveredAccount, DiscoveredAccountAction, searchResults, ThirdPartyAccount } from './accounts';
 import { findAccount } from './findAccount';
 
 /**
@@ -334,9 +334,10 @@ export class Search implements IDbStorable {
 
     // Load the search results, but don't load them into the global accounts map
     const prefix = toId(['searchResult'], instance.id);
-    const results = await ThirdPartyAccount.loadAll(prefix);
+    const results = await ThirdPartyAccount.loadAll(prefix) as DiscoveredAccount[];
 
     for (const result of results) {
+      console.assert(result instanceof DiscoveredAccount, 'Search result was not an instance of DiscoveredAccount!');
       instance.storeResult(result);
     }
 
@@ -372,16 +373,18 @@ export class Search implements IDbStorable {
    *
    * If it's too memory intensive, we can reevaluate.
    */
-  public results: ThirdPartyAccount[] = [];
+  public results: DiscoveredAccount[] = [];
   public resultsById: SearchResultsById = {};
   public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
-  public get discoveredResults() {
-    return this.results.filter(account => account instanceof DiscoveredAccount) as DiscoveredAccount[];
+  /** Search results that have not been claimed/rejected. */
+  public get unevaluatedResults() {
+    return this.results.filter(account => account.actionTaken === DiscoveredAccountAction.NONE);
   }
-  public get unregisteredResults() {
-    return this.results.filter(account => account instanceof UnregisteredAccount) as UnregisteredAccount[];
+  /** Search results that have already been claimed/rejected */
+  public get evaluatedResults() {
+    return this.results.filter(account => account.actionTaken !== DiscoveredAccountAction.NONE);
   }
 
   constructor(definition: SearchDefinition) {
@@ -477,7 +480,7 @@ export class Search implements IDbStorable {
         console.log(`Checking ${site.name}...`);
 
         // Search for the account and store results
-        const account: ThirdPartyAccount = await findAccount(site, userName, this);
+        const account = await findAccount(site, userName, this);
         await account.save();
 
         // Store in multiple formats. See note above result* member initialization
@@ -492,7 +495,7 @@ export class Search implements IDbStorable {
    * Won't overwrite/duplicate accounts whose keys already appear in `resultsMap`
    * (noop for those).
    */
-  protected storeResult(account: ThirdPartyAccount) {
+  protected storeResult(account: DiscoveredAccount) {
     const site = account.site;
 
     // If it's in the map, assume it's everywhere
@@ -512,8 +515,7 @@ export class Search implements IDbStorable {
     this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
     this.resultsByUser[account.userName].push(account);
 
-    // TODO: This doesn't belong here, but figure it out later
-    searchResults[account.id] = account;
+    ThirdPartyAccount.resultCache.add(account);
 
     this.events.emit('result', account.id);
   }

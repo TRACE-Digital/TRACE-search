@@ -18,11 +18,8 @@ const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
 
     const username = shouldExist ? allSites[site].username_claimed : allSites[site].username_unclaimed;
 
-    const profileExists: ThirdPartyAccount = await findAccount(allSites[site], username, null);
-    let exists = false;
-    if (profileExists instanceof DiscoveredAccount) {
-      exists = true;
-    }
+    const account = await findAccount(allSites[site], username);
+    let exists = account instanceof DiscoveredAccount;
 
     if (shouldExist) {
       if (exists) {

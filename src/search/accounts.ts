@@ -254,15 +254,26 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 
   public type = AccountType.DISCOVERED;
 
+  public matchedUserName: boolean = true;
   public matchedFirstNames: string[] = [];
   public matchedLastNames: string[] = [];
   public actionTaken = DiscoveredAccountAction.NONE;
 
   public get confidence(): ConfidenceRating {
-    // Found first names have a weight of 1
-    // Found last names have a weight of 2
+    // Actually matched against the username adds a weight of 3
+    // This won't be true for FailedAccounts or UnregisteredAccounts
+    // These account types should have a confidence of 0
+    // A user might still decide to accept or reject the account based on their own knowledge though
+    const userNameWeight = this.matchedUserName ? 3 : 0;
+
+    // Found first names adds a weight of 1
+    // Found last names adds a weight of 2
     // Max value of 10
-    return Math.min(this.matchedFirstNames.length + this.matchedLastNames.length * 2, 10) as ConfidenceRating;
+    return Math.min(
+      userNameWeight +
+      this.matchedFirstNames.length +
+      this.matchedLastNames.length * 2
+    , 10) as ConfidenceRating;
   }
 
   /**
@@ -420,11 +431,72 @@ export class RejectedAccount extends DiscoveredAccount {
 }
 
 /**
+ * Account that returned a negative result from `Search`.
+ *
+ * This implies the user name hasn't been registered on the site.
+ */
+export class UnregisteredAccount extends DiscoveredAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);;
+  }
+
+  public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new UnregisteredAccount(site, data.userName);
+
+    await super.deserialize(data, instance);
+
+    return instance;
+  }
+
+  public type = AccountType.UNREGISTERED;
+  public matchedUserName = false;
+
+  public serialize(): UnregisteredAccountSchema {
+    const base = super.serialize() as UnregisteredAccountSchema;
+    return base;
+  }
+}
+
+export class FailedAccount extends DiscoveredAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof FailedAccount);;
+  }
+
+  public static async deserialize(data: FailedAccountSchema, existingInstance?: FailedAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new FailedAccount(site, data.userName);
+
+    await super.deserialize(data, instance);
+
+    instance.reason = data.reason;
+
+    return instance;
+  }
+
+  public type = AccountType.FAILED;
+  public matchedUserName = false;
+  public reason: string = 'Unknown error!';
+
+  public serialize(): FailedAccountSchema {
+    const base = super.serialize() as FailedAccountSchema;
+    base.reason = this.reason;
+    return base;
+  }
+}
+
+/**
  * Account manually defined and added by the user.
  *
  * This does not come from `Search`.
  */
-export class ManualAccount extends ThirdPartyAccount {
+ export class ManualAccount extends ThirdPartyAccount {
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof ManualAccount);
   }
@@ -457,65 +529,6 @@ export class ManualAccount extends ThirdPartyAccount {
     const base = super.serialize() as ManualAccountSchema;
     base.lastEditedAt = this.lastEditedAt.toJSON();
     base.site = this.site;
-    return base;
-  }
-}
-
-/**
- * Account that returned a negative result from `Search`.
- *
- * This implies the user name hasn't been registered on the site.
- */
-export class UnregisteredAccount extends ThirdPartyAccount {
-  public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
-  }
-  public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);;
-  }
-
-  public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
-    const site = deserializeSite(data);
-    const instance = existingInstance || new UnregisteredAccount(site, data.userName);
-
-    await super.deserialize(data, instance);
-
-    return instance;
-  }
-
-  public type = AccountType.UNREGISTERED;
-
-  public serialize(): UnregisteredAccountSchema {
-    const base = super.serialize() as UnregisteredAccountSchema;
-    return base;
-  }
-}
-
-export class FailedAccount extends ThirdPartyAccount {
-  public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
-  }
-  public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof FailedAccount);;
-  }
-
-  public static async deserialize(data: FailedAccountSchema, existingInstance?: FailedAccount) {
-    const site = deserializeSite(data);
-    const instance = existingInstance || new FailedAccount(site, data.userName);
-
-    await super.deserialize(data, instance);
-
-    instance.reason = data.reason;
-
-    return instance;
-  }
-
-  public type = AccountType.FAILED;
-  public reason: string = 'Unknown error!';
-
-  public serialize(): FailedAccountSchema {
-    const base = super.serialize() as FailedAccountSchema;
-    base.reason = this.reason;
     return base;
   }
 }

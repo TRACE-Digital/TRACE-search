@@ -2,12 +2,10 @@ import { allSites } from 'sites';
 import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
 import * as meta from 'meta';
 import {
-  accounts,
   ClaimedAccount,
   DiscoveredAccount,
   Search,
   SearchDefinition,
-  searches,
   ThirdPartyAccount,
 } from 'search';
 
@@ -37,9 +35,10 @@ async function main() {
   console.log(search.results);
   console.log(search.resultsMap);
 
-  const claimed = await search.discoveredResults[0].claim();
+  const account = search.unevaluatedResults[0];
+  const claimed = await account.claim();
   console.log('Original account');
-  console.log(search.discoveredResults[0]);
+  console.log(account);
   console.log('Claimed account');
   console.log(claimed);
   console.log(claimed instanceof ClaimedAccount);
@@ -78,7 +77,7 @@ async function main() {
 
   const accountsLoadAll = await ThirdPartyAccount.loadAll();
   console.log(accountsLoadAll);
-  console.log(accounts);
+  console.log(ThirdPartyAccount.accountCache.items);
 
   console.groupEnd();
 }
