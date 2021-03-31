@@ -10,7 +10,7 @@ import {
   ThirdPartyAccount,
   UnregisteredAccount,
 } from 'search';
-import { allSites } from 'sites';
+import { allSites, Site } from 'sites';
 import { checkSaveResponse } from './util';
 
 const accountClasses: (typeof DiscoveredAccount | typeof ManualAccount | typeof UnregisteredAccount)[] = [
@@ -225,4 +225,36 @@ describe('Accounts', () => {
       });
     });
   }
+});
+
+describe('ManualAccount', () => {
+  const site = {
+    name: 'Example',
+    url: 'https://example.com/user',
+    urlMain: 'https://example.com',
+    tags: []
+  } as unknown;
+
+  let account: ManualAccount;
+
+  beforeEach(() => {
+    account = new ManualAccount(site as Site, USERNAME);
+  });
+
+  it('accepts a manual site', () => {
+    expect(account.site).toBe(site);
+  });
+
+  it('serializes with a manual site', () => {
+    const serialized = account.serialize();
+    expect(serialized.site).toBe(site);
+  });
+
+  it('deserializes with a manual site', async () => {
+    const serialized = account.serialize();
+    const deserialized = await ThirdPartyAccount.deserialize(serialized);
+
+    expect(deserialized).toEqual(account);
+    expect(deserialized.serialize()).toEqual(serialized);
+  });
 });
