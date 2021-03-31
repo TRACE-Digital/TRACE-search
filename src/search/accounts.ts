@@ -15,11 +15,6 @@ import {
 } from 'db/schema';
 import { Site } from 'sites';
 
-/** Collection of accounts that have already been pulled out of the database. */
-export const accounts: { [key: string]: ThirdPartyAccount } = {};
-/** Collection of search results that have already been pulled out of the database. */
-export const searchResults: { [key: string]: ThirdPartyAccount } = {};
-
 /**
  * Account associated with a third-party `Site`.
  */
@@ -457,7 +452,6 @@ export class ManualAccount extends ThirdPartyAccount {
     const base = super.serialize() as ManualAccountSchema;
     base.lastEditedAt = this.lastEditedAt.toJSON();
     base.site = this.site;
-    console.log("serializing");
     return base;
   }
 }
@@ -493,15 +487,18 @@ export class UnregisteredAccount extends ThirdPartyAccount {
 }
 
 /**
- * TODO: Keep these updated for backwards compatibility by
- * watching for changes on the the new caches.
+ * **DEPRECATED**
+ * @deprecated Use `ThirdPartyAccount.accountCache` instead.
+ *
+ * Collection of accounts that have already been pulled out of the database.
  */
-ThirdPartyAccount.accountCache.events.on('update', (id) => accounts[id] = ThirdPartyAccount.accountCache.get(id));
-ThirdPartyAccount.accountCache.events.on('remove', (id) => delete accounts[id]);
-ThirdPartyAccount.accountCache.events.on('clear', () => Object.getOwnPropertyNames(accounts).forEach(function (prop) { delete accounts[prop]; }));
-ThirdPartyAccount.resultCache.events.on('update', (id) => searchResults[id] = ThirdPartyAccount.resultCache.get(id));
-ThirdPartyAccount.resultCache.events.on('remove', (id) => delete searchResults[id]);
-ThirdPartyAccount.resultCache.events.on('clear', () => Object.getOwnPropertyNames(searchResults).forEach(function (prop) { delete searchResults[prop]; }))
+export const accounts: { [key: string]: ThirdPartyAccount } = ThirdPartyAccount.accountCache.items;
+/**
+ * **DEPRECATED**
+ * @deprecated Use `ThirdPartyAccount.resultCache` instead.
+ *
+ * Collection of search results that have already been pulled out of the database. */
+export const searchResults: { [key: string]: ThirdPartyAccount } = ThirdPartyAccount.resultCache.items;
 
 /**
  * Rating from 0-10 with 10 being highly confident.

@@ -20,11 +20,6 @@ import { allSites, Site } from 'sites';
 import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 import { findAccount } from './findAccount';
 
-/** Collection of search definitions that have already been pulled out of the database. */
-export const searchDefinitions: { [key: string]: SearchDefinition } = {};
-/** Collection of searches that have already been pulled out of the database. */
-export const searches: { [key: string]: Search } = {};
-
 /**
  * Parameters that define a repeatable `Search`.
  */
@@ -601,3 +596,18 @@ export interface SearchResultsBySite {
 export interface SearchResultsByUser {
   [userName: string]: ThirdPartyAccount[];
 }
+
+/**
+ * **DEPRECATED**
+ * @deprecated Use `SearchDefinition.cache` instead.
+ *
+ * Collection of search definitions that have already been pulled out of the database.
+ */
+export const searchDefinitions: { [key: string]: SearchDefinition } = SearchDefinition.cache.items;
+/**
+ * **DEPRECATED**
+ * @deprecated Use `Search.cache` instead.
+ *
+ * Collection of searches that have already been pulled out of the database.
+ */
+export const searches: { [key: string]: Search } = Search.cache.items;
