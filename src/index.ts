@@ -112,6 +112,7 @@ export {
   ClaimedAccount,
   DiscoveredAccount,
   DiscoveredAccountAction,
+  FailedAccount,
   ManualAccount,
   RejectedAccount,
   Search,

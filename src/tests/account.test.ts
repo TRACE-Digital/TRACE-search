@@ -4,6 +4,7 @@ import {
   ClaimedAccount,
   DiscoveredAccount,
   DiscoveredAccountAction,
+  FailedAccount,
   ManualAccount,
   RejectedAccount,
   ThirdPartyAccount,
@@ -18,6 +19,7 @@ const accountClasses: (typeof DiscoveredAccount | typeof ManualAccount | typeof 
   RejectedAccount,
   ManualAccount,
   UnregisteredAccount,
+  FailedAccount,
 ];
 const SEARCH_PREFIX = 'searchDef/testing/test123';
 const USERNAME = 'test';

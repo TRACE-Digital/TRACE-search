@@ -50,6 +50,10 @@ export interface ManualAccountSchema extends AccountSchema {
 // tslint:disable-next-line:no-empty-interface
 export interface UnregisteredAccountSchema extends AccountSchema {}
 
+export interface FailedAccountSchema extends AccountSchema {
+  reason: string;
+}
+
 /**
  * Deserialize the `site` or `siteName` packed in `AccountSchema`.
  *

@@ -9,6 +9,7 @@ import {
   ClaimedAccountSchema,
   deserializeSite,
   DiscoveredAccountSchema,
+  FailedAccountSchema,
   ManualAccountSchema,
   RejectedAccountSchema,
   UnregisteredAccountSchema,
@@ -42,6 +43,8 @@ export abstract class ThirdPartyAccount implements IDbStorable {
       return await ManualAccount.deserialize(data as ManualAccountSchema);
     } else if (data.type === AccountType.UNREGISTERED) {
       return await UnregisteredAccount.deserialize(data as UnregisteredAccountSchema);
+    } else if (data.type === AccountType.FAILED) {
+      return await FailedAccount.deserialize(data as FailedAccountSchema);
     } else {
       throw new Error(`Cannot deserialize unhandled account type '${data.type}'`);
     }
@@ -486,6 +489,35 @@ export class UnregisteredAccount extends ThirdPartyAccount {
   }
 }
 
+export class FailedAccount extends ThirdPartyAccount {
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
+  }
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof FailedAccount);;
+  }
+
+  public static async deserialize(data: FailedAccountSchema, existingInstance?: FailedAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new FailedAccount(site, data.userName);
+
+    await super.deserialize(data, instance);
+
+    instance.reason = data.reason;
+
+    return instance;
+  }
+
+  public type = AccountType.FAILED;
+  public reason: string = 'Unknown error!';
+
+  public serialize(): FailedAccountSchema {
+    const base = super.serialize() as FailedAccountSchema;
+    base.reason = this.reason;
+    return base;
+  }
+}
+
 /**
  * **DEPRECATED**
  * @deprecated Use `ThirdPartyAccount.accountCache` instead.
@@ -511,6 +543,7 @@ export enum AccountType {
   REJECTED = 'Rejected',
   MANUAL = 'Manual',
   UNREGISTERED = 'Unregistered',
+  FAILED = 'Failed',
 }
 
 /**
