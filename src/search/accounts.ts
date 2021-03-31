@@ -15,6 +15,7 @@ import {
   UnregisteredAccountSchema,
 } from 'db/schema';
 import { Site } from 'sites';
+import SparkMD5 from 'spark-md5';
 
 /**
  * Account associated with a third-party `Site`.
@@ -180,7 +181,8 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     this.site = site;
     this.userName = userName;
 
-    this.id = toId(['account', this.site.name, this.userName], idPrefix);
+    const hash = SparkMD5.hash(toId([this.site.name, this.userName]))
+    this.id = toId(['account', hash], idPrefix);
   }
 
   /**

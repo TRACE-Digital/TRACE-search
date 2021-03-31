@@ -38,7 +38,6 @@ describe('Accounts', () => {
       it('constructs', () => {
         const account = new cls(SITE, USERNAME);
         expect(account).toBeDefined();
-        expect(account.id).toContain(SITE.name);
       });
 
       it('accepts a prefix', () => {
