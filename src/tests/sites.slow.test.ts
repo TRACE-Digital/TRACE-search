@@ -4,13 +4,17 @@ import { findAccount, ThirdPartyAccount, DiscoveredAccount } from 'search';
 const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
   const pass: any[] = [];
   const fail: any[] = [];
-  
-  const testSites = ['Codeforces', 'Code Sandbox', 'hackerearth', 'Chocolatey', 'Ebay', 'Instagram', 'CashApp', 'LinkTree', 'CampSite Bio', 'Sessionize', 'Untappd', 'Angel List', 'PlayStation', 'Tumblr', 'Crates.io']
 
-  for (const site in allSites) {
-    if (!testSites.includes(allSites[site].name)) {
-      continue
-    }
+  const testSiteTimeout = ['Oracle Community'];
+  const testSites = ['Codeforces', 'Code Sandbox', 'hackerearth', 'Chocolatey', 'Ebay', 'Instagram', 'CashApp', 'LinkTree', 'CampSite Bio', 'Sessionize', 'Untappd', 'Angel List', 'PlayStation', 'Tumblr', 'Crates.io'];
+
+  for (const site of Object.keys(allSites)) {
+    // if (!testSites.includes(allSites[site].name)) {
+    //   continue;
+    // }
+    // if (!testSiteTimeout.includes(allSites[site].name)) {
+    //   continue;
+    // }
 
     const username = shouldExist ? allSites[site].username_claimed : allSites[site].username_unclaimed;
 
@@ -50,6 +54,7 @@ describe('Search Sites', () => {
     // Fetch calls timeout after 10s, there are 2 usernames tested per site
     jest.setTimeout(Object.values(allSites).length * 10 * 1000 * 2);
   });
+
   it('detects existing accounts', async () => {
     const results = await testSearch(true);
     // If 20 or more sites fail, red flag
