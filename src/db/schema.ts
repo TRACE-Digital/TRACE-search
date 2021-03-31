@@ -44,6 +44,7 @@ export interface RejectedAccountSchema extends DiscoveredAccountSchema {
 
 export interface ManualAccountSchema extends AccountSchema {
   lastEditedAt: string;
+  site: Site;
 }
 
 // tslint:disable-next-line:no-empty-interface

@@ -456,6 +456,8 @@ export class ManualAccount extends ThirdPartyAccount {
   public serialize(): ManualAccountSchema {
     const base = super.serialize() as ManualAccountSchema;
     base.lastEditedAt = this.lastEditedAt.toJSON();
+    base.site = this.site;
+    console.log("serializing");
     return base;
   }
 }
