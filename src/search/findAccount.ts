@@ -12,7 +12,7 @@ import fetchWithTimeout from './fetchWithTimeout'; // fetchWithTimeout(url, opti
  * @param username username to search for
  * @param search Parent search object
  */
-export const findAccount = async (site: Site, username: string, search: Search | null): Promise<ThirdPartyAccount> => {
+export const findAccount = async (site: Site, username: string, search?: Search): Promise<ThirdPartyAccount> => {
   const errorType: string = site.errorType; // status_code, message, or response_url
   const url: string = site.url; // url for website profile page
   // const urlMain: string = site.urlMain                                    // url for website home page

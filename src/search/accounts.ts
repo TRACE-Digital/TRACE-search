@@ -181,7 +181,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     this.site = site;
     this.userName = userName;
 
-    const hash = SparkMD5.hash(toId([this.site.name, this.userName]))
+    const hash = SparkMD5.hash(toId([this.site.name, this.userName]));
     this.id = toId(['account', hash], idPrefix);
   }
 

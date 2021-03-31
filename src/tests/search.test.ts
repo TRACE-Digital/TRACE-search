@@ -1,5 +1,6 @@
 import { resetDb } from 'db';
-import { Search, SearchDefinition, SearchState } from 'search';
+import { FailedAccount, findAccount, Search, SearchDefinition, SearchState } from 'search';
+import { Site } from 'sites';
 import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
@@ -362,5 +363,28 @@ describe('search', () => {
 
     // expect(deserialized).toEqual(search);
     expect(deserialized.serialize()).toEqual(serialized);
+  });
+});
+
+describe('Internal Search', () => {
+  const invalidDomainSite: Site = {
+    name: 'Example',
+    url: 'https://example.test/user',
+    urlMain: 'https://example.test',
+    errorType: 'status_code',
+    username_claimed: '',
+    username_unclaimed: '',
+    tags: []
+  };
+
+  it('handles invalid DNS', async () => {
+    const result = await findAccount(invalidDomainSite, 'test');
+    expect(result).toBeInstanceOf(FailedAccount);
+
+    if (result instanceof FailedAccount) {
+      console.log(result.reason);
+      expect(result.reason).toBeDefined();
+      expect(result.reason.length).toBeGreaterThan(0);
+    }
   });
 });
