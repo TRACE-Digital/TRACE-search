@@ -520,6 +520,7 @@ export class FailedAccount extends ThirdPartyAccount {
 
 /**
  * **DEPRECATED**
+ *
  * @deprecated Use `ThirdPartyAccount.accountCache` instead.
  *
  * Collection of accounts that have already been pulled out of the database.
@@ -527,9 +528,11 @@ export class FailedAccount extends ThirdPartyAccount {
 export const accounts: { [key: string]: ThirdPartyAccount } = ThirdPartyAccount.accountCache.items;
 /**
  * **DEPRECATED**
+ *
  * @deprecated Use `ThirdPartyAccount.resultCache` instead.
  *
- * Collection of search results that have already been pulled out of the database. */
+ * Collection of search results that have already been pulled out of the database.
+ */
 export const searchResults: { [key: string]: ThirdPartyAccount } = ThirdPartyAccount.resultCache.items;
 
 /**

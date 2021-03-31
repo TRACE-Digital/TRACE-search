@@ -36,6 +36,21 @@ export const findAccount = async (site: Site, username: string, search: Search |
   // prefix id for database - return at the end
   const resultIdPrefix = search ? toId(['searchResult'], search.id) : undefined;
 
+  // This came up after misnaming a trace.json site that was supposed to overlay
+  // a sherlock.json site. It ended up with only trace.json fields and was missing everything
+  if (url === undefined && urlProbe === undefined) {
+    const failedAccount = new FailedAccount(site, username, resultIdPrefix);
+    failedAccount.reason = `Something went wrong: urlProbe and url were both undefined
+      Name: ${site.name}
+      urlMain: ${site.urlMain}
+      Keys: ${Object.keys(site)}
+      Values: ${Object.values(site)}
+    `;
+
+    console.error(failedAccount.reason);
+    return failedAccount;
+  }
+
   // Take required profile page URL template and replace '{}' with the username
   const profileUrl = urlProbe === undefined ? url.replace('{}', username) : urlProbe.replace('{}', username);
 
