@@ -8,7 +8,7 @@ import {
   AccountSchema,
   ClaimedAccountSchema,
   deserializeSite,
-  DiscoveredAccountSchema,
+  AutoSearchAccountSchema,
   FailedAccountSchema,
   ManualAccountSchema,
   RejectedAccountSchema,
@@ -35,7 +35,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    */
   public static async factory(data: AccountSchema): Promise<ThirdPartyAccount> {
     if (data.type === AccountType.DISCOVERED) {
-      return await DiscoveredAccount.deserialize(data as DiscoveredAccountSchema);
+      return await AutoSearchAccount.deserialize(data as AutoSearchAccountSchema);
     } else if (data.type === AccountType.CLAIMED) {
       return await ClaimedAccount.deserialize(data as ClaimedAccountSchema);
     } else if (data.type === AccountType.REJECTED) {
@@ -230,17 +230,17 @@ export abstract class ThirdPartyAccount implements IDbStorable {
  *
  * Has not been claimed or rejected yet.
  */
-export class DiscoveredAccount extends ThirdPartyAccount {
+export class AutoSearchAccount extends ThirdPartyAccount {
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof DiscoveredAccount);
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof AutoSearchAccount);
   }
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof DiscoveredAccount);;
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof AutoSearchAccount);;
   }
 
-  public static async deserialize(data: DiscoveredAccountSchema, existingInstance?: DiscoveredAccount) {
+  public static async deserialize(data: AutoSearchAccountSchema, existingInstance?: AutoSearchAccount) {
     const site = deserializeSite(data);
-    const instance = existingInstance || new DiscoveredAccount(site, data.userName);
+    const instance = existingInstance || new AutoSearchAccount(site, data.userName);
 
     await super.deserialize(data, instance);
 
@@ -257,7 +257,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
   public matchedUserName: boolean = true;
   public matchedFirstNames: string[] = [];
   public matchedLastNames: string[] = [];
-  public actionTaken = DiscoveredAccountAction.NONE;
+  public actionTaken = AutoSearchAccountAction.NONE;
 
   public get confidence(): ConfidenceRating {
     // Actually matched against the username adds a weight of 3
@@ -282,7 +282,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
    * TODO: This is a little unstable
    */
   public async claim(): Promise<ClaimedAccount> {
-    if (this.actionTaken === DiscoveredAccountAction.CLAIMED) {
+    if (this.actionTaken === AutoSearchAccountAction.CLAIMED) {
       throw new Error(`'${this.id}' has already been claimed!`);
     }
 
@@ -309,7 +309,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await ClaimedAccount.deserialize(schema, account);
 
-    this.actionTaken = DiscoveredAccountAction.CLAIMED;
+    this.actionTaken = AutoSearchAccountAction.CLAIMED;
     await this.save();
     await account.save();
 
@@ -322,7 +322,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
    * TODO: This is a little unstable
    */
   public async reject(): Promise<RejectedAccount> {
-    if (this.actionTaken === DiscoveredAccountAction.REJECTED) {
+    if (this.actionTaken === AutoSearchAccountAction.REJECTED) {
       throw new Error(`'${this.id}' has already been rejected!`);
     }
 
@@ -349,15 +349,15 @@ export class DiscoveredAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await RejectedAccount.deserialize(schema, account);
 
-    this.actionTaken = DiscoveredAccountAction.REJECTED;
+    this.actionTaken = AutoSearchAccountAction.REJECTED;
     await this.save();
     await account.save();
 
     return account;
   }
 
-  public serialize(): DiscoveredAccountSchema {
-    const base = super.serialize() as DiscoveredAccountSchema;
+  public serialize(): AutoSearchAccountSchema {
+    const base = super.serialize() as AutoSearchAccountSchema;
     // base.confidence = this.confidence;
     base.matchedFirstNames = this.matchedFirstNames;
     base.matchedLastNames = this.matchedLastNames;
@@ -369,7 +369,7 @@ export class DiscoveredAccount extends ThirdPartyAccount {
 /**
  * Account that has been claimed by the user after `Search`.
  */
-export class ClaimedAccount extends DiscoveredAccount {
+export class ClaimedAccount extends AutoSearchAccount {
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof ClaimedAccount);
   }
@@ -401,7 +401,7 @@ export class ClaimedAccount extends DiscoveredAccount {
 /**
  * Account that has been rejected by the user after `Search`.
  */
-export class RejectedAccount extends DiscoveredAccount {
+export class RejectedAccount extends AutoSearchAccount {
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof RejectedAccount);
   }
@@ -435,7 +435,7 @@ export class RejectedAccount extends DiscoveredAccount {
  *
  * This implies the user name hasn't been registered on the site.
  */
-export class UnregisteredAccount extends DiscoveredAccount {
+export class UnregisteredAccount extends AutoSearchAccount {
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
   }
@@ -461,7 +461,7 @@ export class UnregisteredAccount extends DiscoveredAccount {
   }
 }
 
-export class FailedAccount extends DiscoveredAccount {
+export class FailedAccount extends AutoSearchAccount {
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
   }
@@ -565,12 +565,12 @@ export enum AccountType {
 }
 
 /**
- * Decision that a user made on a `DiscoveredAccount`.
+ * Decision that a user made on a `AutoSearchAccount`.
  *
- * This is stored with the original `DiscoveredAccount` so
+ * This is stored with the original `AutoSearchAccount` so
  * that we can tell what happened when we view history.
  */
-export enum DiscoveredAccountAction {
+export enum AutoSearchAccountAction {
   NONE = 'None',
   CLAIMED = 'Claimed',
   REJECTED = 'Rejected',

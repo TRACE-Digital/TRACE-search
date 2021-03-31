@@ -1,4 +1,4 @@
-import { AccountType, ConfidenceRating, DiscoveredAccountAction, SearchState } from 'search';
+import { AccountType, ConfidenceRating, AutoSearchAccountAction, SearchState } from 'search';
 import { allSites, Site } from 'sites';
 import { PouchDbId } from './types';
 
@@ -27,25 +27,25 @@ export interface AccountSchema extends BaseSchema {
   userName: string;
 }
 
-export interface DiscoveredAccountSchema extends AccountSchema {
+export interface AutoSearchAccountSchema extends AccountSchema {
   confidence: ConfidenceRating;
   matchedFirstNames: string[];
   matchedLastNames: string[];
-  actionTaken: DiscoveredAccountAction;
+  actionTaken: AutoSearchAccountAction;
 }
 
-export interface ClaimedAccountSchema extends DiscoveredAccountSchema {
+export interface ClaimedAccountSchema extends AutoSearchAccountSchema {
   claimedAt: string;
 }
 
-export interface RejectedAccountSchema extends DiscoveredAccountSchema {
+export interface RejectedAccountSchema extends AutoSearchAccountSchema {
   rejectedAt: string;
 }
 
 // tslint:disable-next-line:no-empty-interface
-export interface UnregisteredAccountSchema extends DiscoveredAccountSchema {}
+export interface UnregisteredAccountSchema extends AutoSearchAccountSchema {}
 
-export interface FailedAccountSchema extends DiscoveredAccountSchema {
+export interface FailedAccountSchema extends AutoSearchAccountSchema {
   reason: string;
 }
 

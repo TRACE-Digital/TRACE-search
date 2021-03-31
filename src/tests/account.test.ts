@@ -2,8 +2,8 @@ import { resetDb } from 'db';
 import {
   AccountType,
   ClaimedAccount,
-  DiscoveredAccount,
-  DiscoveredAccountAction,
+  AutoSearchAccount,
+  AutoSearchAccountAction,
   FailedAccount,
   ManualAccount,
   RejectedAccount,
@@ -13,8 +13,8 @@ import {
 import { allSites, Site } from 'sites';
 import { checkSaveResponse } from './util';
 
-const accountClasses: (typeof DiscoveredAccount | typeof ManualAccount | typeof UnregisteredAccount)[] = [
-  DiscoveredAccount,
+const accountClasses: (typeof AutoSearchAccount | typeof ManualAccount | typeof UnregisteredAccount)[] = [
+  AutoSearchAccount,
   ClaimedAccount,
   RejectedAccount,
   ManualAccount,
@@ -161,33 +161,33 @@ describe('Accounts', () => {
       it('can be claimed', async () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
-        if (account instanceof DiscoveredAccount) {
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.NONE);
+        if (account instanceof AutoSearchAccount) {
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.NONE);
 
           const claimed = await account.claim();
 
           expect(claimed).toBeInstanceOf(ClaimedAccount);
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.CLAIMED);
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
         }
       });
 
       it('can be rejected', async () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
-        if (account instanceof DiscoveredAccount) {
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.NONE);
+        if (account instanceof AutoSearchAccount) {
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.NONE);
 
           const rejected = await account.reject();
 
           expect(rejected).toBeInstanceOf(RejectedAccount);
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.REJECTED);
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
         }
       });
 
       it('can be switched from rejected to claimed', async () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
-        if (account instanceof DiscoveredAccount) {
+        if (account instanceof AutoSearchAccount) {
           const rejected = await account.reject();
           expect(rejected.type).toEqual(AccountType.REJECTED);
           expect(rejected).toBeInstanceOf(RejectedAccount);
@@ -196,7 +196,7 @@ describe('Accounts', () => {
           expect(claimed.type).toEqual(AccountType.CLAIMED);
           expect(claimed).toBeInstanceOf(ClaimedAccount);
 
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.CLAIMED);
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
 
           // Confirm that cache was overwritten
           expect(ThirdPartyAccount.accountCache.get(rejected.id)).toBe(claimed);
@@ -207,7 +207,7 @@ describe('Accounts', () => {
       it('can be switched from claimed to rejected', async () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
-        if (account instanceof DiscoveredAccount) {
+        if (account instanceof AutoSearchAccount) {
           const claimed = await account.claim();
           expect(claimed.type).toEqual(AccountType.CLAIMED);
           expect(claimed).toBeInstanceOf(ClaimedAccount);
@@ -216,7 +216,7 @@ describe('Accounts', () => {
           expect(rejected.type).toEqual(AccountType.REJECTED);
           expect(rejected).toBeInstanceOf(RejectedAccount);
 
-          expect(account.actionTaken).toEqual(DiscoveredAccountAction.REJECTED);
+          expect(account.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
 
           // Confirm that cache was overwritten
           expect(ThirdPartyAccount.accountCache.get(claimed.id)).toBe(rejected);

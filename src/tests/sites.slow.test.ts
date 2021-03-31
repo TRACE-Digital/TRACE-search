@@ -1,5 +1,5 @@
 import { allSites, Site, SiteList } from 'sites';
-import { findAccount, ThirdPartyAccount, DiscoveredAccount } from 'search';
+import { findAccount, ThirdPartyAccount, AutoSearchAccount } from 'search';
 
 const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
   const pass: any[] = [];
@@ -19,7 +19,7 @@ const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
     const username = shouldExist ? allSites[site].username_claimed : allSites[site].username_unclaimed;
 
     const account = await findAccount(allSites[site], username);
-    let exists = account instanceof DiscoveredAccount;
+    let exists = account instanceof AutoSearchAccount;
 
     if (shouldExist) {
       if (exists) {

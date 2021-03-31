@@ -17,7 +17,7 @@ import {
   DbCache,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { DiscoveredAccount, DiscoveredAccountAction, searchResults, ThirdPartyAccount } from './accounts';
+import { AutoSearchAccount, AutoSearchAccountAction, searchResults, ThirdPartyAccount } from './accounts';
 import { findAccount } from './findAccount';
 
 /**
@@ -334,10 +334,10 @@ export class Search implements IDbStorable {
 
     // Load the search results, but don't load them into the global accounts map
     const prefix = toId(['searchResult'], instance.id);
-    const results = await ThirdPartyAccount.loadAll(prefix) as DiscoveredAccount[];
+    const results = await ThirdPartyAccount.loadAll(prefix) as AutoSearchAccount[];
 
     for (const result of results) {
-      console.assert(result instanceof DiscoveredAccount, 'Search result was not an instance of DiscoveredAccount!');
+      console.assert(result instanceof AutoSearchAccount, 'Search result was not an instance of AutoSearchAccount!');
       instance.storeResult(result);
     }
 
@@ -373,18 +373,18 @@ export class Search implements IDbStorable {
    *
    * If it's too memory intensive, we can reevaluate.
    */
-  public results: DiscoveredAccount[] = [];
+  public results: AutoSearchAccount[] = [];
   public resultsById: SearchResultsById = {};
   public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
   /** Search results that have not been claimed/rejected. */
   public get unevaluatedResults() {
-    return this.results.filter(account => account.actionTaken === DiscoveredAccountAction.NONE);
+    return this.results.filter(account => account.actionTaken === AutoSearchAccountAction.NONE);
   }
   /** Search results that have already been claimed/rejected */
   public get evaluatedResults() {
-    return this.results.filter(account => account.actionTaken !== DiscoveredAccountAction.NONE);
+    return this.results.filter(account => account.actionTaken !== AutoSearchAccountAction.NONE);
   }
 
   constructor(definition: SearchDefinition) {
@@ -495,7 +495,7 @@ export class Search implements IDbStorable {
    * Won't overwrite/duplicate accounts whose keys already appear in `resultsMap`
    * (noop for those).
    */
-  protected storeResult(account: DiscoveredAccount) {
+  protected storeResult(account: AutoSearchAccount) {
     const site = account.site;
 
     // If it's in the map, assume it's everywhere

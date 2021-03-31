@@ -3,7 +3,8 @@ import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
 import * as meta from 'meta';
 import {
   ClaimedAccount,
-  DiscoveredAccount,
+  AutoSearchAccount,
+  AutoSearchAccountAction,
   Search,
   SearchDefinition,
   ThirdPartyAccount,
@@ -42,7 +43,7 @@ async function main() {
   console.log('Claimed account');
   console.log(claimed);
   console.log(claimed instanceof ClaimedAccount);
-  console.log(claimed instanceof DiscoveredAccount);
+  console.log(claimed instanceof AutoSearchAccount);
 
   console.groupEnd();
   console.groupCollapsed('Test serialization');
@@ -101,6 +102,11 @@ async function testReplicate() {
 // tslint:disable-next-line:no-floating-promises
 // main();
 
+/** @deprecated Use `RegisteredAccount` instead. */
+const DiscoveredAccount = AutoSearchAccount;
+/** @deprecated Use `AutoSearchAccountAction` instead. */
+const DiscoveredAccountAction = AutoSearchAccountAction;
+
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
 export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
@@ -109,8 +115,8 @@ export { VERSION as version } from 'meta';
 export {
   AccountType,
   ClaimedAccount,
-  DiscoveredAccount,
-  DiscoveredAccountAction,
+  AutoSearchAccount,
+  AutoSearchAccountAction,
   FailedAccount,
   ManualAccount,
   RejectedAccount,
@@ -124,6 +130,12 @@ export {
   searchResults,
   searches,
 } from 'search';
+
+// Deprecated stuff
+export {
+  DiscoveredAccount,
+  DiscoveredAccountAction
+}
 
 // Top level types that we want to be publicly visible
 export * from 'search';
