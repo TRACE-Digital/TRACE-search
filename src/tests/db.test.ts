@@ -117,6 +117,9 @@ describe('Database IDs', () => {
 });
 
 describe('Remote DB', () => {
+  const USER_ID = 'test123';
+  const USER_ID2 = 'notTest123';
+
   beforeEach(async () => {
     await resetRemoteDb();
   });
@@ -126,10 +129,21 @@ describe('Remote DB', () => {
     expect(db).toBeDefined();
   });
 
+  it('accepts a user ID', async () => {
+    const db = await getRemoteDb('test');
+    expect(db.name).toContain(USER_ID);
+  });
+
   it('is a singleton', async () => {
     const obj = await getRemoteDb();
     const obj2 = await getRemoteDb();
     expect(obj2).toBe(obj);
+  });
+
+  it('invalidates the singleton on switch of user ID', async () => {
+    const obj = await getRemoteDb(USER_ID);
+    const obj2 = await getRemoteDb(USER_ID2);
+    expect(obj2).not.toBe(obj);
   });
 
   it('closes', async () => {

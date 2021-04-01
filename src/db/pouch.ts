@@ -18,13 +18,15 @@ PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
+let _remoteUserId: string | null = null;
 let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
 export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
-export const REMOTE_DB_URL = 'https://couchdb.tracedigital.tk:6984/trace';
+export const REMOTE_DB_BASE_URL = 'https://couchdb.tracedigital.tk:6984/';
+export const REMOTE_DB_DEFAULT_ID = 'trace';
 export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {
   auth: {
     username: 'admin',
@@ -59,7 +61,11 @@ export const getDb = async () => {
 /**
  * Initialize or return the remote database instance (i.e. CouchDB).
  */
-export const getRemoteDb = async () => {
+export const getRemoteDb = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
+  if (userId != _remoteUserId) {
+    await closeRemoteDb();
+  }
+
   if (_remoteDb) {
     return _remoteDb;
   }
@@ -70,8 +76,11 @@ export const getRemoteDb = async () => {
     console.warn('No remote database password is present!');
   }
 
+  const dbUrl = new URL(userId, REMOTE_DB_BASE_URL);
+
   try {
-    _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
+    _remoteDb = new PouchDB(dbUrl.toString(), REMOTE_DB_OPTIONS);
+    _remoteUserId = userId;
     // @ts-ignore
     await _remoteDb.crypto(ENCRYPTION_KEY);
   } catch (e) {
@@ -109,8 +118,8 @@ export const resetDb = async () => {
  * TODO: Figure out how to propagate this to any other synced devices
  * and to fully remove the old documents from the CouchDB instance
  */
-export const resetRemoteDb = async () => {
-  const db = await getRemoteDb();
+export const resetRemoteDb = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
+  const db = await getRemoteDb(userId);
   await resetDbCommon(db);
 };
 
@@ -157,7 +166,7 @@ export const closeRemoteDb = async () => {
     _remoteDb = null;
     console.log('Closed remote database');
   } else {
-    console.warn('Remote database was not open');
+    console.debug('Remote database was not open');
   }
 };
 
@@ -203,7 +212,7 @@ const setupDb = async () => {
 /**
  * Setup replication to and from the remote CouchDB server.
  */
-export const setupReplication = async () => {
+export const setupReplication = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
   if (_remoteDb && _replicator) {
     console.log('Replication already setup');
     return { TODO_replication: _replicator };
@@ -212,7 +221,7 @@ export const setupReplication = async () => {
   console.log('Setting up replication...');
 
   const localDb = await getDb();
-  const remoteDb = await getRemoteDb();
+  const remoteDb = await getRemoteDb(userId);
 
   console.log('Connected to remote database');
 
