@@ -113,7 +113,7 @@ const DiscoveredAccountAction = AutoSearchAccountAction;
 export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
-export { ProfilePage, DEFAULT_COLOR_SCHEME } from 'profile';
+export { ProfilePage, DEFAULT_COLOR_SCHEME, pages } from 'profile';
 export {
   AccountType,
   ClaimedAccount,
