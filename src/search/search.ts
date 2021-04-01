@@ -14,31 +14,37 @@ import {
   DbResponse,
   throwIfIdMismatch,
   UTF_MAX,
+  DbCache,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { DiscoveredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
+import {
+  AutoSearchAccount,
+  AutoSearchAccountAction,
+  FailedAccount,
+  RegisteredAccount,
+  searchResults,
+  ThirdPartyAccount,
+  UnregisteredAccount,
+} from './accounts';
 import { findAccount } from './findAccount';
-
-/** Collection of search definitions that have already been pulled out of the database. */
-export const searchDefinitions: { [key: string]: SearchDefinition } = {};
-/** Collection of searches that have already been pulled out of the database. */
-export const searches: { [key: string]: Search } = {};
-
-const ENCRYPTION_PASSWORD = 'sldadhfkashlfdks';
 
 /**
  * Parameters that define a repeatable `Search`.
  */
 export class SearchDefinition implements IDbStorable {
+  public static cache = new DbCache<SearchDefinition>();
+  public get definitions() {
+    return SearchDefinition.cache.items;
+  }
   private static idForDefaultName = 0;
 
   /**
    * Load all `SearchDefinition`s from the database into
-   * the `searchDefinitions` map.
+   * the `SearchDefinition.cache`.
    *
    * Returns an array of the requested definitions. All loaded definitions
-   * (including ones not loaded by this request) can be accessed
-   * via `searchDefinitions`.
+   * (including ones loaded by other requests) can be accessed
+   * via `SearchDefinition.cache`.
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
@@ -65,8 +71,9 @@ export class SearchDefinition implements IDbStorable {
         continue;
       }
 
-      if (doc._id in searchDefinitions) {
-        results.push(searchDefinitions[doc._id]);
+      const existing = SearchDefinition.cache.get(doc._id);
+      if (existing) {
+        results.push(existing);
       } else {
         try {
           const searchDef = await SearchDefinition.deserialize(doc);
@@ -102,7 +109,7 @@ export class SearchDefinition implements IDbStorable {
 
     // IMPORTANT: Add our instance before we create search history so that
     // each entry can look us up and won't try to go to the db
-    searchDefinitions[instance.id] = instance;
+    SearchDefinition.cache.add(instance);
 
     const results = await Search.loadAll(instance.id);
 
@@ -179,21 +186,6 @@ export class SearchDefinition implements IDbStorable {
   }
 
   /**
-   * Remove all executions of this search from history.
-   */
-  public clear() {
-    console.warn('TODO: Remove from the database');
-    this.history.length = 0;
-  }
-
-  /**
-   * Delete this search definition and all executions.
-   */
-  public delete() {
-    throw new Error('Not implemented yet!');
-  }
-
-  /**
    * Save/update this search definition in the database.
    *
    * Don't call this unless you've made changes!
@@ -207,12 +199,54 @@ export class SearchDefinition implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
-      searchDefinitions[this.id] = this;
+      SearchDefinition.cache.add(this);
       return result;
     }
 
     console.error(result);
     throw new Error('Failed to save search definition!');
+  }
+
+  /**
+   * Remove all executions of this search from history.
+   */
+  public async clear() {
+    for (const search of this.history) {
+      try {
+        await search.remove();
+      } catch (e) {
+        console.warn(`Could not remove '${search.id}': ${e}`);
+      }
+    }
+
+    this.history.length = 0;
+  }
+
+  /**
+   * Remove the search definition and all executions from the database.
+   */
+  public async remove(): Promise<void> {
+    console.debug(`Removing search ${this.id}...`);
+
+    await this.clear();
+
+    const db = await getDb();
+    let result;
+    try {
+      result = await db.remove(this.serialize());
+    } catch (e) {
+      console.warn(`Could not remove ${this.id}: ${e}`);
+      return;
+    }
+
+    DbCache.remove(this.id);
+
+    if (!result.ok) {
+      console.error(`Could not delete ${this.id}!`);
+      console.error(result);
+    }
+
+    this.rev = result.rev;
   }
 
   public serialize(): SearchDefinitionSchema {
@@ -234,15 +268,20 @@ export class SearchDefinition implements IDbStorable {
  * Single execution of a `SearchDefinition`.
  */
 export class Search implements IDbStorable {
+  public static cache = new DbCache<Search>();
+  public get searches() {
+    return Search.cache.items;
+  }
+
   /**
    * This won't return anything unless you pass a searchDefinition prefix!
    *
    * Load all `Search`s from the database into
-   * the `searches` map.
+   * the `Search.cache`.
    *
    * Returns an array of the requested searches. All loaded searches
    * (including ones not loaded by this request) can be accessed
-   * via `searches`.
+   * via `Search.cache`.
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
@@ -269,8 +308,9 @@ export class Search implements IDbStorable {
         continue;
       }
 
-      if (doc._id in searches) {
-        results.push(searches[doc._id]);
+      const existing = Search.cache.get(doc._id);
+      if (existing) {
+        results.push(existing);
       } else {
         try {
           const search = await Search.deserialize(doc);
@@ -293,12 +333,10 @@ export class Search implements IDbStorable {
     const db = await getDb();
 
     // We need the search definition to construct a new search
-    let definition: SearchDefinition;
+    let definition = SearchDefinition.cache.get(data.definitionId);
     if (existingInstance) {
       definition = existingInstance.definition;
-    } else if (data.definitionId in searchDefinitions) {
-      definition = searchDefinitions[data.definitionId];
-    } else {
+    } else if (!definition) {
       try {
         const definitionSchema = await db.get<SearchDefinitionSchema>(data.definitionId);
         definition = await SearchDefinition.deserialize(definitionSchema);
@@ -307,13 +345,16 @@ export class Search implements IDbStorable {
         throw new Error(`Failed to deserialize search definition '${data.definitionId}': ${e}`);
       }
 
-      // Deserializing the search definition should create the instance for us
-      if (!(data._id in searches)) {
+      // Deserializing the search definition should create the Search instance for us
+      const search = Search.cache.get(data._id);
+      if (!search) {
         throw new Error(`SearchDefinition.deserialize() did not create search '${data._id}'!`);
       }
 
-      return searches[data._id];
+      return search;
     }
+
+    console.assert(definition, `Could not find definition '${data.definitionId}' for '${data._id}'!`);
 
     const instance = existingInstance || new Search(definition);
 
@@ -324,13 +365,14 @@ export class Search implements IDbStorable {
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
-    searches[instance.id] = instance;
+    Search.cache.add(instance);
 
     // Load the search results, but don't load them into the global accounts map
     const prefix = toId(['searchResult'], instance.id);
-    const results = await ThirdPartyAccount.loadAll(prefix);
+    const results = (await ThirdPartyAccount.loadAll(prefix)) as AutoSearchAccount[];
 
     for (const result of results) {
+      console.assert(result instanceof AutoSearchAccount, 'Search result was not an instance of AutoSearchAccount!');
       instance.storeResult(result);
     }
 
@@ -366,16 +408,30 @@ export class Search implements IDbStorable {
    *
    * If it's too memory intensive, we can reevaluate.
    */
-  public results: ThirdPartyAccount[] = [];
+  public results: AutoSearchAccount[] = [];
   public resultsById: SearchResultsById = {};
   public resultsMap: SearchResults = {};
   public resultsBySite: SearchResultsBySite = {};
   public resultsByUser: SearchResultsByUser = {};
-  public get discoveredResults() {
-    return this.results.filter(account => account instanceof DiscoveredAccount) as DiscoveredAccount[];
+  /** Search results that have not been claimed/rejected. */
+  public get unevaluatedResults() {
+    return this.results.filter(account => account.actionTaken === AutoSearchAccountAction.NONE);
   }
+  /** Search results that have already been claimed/rejected */
+  public get evaluatedResults() {
+    return this.results.filter(account => account.actionTaken !== AutoSearchAccountAction.NONE);
+  }
+  /** Positive search results that are available to claim/reject. */
+  public get registeredResults() {
+    return this.unevaluatedResults.filter(account => account instanceof RegisteredAccount);
+  }
+  /** Negative search results that are available to claim/reject. */
   public get unregisteredResults() {
-    return this.results.filter(account => account instanceof UnregisteredAccount) as UnregisteredAccount[];
+    return this.unevaluatedResults.filter(account => account instanceof UnregisteredAccount);
+  }
+  /** Inconclusive search results that failed because of an error. */
+  public get inconclusiveResults() {
+    return this.unevaluatedResults.filter(account => account instanceof FailedAccount);
   }
 
   constructor(definition: SearchDefinition) {
@@ -471,7 +527,7 @@ export class Search implements IDbStorable {
         console.log(`Checking ${site.name}...`);
 
         // Search for the account and store results
-        const account: ThirdPartyAccount = await findAccount(site, userName, this);
+        const account = await findAccount(site, userName, this);
         await account.save();
 
         // Store in multiple formats. See note above result* member initialization
@@ -486,7 +542,7 @@ export class Search implements IDbStorable {
    * Won't overwrite/duplicate accounts whose keys already appear in `resultsMap`
    * (noop for those).
    */
-  protected storeResult(account: ThirdPartyAccount) {
+  protected storeResult(account: AutoSearchAccount) {
     const site = account.site;
 
     // If it's in the map, assume it's everywhere
@@ -506,8 +562,7 @@ export class Search implements IDbStorable {
     this.resultsByUser[account.userName] = this.resultsByUser[account.userName] || [];
     this.resultsByUser[account.userName].push(account);
 
-    // TODO: This doesn't belong here, but figure it out later
-    searchResults[account.id] = account;
+    ThirdPartyAccount.resultCache.add(account);
 
     this.events.emit('result', account.id);
   }
@@ -531,12 +586,34 @@ export class Search implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
-      searches[this.id] = this;
+      Search.cache.add(this);
       return result;
     }
 
     console.error(result);
     throw new Error('Failed to save search definition!');
+  }
+
+  public async remove(): Promise<void> {
+    console.debug(`Removing search ${this.id}...`);
+
+    const db = await getDb();
+    let result;
+    try {
+      result = await db.remove(this.serialize());
+    } catch (e) {
+      console.warn(`Could not remove ${this.id}: ${e}`);
+      return;
+    }
+
+    DbCache.remove(this.id);
+
+    if (!result.ok) {
+      console.error(`Could not delete ${this.id}!`);
+      console.error(result);
+    }
+
+    this.rev = result.rev;
   }
 
   public serialize(): SearchSchema {
@@ -590,3 +667,18 @@ export interface SearchResultsBySite {
 export interface SearchResultsByUser {
   [userName: string]: ThirdPartyAccount[];
 }
+
+/**
+ * **DEPRECATED**
+ * @deprecated Use `SearchDefinition.cache` instead.
+ *
+ * Collection of search definitions that have already been pulled out of the database.
+ */
+export const searchDefinitions: { [key: string]: SearchDefinition } = SearchDefinition.cache.items;
+/**
+ * **DEPRECATED**
+ * @deprecated Use `Search.cache` instead.
+ *
+ * Collection of searches that have already been pulled out of the database.
+ */
+export const searches: { [key: string]: Search } = Search.cache.items;

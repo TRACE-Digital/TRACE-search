@@ -1,6 +1,4 @@
 import PouchDB from 'pouchdb';
-// @ts-ignore
-import CryptoPouch from 'crypto-pouch';
 import {
   BaseSchema,
   DEFAULT_SETTINGS,
@@ -17,10 +15,11 @@ import {
   resetRemoteDb,
   closeRemoteDb,
   ENCRYPTION_KEY,
-  _replicator,
+  setRemoteUser,
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
+import { CognitoUserPartial } from 'db/aws-amplify';
 
 describe('PouchDB', () => {
   let db: PouchDB.Database;
@@ -120,6 +119,21 @@ describe('Database IDs', () => {
 });
 
 describe('Remote DB', () => {
+  const USER1: CognitoUserPartial = {
+    attributes: {
+      sub: 'test123',
+      email: 'test123@example.test',
+      email_verified: false,
+    },
+  };
+  const USER2: CognitoUserPartial = {
+    attributes: {
+      sub: 'notTest123',
+      email: 'notTest123@example.test',
+      email_verified: false,
+    },
+  };
+
   beforeEach(async () => {
     await resetRemoteDb();
   });
@@ -133,6 +147,21 @@ describe('Remote DB', () => {
     const obj = await getRemoteDb();
     const obj2 = await getRemoteDb();
     expect(obj2).toBe(obj);
+  });
+
+  it('accepts a remote user', async () => {
+    await setRemoteUser(USER1);
+    const db = await getRemoteDb();
+    expect(db.name).toContain(USER1.attributes.sub);
+  });
+
+  it('invalidates the singleton on switch of user ID', async () => {
+    await setRemoteUser(USER1);
+    const obj = await getRemoteDb();
+
+    await setRemoteUser(USER2);
+    const obj2 = await getRemoteDb();
+    expect(obj2).not.toBe(obj);
   });
 
   it('closes', async () => {
