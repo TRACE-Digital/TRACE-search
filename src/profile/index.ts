@@ -76,9 +76,6 @@ export class ProfilePage implements IDbStorable {
 
     const instance = existingInstance || new ProfilePage(data.title);
 
-    // TODO: Trust the constructor to get this right? Yes, probably
-    // instance.includedSites
-
     instance.id = data._id;
     instance.rev = data._rev;
     instance.title = data.title;
@@ -86,37 +83,45 @@ export class ProfilePage implements IDbStorable {
     instance.lastEditedAt = new Date(data.lastEditedAt);
     instance.colorScheme = data.colorScheme;
 
-    const db = await getDb();
-    const response = await db.bulkGet<AccountSchema>({
-      docs: data.accountIds.map(id => ({ id })),
-    });
+    // bulkGet never returns if we pass [] for docs???
+    if (data.accountIds.length > 0) {
 
-    // Clear the history so we don't have to worry about duplicates
-    instance.accounts.length = 0;
+      const db = await getDb();
+      const response = await db.bulkGet<AccountSchema>({
+        docs: data.accountIds.map(id => ({ id })),
+      });
+      console.debug(response);
 
-    for (const result of response.results) {
-      // Assume we only got back a single revision
-      const doc = result.docs[0];
+      // Clear the history so we don't have to worry about duplicates
+      instance.accounts.length = 0;
 
-      if ('error' in doc) {
-        console.warn(`Skipping search '${result.id}': ${doc.error}`);
-        continue;
-      }
+      for (const result of response.results) {
+        // Assume we only got back a single revision
+        const doc = result.docs[0];
 
-      // TODO: Rewrite to use caches after merge
-      if (result.id in accounts) {
-        instance.accounts.push(accounts[result.id]);
-      } else {
-        try {
-          const account = await ThirdPartyAccount.deserialize(doc.ok);
-          instance.accounts.push(account);
-        } catch (e) {
-          console.debug(result);
-          console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
+        if ('error' in doc) {
+          console.warn(`Skipping search '${result.id}': ${doc.error}`);
           continue;
+        }
+
+        // TODO: Rewrite to use caches after merge
+        if (result.id in accounts) {
+          instance.accounts.push(accounts[result.id]);
+        } else {
+          try {
+            const account = await ThirdPartyAccount.deserialize(doc.ok);
+            instance.accounts.push(account);
+          } catch (e) {
+            console.debug(result);
+            console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
+            continue;
+          }
         }
       }
     }
+
+    // TODO: Rewrite using caches after merge
+    pages[instance.id] = instance;
 
     return instance;
   }
