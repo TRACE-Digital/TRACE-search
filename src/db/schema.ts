@@ -82,3 +82,20 @@ export interface SearchSchema extends BaseSchema {
   endedAt: string | null;
   definitionId: PouchDbId;
 }
+
+////  Profile  ////
+
+export interface ProfilePageSchema extends BaseSchema {
+  title: string;
+  createdAt: string;
+  lastEditedAt: string;
+  colorScheme: ProfilePageColorSchema;
+  accountIds: PouchDbId[];
+}
+
+export interface ProfilePageColorSchema {
+  titleColor: string;
+  backgroundColor: string;
+  siteColor: string;
+  iconColor: string;
+}
