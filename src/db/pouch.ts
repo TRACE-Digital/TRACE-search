@@ -246,7 +246,7 @@ const setupDb = async () => {
     since: 'now',
     live: true,
     include_docs: true,
-  }).on('change', (change) => {
+  }).on('change', async (change) => {
     if (change.deleted) {
       DbCache.remove(change.id);
     } else {
@@ -259,23 +259,23 @@ const setupDb = async () => {
       if (change.id.startsWith('account')) {
         console.debug(`Change '${change.id}' matched account`);
         const existing = ThirdPartyAccount.accountCache.get(change.id);
-        ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+        await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
       } else if (change.id.match('^searchDef/.*/searchResult')) {
         console.debug(`Change '${change.id}' matched searchResult`);
         const existing = ThirdPartyAccount.resultCache.get(change.id);
-        ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+        await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
       } else if (change.id.match('^searchDef/.*/search')) {
         console.debug(`Change '${change.id}' matched search`);
         const existing = Search.cache.get(change.id);
-        Search.deserialize(change.doc as SearchSchema, existing);
+        await Search.deserialize(change.doc as SearchSchema, existing);
       } else if (change.id.match('^searchDef')) {
         console.debug(`Change '${change.id}' matched search definition`);
         const existing = SearchDefinition.cache.get(change.id);
-        SearchDefinition.deserialize(change.doc as SearchDefinitionSchema, existing);
+        await SearchDefinition.deserialize(change.doc as SearchDefinitionSchema, existing);
       } else if (change.id.match('^profile')) {
         console.debug(`Change '${change.id}' matched profile page`);
         const existing = ProfilePage.cache.get(change.id);
-        ProfilePage.deserialize(change.doc as ProfilePageSchema, existing);
+        await ProfilePage.deserialize(change.doc as ProfilePageSchema, existing);
       } else {
         console.warn(`Change '${change.id}' did not match any cache!`);
       }
