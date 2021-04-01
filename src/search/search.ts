@@ -17,7 +17,7 @@ import {
   DbCache,
 } from 'db';
 import { allSites, Site } from 'sites';
-import { AutoSearchAccount, AutoSearchAccountAction, searchResults, ThirdPartyAccount } from './accounts';
+import { AutoSearchAccount, AutoSearchAccountAction, FailedAccount, RegisteredAccount, searchResults, ThirdPartyAccount, UnregisteredAccount } from './accounts';
 import { findAccount } from './findAccount';
 
 /**
@@ -385,6 +385,18 @@ export class Search implements IDbStorable {
   /** Search results that have already been claimed/rejected */
   public get evaluatedResults() {
     return this.results.filter(account => account.actionTaken !== AutoSearchAccountAction.NONE);
+  }
+  /** Positive search results that are available to claim/reject. */
+  public get registeredResults() {
+    return this.unevaluatedResults.filter(account => account instanceof RegisteredAccount);
+  }
+  /** Negative search results that are available to claim/reject. */
+  public get unregisteredResults() {
+    return this.unevaluatedResults.filter(account => account instanceof UnregisteredAccount);
+  }
+  /** Inconclusive search results that failed because of an error. */
+  public get inconclusiveResults() {
+    return this .unevaluatedResults.filter(account => account instanceof FailedAccount);
   }
 
   constructor(definition: SearchDefinition) {

@@ -1,7 +1,7 @@
 import { toId } from 'db';
 import { Search } from 'search';
 import { Site } from 'sites';
-import { AutoSearchAccount, FailedAccount, UnregisteredAccount } from './accounts';
+import { AutoSearchAccount, FailedAccount, RegisteredAccount, UnregisteredAccount } from './accounts';
 import fetchWithTimeout from './fetchWithTimeout'; // fetchWithTimeout(url, options, timeout_ms = 10000)
 
 /**
@@ -172,7 +172,7 @@ export const findAccount = async (site: Site, username: string, search?: Search)
   }
 
   if (accountFound) {
-    const account = new AutoSearchAccount(site, username, resultIdPrefix);
+    const account = new RegisteredAccount(site, username, resultIdPrefix);
     account.matchedFirstNames = matchedFirstNames;
     account.matchedLastNames = matchedLastNames;
     return account;

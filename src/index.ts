@@ -8,6 +8,7 @@ import {
   Search,
   SearchDefinition,
   ThirdPartyAccount,
+  RegisteredAccount,
 } from 'search';
 
 async function main() {
@@ -50,7 +51,7 @@ async function main() {
 
   console.log(searchDef.serialize());
   console.log(search.serialize());
-  console.log(search.discoveredResults[0].serialize());
+  console.log(search.unevaluatedResults[0].serialize());
   console.log(claimed.serialize());
 
   console.groupEnd();
@@ -103,7 +104,7 @@ async function testReplicate() {
 // main();
 
 /** @deprecated Use `RegisteredAccount` instead. */
-const DiscoveredAccount = AutoSearchAccount;
+const DiscoveredAccount = RegisteredAccount;
 /** @deprecated Use `AutoSearchAccountAction` instead. */
 const DiscoveredAccountAction = AutoSearchAccountAction;
 
@@ -124,6 +125,7 @@ export {
   SearchDefinition,
   SearchState,
   ThirdPartyAccount,
+  RegisteredAccount,
   UnregisteredAccount,
   accounts,
   searchDefinitions,

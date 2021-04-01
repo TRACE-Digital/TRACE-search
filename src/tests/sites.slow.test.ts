@@ -19,7 +19,7 @@ const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
     const username = shouldExist ? allSites[site].username_claimed : allSites[site].username_unclaimed;
 
     const account = await findAccount(allSites[site], username);
-    let exists = account instanceof AutoSearchAccount;
+    const exists = account instanceof AutoSearchAccount;
 
     if (shouldExist) {
       if (exists) {

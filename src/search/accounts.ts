@@ -13,6 +13,7 @@ import {
   ManualAccountSchema,
   RejectedAccountSchema,
   UnregisteredAccountSchema,
+  RegisteredAccountSchema,
 } from 'db/schema';
 import { Site } from 'sites';
 import SparkMD5 from 'spark-md5';
@@ -23,9 +24,11 @@ import SparkMD5 from 'spark-md5';
 export abstract class ThirdPartyAccount implements IDbStorable {
   public static accountCache = new DbCache<ThirdPartyAccount>();
   public static resultCache = new DbCache<ThirdPartyAccount>();
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.items;
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.items;
   }
@@ -34,18 +37,18 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    * Factory method for creating an account using the appropriate subclass.
    */
   public static async factory(data: AccountSchema): Promise<ThirdPartyAccount> {
-    if (data.type === AccountType.DISCOVERED) {
-      return await AutoSearchAccount.deserialize(data as AutoSearchAccountSchema);
-    } else if (data.type === AccountType.CLAIMED) {
+    if (data.type === AccountType.CLAIMED) {
       return await ClaimedAccount.deserialize(data as ClaimedAccountSchema);
     } else if (data.type === AccountType.REJECTED) {
       return await RejectedAccount.deserialize(data as RejectedAccountSchema);
-    } else if (data.type === AccountType.MANUAL) {
-      return await ManualAccount.deserialize(data as ManualAccountSchema);
+    } else if (data.type === AccountType.REGISTERED) {
+      return await RegisteredAccount.deserialize(data as RegisteredAccountSchema);
     } else if (data.type === AccountType.UNREGISTERED) {
       return await UnregisteredAccount.deserialize(data as UnregisteredAccountSchema);
     } else if (data.type === AccountType.FAILED) {
       return await FailedAccount.deserialize(data as FailedAccountSchema);
+    } else if (data.type === AccountType.MANUAL) {
+      return await ManualAccount.deserialize(data as ManualAccountSchema);
     } else {
       throw new Error(`Cannot deserialize unhandled account type '${data.type}'`);
     }
@@ -226,25 +229,31 @@ export abstract class ThirdPartyAccount implements IDbStorable {
 }
 
 /**
- * An account discovered during `Search`.
+ * An account on which we attempted `Search`.
  *
- * Has not been claimed or rejected yet.
+ * Search may have returned positive, negative, or failed.
+ *
+ * This has not been claimed or rejected yet.
  */
-export class AutoSearchAccount extends ThirdPartyAccount {
+export abstract class AutoSearchAccount extends ThirdPartyAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof AutoSearchAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.filter((account) => account instanceof AutoSearchAccount);;
   }
 
-  public static async deserialize(data: AutoSearchAccountSchema, existingInstance?: AutoSearchAccount) {
-    const site = deserializeSite(data);
-    const instance = existingInstance || new AutoSearchAccount(site, data.userName);
+  public static async deserialize(data: AutoSearchAccountSchema, instance?: AutoSearchAccount) {
+    // No one should ever call deserialize on this class without an instance
+    // But the inheritance doesn't work if we make it required here
+    if (instance === undefined) {
+      throw new Error(`Argument 'instance' is required on AutoSearchAccount.deserialize()!`);
+    }
 
     await super.deserialize(data, instance);
 
-    // instance.confidence = data.confidence;
     instance.matchedFirstNames = data.matchedFirstNames;
     instance.matchedLastNames = data.matchedLastNames;
     instance.actionTaken = data.actionTaken;
@@ -252,9 +261,9 @@ export class AutoSearchAccount extends ThirdPartyAccount {
     return instance;
   }
 
-  public type = AccountType.DISCOVERED;
+  public type = AccountType.AUTOMATIC;
 
-  public matchedUserName: boolean = true;
+  public matchedUserName: boolean = false;
   public matchedFirstNames: string[] = [];
   public matchedLastNames: string[] = [];
   public actionTaken = AutoSearchAccountAction.NONE;
@@ -358,7 +367,6 @@ export class AutoSearchAccount extends ThirdPartyAccount {
 
   public serialize(): AutoSearchAccountSchema {
     const base = super.serialize() as AutoSearchAccountSchema;
-    // base.confidence = this.confidence;
     base.matchedFirstNames = this.matchedFirstNames;
     base.matchedLastNames = this.matchedLastNames;
     base.actionTaken = this.actionTaken;
@@ -367,12 +375,47 @@ export class AutoSearchAccount extends ThirdPartyAccount {
 }
 
 /**
+ * Account that represents a positive result from `Search`.
+ *
+ * This implies the user name exists on the site.
+ */
+ export class RegisteredAccount extends AutoSearchAccount {
+   /** Map of accounts that are an instance of this class. */
+  public static get accounts() {
+    return ThirdPartyAccount.accountCache.filter((account) => account instanceof RegisteredAccount);
+  }
+  /** Map of results that are an instance of this class. */
+  public static get results() {
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof RegisteredAccount);;
+  }
+
+  public static async deserialize(data: RegisteredAccountSchema, existingInstance?: RegisteredAccount) {
+    const site = deserializeSite(data);
+    const instance = existingInstance || new RegisteredAccount(site, data.userName);
+
+    await super.deserialize(data, instance);
+
+    return instance;
+  }
+
+  public type = AccountType.REGISTERED;
+  public matchedUserName = true;
+
+  public serialize(): RegisteredAccountSchema {
+    const base = super.serialize() as RegisteredAccountSchema;
+    return base;
+  }
+}
+
+/**
  * Account that has been claimed by the user after `Search`.
  */
 export class ClaimedAccount extends AutoSearchAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof ClaimedAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.filter((account) => account instanceof ClaimedAccount);;
   }
@@ -402,9 +445,11 @@ export class ClaimedAccount extends AutoSearchAccount {
  * Account that has been rejected by the user after `Search`.
  */
 export class RejectedAccount extends AutoSearchAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof RejectedAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.filter((account) => account instanceof RejectedAccount);;
   }
@@ -436,11 +481,13 @@ export class RejectedAccount extends AutoSearchAccount {
  * This implies the user name hasn't been registered on the site.
  */
 export class UnregisteredAccount extends AutoSearchAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);;
+    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);
   }
 
   public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
@@ -461,10 +508,17 @@ export class UnregisteredAccount extends AutoSearchAccount {
   }
 }
 
+/**
+ * Account that experienced an error during `Search`.
+ *
+ * Error text is stored in `reason`.
+ */
 export class FailedAccount extends AutoSearchAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.filter((account) => account instanceof FailedAccount);;
   }
@@ -497,9 +551,11 @@ export class FailedAccount extends AutoSearchAccount {
  * This does not come from `Search`.
  */
  export class ManualAccount extends ThirdPartyAccount {
+   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
     return ThirdPartyAccount.accountCache.filter((account) => account instanceof ManualAccount);
   }
+  /** Map of results that are an instance of this class. */
   public static get results() {
     return ThirdPartyAccount.resultCache.filter((account) => account instanceof ManualAccount);;
   }
@@ -556,12 +612,13 @@ export const searchResults: { [key: string]: ThirdPartyAccount } = ThirdPartyAcc
 export type ConfidenceRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export enum AccountType {
-  DISCOVERED = 'Discovered',
+  AUTOMATIC = 'Automatic',
   CLAIMED = 'Claimed',
   REJECTED = 'Rejected',
-  MANUAL = 'Manual',
+  REGISTERED = 'Registered',
   UNREGISTERED = 'Unregistered',
   FAILED = 'Failed',
+  MANUAL = 'Manual',
 }
 
 /**

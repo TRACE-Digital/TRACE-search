@@ -9,17 +9,18 @@ import {
   RejectedAccount,
   ThirdPartyAccount,
   UnregisteredAccount,
+  RegisteredAccount,
 } from 'search';
 import { allSites, Site } from 'sites';
 import { checkSaveResponse } from './util';
 
-const accountClasses: (typeof AutoSearchAccount | typeof ManualAccount | typeof UnregisteredAccount)[] = [
-  AutoSearchAccount,
+const accountClasses: (typeof AutoSearchAccount | typeof ManualAccount)[] = [
   ClaimedAccount,
   RejectedAccount,
-  ManualAccount,
+  RegisteredAccount,
   UnregisteredAccount,
   FailedAccount,
+  ManualAccount,
 ];
 const SEARCH_PREFIX = 'searchDef/testing/test123';
 const USERNAME = 'test';

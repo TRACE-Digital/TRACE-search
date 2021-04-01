@@ -28,7 +28,6 @@ export interface AccountSchema extends BaseSchema {
 }
 
 export interface AutoSearchAccountSchema extends AccountSchema {
-  confidence: ConfidenceRating;
   matchedFirstNames: string[];
   matchedLastNames: string[];
   actionTaken: AutoSearchAccountAction;
@@ -41,6 +40,9 @@ export interface ClaimedAccountSchema extends AutoSearchAccountSchema {
 export interface RejectedAccountSchema extends AutoSearchAccountSchema {
   rejectedAt: string;
 }
+
+// tslint:disable-next-line:no-empty-interface
+export interface RegisteredAccountSchema extends AutoSearchAccountSchema {}
 
 // tslint:disable-next-line:no-empty-interface
 export interface UnregisteredAccountSchema extends AutoSearchAccountSchema {}
