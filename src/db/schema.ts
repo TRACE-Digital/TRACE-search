@@ -74,6 +74,7 @@ export interface SearchDefinitionSchema extends BaseSchema {
   userNames: string[];
   firstNames: string[];
   lastNames: string[];
+  tags: string[];
 }
 
 export interface SearchSchema extends BaseSchema {
