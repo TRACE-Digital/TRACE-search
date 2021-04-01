@@ -20,7 +20,7 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      - name: Collect coverage
+      - name: Test and collect coverage
         run: npm run coverage
 
       - name: Upload coverage to Codecov
