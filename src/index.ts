@@ -135,10 +135,7 @@ export {
 } from 'search';
 
 // Deprecated stuff
-export {
-  DiscoveredAccount,
-  DiscoveredAccountAction
-}
+export { DiscoveredAccount, DiscoveredAccountAction };
 
 // Top level types that we want to be publicly visible
 export { ProfilePageColorSchema } from 'db/schema';

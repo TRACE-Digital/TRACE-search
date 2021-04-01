@@ -24,7 +24,7 @@ export const ID_SEPARATOR = '/';
  *
  * We don't currently support converting the ID back into whatever it came from.
  */
- export function toId(value: string[], prefix?: PouchDbId): PouchDbId {
+export function toId(value: string[], prefix?: PouchDbId): PouchDbId {
   if (prefix) {
     value = [prefix].concat(value);
   }

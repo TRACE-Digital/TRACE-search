@@ -1,5 +1,5 @@
-import EventEmitter from "events";
-import { IDbStorable } from "./types";
+import EventEmitter from 'events';
+import { IDbStorable } from './types';
 
 /**
  * In-memory cache of items from the database that we're working with.
@@ -72,7 +72,7 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
    * Returns `true` if id is in the cache.
    */
   public has(id: IDbStorable['id']) {
-    return (id in this.items);
+    return id in this.items;
   }
 
   /**

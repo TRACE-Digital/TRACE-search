@@ -432,7 +432,7 @@ describe('Internal Search', () => {
     errorType: 'status_code',
     username_claimed: '',
     username_unclaimed: '',
-    tags: []
+    tags: [],
   };
 
   beforeEach(() => {
@@ -454,7 +454,6 @@ describe('Internal Search', () => {
 
   for (const errorType of ERROR_TYPES) {
     describe(`Error type: ${errorType}`, () => {
-
       beforeEach(() => {
         site.errorType = errorType;
       });

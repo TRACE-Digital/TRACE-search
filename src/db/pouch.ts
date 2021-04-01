@@ -19,7 +19,7 @@ PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
-let _remoteUser: CognitoUserPartial | undefined = undefined;
+let _remoteUser: CognitoUserPartial | undefined;
 let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
 export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
@@ -69,8 +69,8 @@ export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
     return;
   }
 
-  const open = (_remoteDb);
-  const replicating = (_remoteDb && _replicator);
+  const open = _remoteDb;
+  const replicating = _remoteDb && _replicator;
 
   if (replicating) {
     await teardownReplication();
@@ -87,7 +87,7 @@ export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
   if (open) {
     await getRemoteDb();
   }
-}
+};
 
 /**
  * Initialize or return the remote database instance (i.e. CouchDB).

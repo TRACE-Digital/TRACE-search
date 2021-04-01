@@ -1,8 +1,10 @@
-import { resetDb } from "db";
-import { DEFAULT_COLOR_SCHEME, pages, ProfilePage } from "profile";
-import { ManualAccount, ThirdPartyAccount } from "search";
-import { supportedSites } from "sites";
-import { checkSaveResponse } from "./util";
+import { resetDb } from 'db';
+import { DEFAULT_COLOR_SCHEME, pages, ProfilePage } from 'profile';
+import { ManualAccount, ThirdPartyAccount } from 'search';
+import { supportedSites } from 'sites';
+import { checkSaveResponse } from './util';
+
+const TEST_SITE = 'Wikipedia';
 
 beforeEach(async () => {
   await resetDb();
@@ -13,8 +15,8 @@ describe('search definition', () => {
   let account2: ThirdPartyAccount;
 
   beforeEach(async () => {
-    account1 = new ManualAccount(supportedSites['Wikipedia'], 'test1');
-    account2 = new ManualAccount(supportedSites['Wikipedia'], 'test2');
+    account1 = new ManualAccount(supportedSites[TEST_SITE], 'test1');
+    account2 = new ManualAccount(supportedSites[TEST_SITE], 'test2');
     await account1.save();
     await account2.save();
   });

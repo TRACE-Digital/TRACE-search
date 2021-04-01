@@ -249,7 +249,7 @@ describe('ManualAccount', () => {
     name: 'Example',
     url: 'https://example.com/user',
     urlMain: 'https://example.com',
-    tags: []
+    tags: [],
   } as unknown;
 
   let account: ManualAccount;

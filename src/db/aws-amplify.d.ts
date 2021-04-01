@@ -1,4 +1,4 @@
-import { RequestInit } from "node-fetch";
+import { RequestInit } from 'node-fetch';
 
 type KeyValue = { [key: string]: any };
 
@@ -23,8 +23,8 @@ export interface CognitoUser extends CognitoUserPartial {
     userPoolId: string;
     clientId: string;
     client: {
-        endpoint: string;
-        fetchOptions: RequestInit
+      endpoint: string;
+      fetchOptions: RequestInit;
     };
     advancedSecurityDataCollectionFlag: boolean;
     storage: KeyValue;
@@ -32,7 +32,7 @@ export interface CognitoUser extends CognitoUserPartial {
   Session: object | null;
   client: {
     endpoint: string;
-    fetchOptions: RequestInit
+    fetchOptions: RequestInit;
   };
   signInUserSession: {
     idToken: {
@@ -67,8 +67,8 @@ export interface CognitoUser extends CognitoUserPartial {
         jti: string;
         client_id: string;
         username: string;
-      }
-    },
+      };
+    };
     clockDrift: number;
   };
   authenticationFlowType: string;

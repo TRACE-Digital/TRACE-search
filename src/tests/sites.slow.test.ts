@@ -6,7 +6,23 @@ const testSearch = async (shouldExist: boolean): Promise<Site[]> => {
   const fail: any[] = [];
 
   const testSiteTimeout = ['Oracle Community'];
-  const testSites = ['Codeforces', 'Code Sandbox', 'hackerearth', 'Chocolatey', 'Ebay', 'Instagram', 'CashApp', 'LinkTree', 'CampSite Bio', 'Sessionize', 'Untappd', 'Angel List', 'PlayStation', 'Tumblr', 'Crates.io'];
+  const testSites = [
+    'Codeforces',
+    'Code Sandbox',
+    'hackerearth',
+    'Chocolatey',
+    'Ebay',
+    'Instagram',
+    'CashApp',
+    'LinkTree',
+    'CampSite Bio',
+    'Sessionize',
+    'Untappd',
+    'Angel List',
+    'PlayStation',
+    'Tumblr',
+    'Crates.io',
+  ];
 
   for (const site of Object.keys(allSites)) {
     // if (!testSites.includes(allSites[site].name)) {

@@ -22,12 +22,11 @@ export const findAccount = async (site: Site, username: string, search?: Search)
   const urlProbe: string | undefined = site.urlProbe; // alternate profile page test url for sites where profiles aren't publicly facing
   // const noPeriod: string = site.noPeriod || "False"                       // todo (never used?)
   const headers: object = site.headers || {}; // headers to send with the request if needed
-  let requestHeadOnly: boolean | undefined = site.request_head_only;         // for status_code errorType website -- use a GET request instead of a HEAD request
+  let requestHeadOnly: boolean | undefined = site.request_head_only; // for status_code errorType website -- use a GET request instead of a HEAD request
   if (requestHeadOnly === undefined) {
-    requestHeadOnly = true
+    requestHeadOnly = true;
   }
   // const omit: boolean = site.omit || false                                // tells program to not process the site
-
 
   const firstNames: string[] = search?.definition.firstNames || [];
   const lastNames: string[] = search?.definition.lastNames || [];

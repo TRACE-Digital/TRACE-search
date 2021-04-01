@@ -124,14 +124,14 @@ describe('Remote DB', () => {
       sub: 'test123',
       email: 'test123@example.test',
       email_verified: false,
-    }
+    },
   };
   const USER2: CognitoUserPartial = {
     attributes: {
       sub: 'notTest123',
       email: 'notTest123@example.test',
       email_verified: false,
-    }
+    },
   };
 
   beforeEach(async () => {

@@ -1,11 +1,23 @@
-import { AccountSchema, DbCache, DbResponse, getDb, IDbStorable, PouchDbId, ProfilePageColorSchema, ProfilePageSchema, throwIfIdMismatch, toId, UTF_MAX } from "db";
-import { accounts, ThirdPartyAccount } from "search";
+import {
+  AccountSchema,
+  DbCache,
+  DbResponse,
+  getDb,
+  IDbStorable,
+  PouchDbId,
+  ProfilePageColorSchema,
+  ProfilePageSchema,
+  throwIfIdMismatch,
+  toId,
+  UTF_MAX,
+} from 'db';
+import { accounts, ThirdPartyAccount } from 'search';
 
 export const DEFAULT_COLOR_SCHEME: ProfilePageColorSchema = {
-  titleColor: "#FFFFFF",
-  backgroundColor: "#1E1D2A",
-  siteColor: "#26283A",
-  iconColor: "Default"
+  titleColor: '#FFFFFF',
+  backgroundColor: '#1E1D2A',
+  siteColor: '#26283A',
+  iconColor: 'Default',
 };
 
 /**
@@ -84,7 +96,6 @@ export class ProfilePage implements IDbStorable {
 
     // bulkGet never returns if we pass [] for docs???
     if (data.accountIds.length > 0) {
-
       const db = await getDb();
       const response = await db.bulkGet<AccountSchema>({
         docs: data.accountIds.map(id => ({ id })),
@@ -123,7 +134,6 @@ export class ProfilePage implements IDbStorable {
 
     return instance;
   }
-
 
   public id: PouchDbId;
   public rev: string = '';

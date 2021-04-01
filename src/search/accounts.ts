@@ -260,11 +260,11 @@ export abstract class ThirdPartyAccount implements IDbStorable {
 export abstract class AutoSearchAccount extends ThirdPartyAccount {
   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof AutoSearchAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof AutoSearchAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof AutoSearchAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof AutoSearchAccount);
   }
 
   public static async deserialize(data: AutoSearchAccountSchema, instance?: AutoSearchAccount) {
@@ -301,10 +301,9 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
     // Found last names adds a weight of 2
     // Max value of 10
     return Math.min(
-      userNameWeight +
-      this.matchedFirstNames.length +
-      this.matchedLastNames.length * 2
-    , 10) as ConfidenceRating;
+      userNameWeight + this.matchedFirstNames.length + this.matchedLastNames.length * 2,
+      10,
+    ) as ConfidenceRating;
   }
 
   /**
@@ -401,14 +400,14 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
  *
  * This implies the user name exists on the site.
  */
- export class RegisteredAccount extends AutoSearchAccount {
-   /** Map of accounts that are an instance of this class. */
+export class RegisteredAccount extends AutoSearchAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof RegisteredAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof RegisteredAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof RegisteredAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof RegisteredAccount);
   }
 
   public static async deserialize(data: RegisteredAccountSchema, existingInstance?: RegisteredAccount) {
@@ -435,11 +434,11 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
 export class ClaimedAccount extends AutoSearchAccount {
   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof ClaimedAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof ClaimedAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof ClaimedAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof ClaimedAccount);
   }
 
   public static async deserialize(data: ClaimedAccountSchema, existingInstance?: ClaimedAccount) {
@@ -469,11 +468,11 @@ export class ClaimedAccount extends AutoSearchAccount {
 export class RejectedAccount extends AutoSearchAccount {
   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof RejectedAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof RejectedAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof RejectedAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof RejectedAccount);
   }
 
   public static async deserialize(data: RejectedAccountSchema, existingInstance?: RejectedAccount) {
@@ -505,11 +504,11 @@ export class RejectedAccount extends AutoSearchAccount {
 export class UnregisteredAccount extends AutoSearchAccount {
   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof UnregisteredAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof UnregisteredAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof UnregisteredAccount);
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof UnregisteredAccount);
   }
 
   public static async deserialize(data: UnregisteredAccountSchema, existingInstance?: UnregisteredAccount) {
@@ -538,11 +537,11 @@ export class UnregisteredAccount extends AutoSearchAccount {
 export class FailedAccount extends AutoSearchAccount {
   /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof FailedAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof FailedAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof FailedAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof FailedAccount);
   }
 
   public static async deserialize(data: FailedAccountSchema, existingInstance?: FailedAccount) {
@@ -572,14 +571,14 @@ export class FailedAccount extends AutoSearchAccount {
  *
  * This does not come from `Search`.
  */
- export class ManualAccount extends ThirdPartyAccount {
-   /** Map of accounts that are an instance of this class. */
+export class ManualAccount extends ThirdPartyAccount {
+  /** Map of accounts that are an instance of this class. */
   public static get accounts() {
-    return ThirdPartyAccount.accountCache.filter((account) => account instanceof ManualAccount);
+    return ThirdPartyAccount.accountCache.filter(account => account instanceof ManualAccount);
   }
   /** Map of results that are an instance of this class. */
   public static get results() {
-    return ThirdPartyAccount.resultCache.filter((account) => account instanceof ManualAccount);;
+    return ThirdPartyAccount.resultCache.filter(account => account instanceof ManualAccount);
   }
 
   public static async deserialize(data: ManualAccountSchema, existingInstance?: ManualAccount) {
