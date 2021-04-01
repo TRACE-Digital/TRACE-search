@@ -245,8 +245,6 @@ describe('search definition', () => {
   it('is stored in the cache during deserialization', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
 
-    // TODO: Figure out how newly created definitions will end up in the cache
-    // It's possible that the changes feed will trigger on .save()
     await SearchDefinition.deserialize(searchDef.serialize());
 
     expect(SearchDefinition.cache.get(searchDef.id)).toEqual(searchDef);
@@ -258,6 +256,7 @@ describe('search definition', () => {
 
     // Remove from cache since save() should have stored it
     SearchDefinition.cache.remove(searchDef.id);
+    expect(SearchDefinition.cache.has(searchDef.id)).toBeFalsy();
 
     const results = await SearchDefinition.loadAll();
 

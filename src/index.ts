@@ -113,6 +113,7 @@ const DiscoveredAccountAction = AutoSearchAccountAction;
 export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
+export { ProfilePage, DEFAULT_COLOR_SCHEME } from 'profile';
 export {
   AccountType,
   ClaimedAccount,
@@ -140,5 +141,6 @@ export {
 }
 
 // Top level types that we want to be publicly visible
+export { ProfilePageColorSchema } from 'db/schema';
 export * from 'search';
 export { Site, SiteList } from 'sites';
