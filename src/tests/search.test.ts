@@ -182,7 +182,7 @@ describe('search definition', () => {
 
     await searchDef.remove();
 
-    expect(searchDef.id).not.toBeInDatabase();
+    await expect(searchDef.id).not.toBeInDatabase();
     expect(SearchDefinition.cache.get(searchDef.id)).toBeUndefined();
   });
 
@@ -191,16 +191,30 @@ describe('search definition', () => {
     await searchDef.remove();
   });
 
-  it('removes search history on remove', async () => {
+  it('clears search history on remove', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
     const search = await searchDef.new();
     await searchDef.save();
 
-    expect(search.id).toBeInDatabase();
+    await expect(search.id).toBeInDatabase();
 
     await searchDef.remove();
 
-    expect(search.id).not.toBeInDatabase();
+    await expect(search.id).not.toBeInDatabase();
+  });
+
+  it('clears search history', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+    await searchDef.save();
+
+    expect(searchDef.history).toHaveLength(1);
+    await expect(search.id).toBeInDatabase();
+
+    await searchDef.clear();
+
+    expect(searchDef.history).toHaveLength(0);
+    await expect(search.id).not.toBeInDatabase();
   });
 
   it('produces a new search', async () => {
@@ -363,7 +377,7 @@ describe('search', () => {
 
     await search.remove();
 
-    expect(search.id).not.toBeInDatabase();
+    await expect(search.id).not.toBeInDatabase();
     expect(Search.cache.get(search.id)).toBeUndefined();
   });
 

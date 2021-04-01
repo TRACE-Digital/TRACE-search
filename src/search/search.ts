@@ -178,21 +178,6 @@ export class SearchDefinition implements IDbStorable {
   }
 
   /**
-   * Remove all executions of this search from history.
-   */
-  public clear() {
-    console.warn('TODO: Remove from the database');
-    this.history.length = 0;
-  }
-
-  /**
-   * Delete this search definition and all executions.
-   */
-  public delete() {
-    throw new Error('Not implemented yet!');
-  }
-
-  /**
    * Save/update this search definition in the database.
    *
    * Don't call this unless you've made changes!
@@ -215,11 +200,9 @@ export class SearchDefinition implements IDbStorable {
   }
 
   /**
-   * Remove the search definition and all executions from the database.
+   * Remove all executions of this search from history.
    */
-  public async remove(): Promise<void> {
-    console.debug(`Removing search ${this.id}...`);
-
+  public async clear() {
     for (const search of this.history) {
       try {
         await search.remove();
@@ -227,6 +210,17 @@ export class SearchDefinition implements IDbStorable {
         console.warn(`Could not remove '${search.id}': ${e}`)
       }
     }
+
+    this.history.length = 0;
+  }
+
+  /**
+   * Remove the search definition and all executions from the database.
+   */
+  public async remove(): Promise<void> {
+    console.debug(`Removing search ${this.id}...`);
+
+    await this.clear();
 
     const db = await getDb();
     let result;
@@ -429,7 +423,7 @@ export class Search implements IDbStorable {
   }
   /** Inconclusive search results that failed because of an error. */
   public get inconclusiveResults() {
-    return this .unevaluatedResults.filter(account => account instanceof FailedAccount);
+    return this.unevaluatedResults.filter(account => account instanceof FailedAccount);
   }
 
   constructor(definition: SearchDefinition) {

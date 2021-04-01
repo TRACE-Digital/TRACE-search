@@ -165,7 +165,7 @@ describe('Accounts', () => {
 
         await account.remove();
 
-        expect(account.id).not.toBeInDatabase();
+        await expect(account.id).not.toBeInDatabase();
         expect(ThirdPartyAccount.resultCache.get(account.id)).toBeUndefined();
         expect(ThirdPartyAccount.accountCache.get(account.id)).toBeUndefined();
       });
