@@ -1,4 +1,4 @@
-import { resetDb } from 'db';
+import { getDb, resetDb } from 'db';
 import {
   AccountType,
   ClaimedAccount,
@@ -14,7 +14,7 @@ import {
 import { allSites, Site } from 'sites';
 import { checkSaveResponse } from './util';
 
-const accountClasses: (typeof AutoSearchAccount | typeof ManualAccount)[] = [
+const accountClasses = [
   ClaimedAccount,
   RejectedAccount,
   RegisteredAccount,
@@ -157,6 +157,22 @@ describe('Accounts', () => {
           // Save should put it in the cache
           expect(ThirdPartyAccount.accountCache.get(account.id)).toBe(account);
         }
+      });
+
+      it('removes', async () => {
+        const account = new cls(SITE, USERNAME);
+        await account.save();
+
+        await account.remove();
+
+        expect(account.id).not.toBeInDatabase();
+        expect(ThirdPartyAccount.resultCache.get(account.id)).toBeUndefined();
+        expect(ThirdPartyAccount.accountCache.get(account.id)).toBeUndefined();
+      });
+
+      it('does not throw on non-existent remove', async () => {
+        const account = new cls(SITE, USERNAME);
+        await account.remove();
       });
 
       it('can be claimed', async () => {

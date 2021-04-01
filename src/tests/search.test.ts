@@ -176,6 +176,33 @@ describe('search definition', () => {
     }
   });
 
+  it('removes', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await searchDef.save();
+
+    await searchDef.remove();
+
+    expect(searchDef.id).not.toBeInDatabase();
+    expect(SearchDefinition.cache.get(searchDef.id)).toBeUndefined();
+  });
+
+  it('does not throw on non-existent remove', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await searchDef.remove();
+  });
+
+  it('removes search history on remove', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+    await searchDef.save();
+
+    expect(search.id).toBeInDatabase();
+
+    await searchDef.remove();
+
+    expect(search.id).not.toBeInDatabase();
+  });
+
   it('produces a new search', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
     const search = await searchDef.new();
@@ -328,6 +355,21 @@ describe('search', () => {
       // Save should put it in the cache
       expect(Search.cache.get(search.id)).toBe(search);
     }
+  });
+
+  it('removes', async () => {
+    const search = await definition.new();
+    await search.save();
+
+    await search.remove();
+
+    expect(search.id).not.toBeInDatabase();
+    expect(Search.cache.get(search.id)).toBeUndefined();
+  });
+
+  it('does not throw on non-existent remove', async () => {
+    const search = await definition.new();
+    await search.remove();
   });
 
   it('deserializes without results', async () => {
