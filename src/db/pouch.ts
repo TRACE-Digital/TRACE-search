@@ -13,12 +13,13 @@ import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
 import { DbCache } from './cache';
+import { CognitoUserPartial } from './aws-amplify';
 
 PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
-let _remoteUserId: string | null = null;
+let _remoteUser: CognitoUserPartial | undefined = undefined;
 let _replicator: PouchDB.Replication.Replication<any> | null = null;
 
 export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
@@ -59,13 +60,41 @@ export const getDb = async () => {
 };
 
 /**
- * Initialize or return the remote database instance (i.e. CouchDB).
+ * Set the remote user that will be used to connect to
+ * the remote database.
  */
-export const getRemoteDb = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
-  if (userId != _remoteUserId) {
+export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
+  if (_remoteUser?.attributes.sub === cognitoUser.attributes.sub) {
+    console.debug(`Remote user was already set to '${cognitoUser.attributes.sub}'.`);
+    return;
+  }
+
+  const open = (_remoteDb);
+  const replicating = (_remoteDb && _replicator);
+
+  if (replicating) {
+    await teardownReplication();
+  }
+  if (open) {
     await closeRemoteDb();
   }
 
+  _remoteUser = cognitoUser;
+
+  if (replicating) {
+    await setupReplication();
+  }
+  if (open) {
+    await getRemoteDb();
+  }
+}
+
+/**
+ * Initialize or return the remote database instance (i.e. CouchDB).
+ *
+ * Passing `userId` sets the
+ */
+export const getRemoteDb = async () => {
   if (_remoteDb) {
     return _remoteDb;
   }
@@ -76,11 +105,12 @@ export const getRemoteDb = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
     console.warn('No remote database password is present!');
   }
 
+  const userId = _remoteUser?.attributes.sub || REMOTE_DB_DEFAULT_ID;
   const dbUrl = new URL(userId, REMOTE_DB_BASE_URL);
 
   try {
+    console.log(`Connecting to remote database ${dbUrl}...`);
     _remoteDb = new PouchDB(dbUrl.toString(), REMOTE_DB_OPTIONS);
-    _remoteUserId = userId;
     // @ts-ignore
     await _remoteDb.crypto(ENCRYPTION_KEY);
   } catch (e) {
@@ -118,8 +148,8 @@ export const resetDb = async () => {
  * TODO: Figure out how to propagate this to any other synced devices
  * and to fully remove the old documents from the CouchDB instance
  */
-export const resetRemoteDb = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
-  const db = await getRemoteDb(userId);
+export const resetRemoteDb = async () => {
+  const db = await getRemoteDb();
   await resetDbCommon(db);
 };
 
@@ -212,7 +242,7 @@ const setupDb = async () => {
 /**
  * Setup replication to and from the remote CouchDB server.
  */
-export const setupReplication = async (userId: string = REMOTE_DB_DEFAULT_ID) => {
+export const setupReplication = async () => {
   if (_remoteDb && _replicator) {
     console.log('Replication already setup');
     return { TODO_replication: _replicator };
@@ -221,7 +251,7 @@ export const setupReplication = async (userId: string = REMOTE_DB_DEFAULT_ID) =>
   console.log('Setting up replication...');
 
   const localDb = await getDb();
-  const remoteDb = await getRemoteDb(userId);
+  const remoteDb = await getRemoteDb();
 
   console.log('Connected to remote database');
 
