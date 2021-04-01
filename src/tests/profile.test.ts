@@ -77,7 +77,7 @@ describe('search definition', () => {
 
     // Save should put it in the cache
     // TODO: Rewrite to use cache after merge
-    expect(pages[page.id]).toBe(page);
+    expect(ProfilePage.cache.get(page.id)).toBe(page);
   });
 
   it('saves multiple times', async () => {
@@ -93,7 +93,7 @@ describe('search definition', () => {
       lastRev = page.rev;
 
       // Save should put it in the cache
-      expect(pages[page.id]).toBe(page);
+      expect(ProfilePage.cache.get(page.id)).toBe(page);
     }
   });
 
@@ -120,20 +120,19 @@ describe('search definition', () => {
     await ProfilePage.deserialize(page.serialize());
 
     // TODO: Rewrite using cache after merge
-    expect(pages[page.id]).toEqual(page);
+    expect(ProfilePage.cache.get(page.id)).toEqual(page);
   });
 
   it('is stored in the cache during loadAll', async () => {
     const page = new ProfilePage(undefined);
     await page.save();
 
-    // TODO: Rewrite using cache after merge
-    delete pages[page.id];
-    expect(pages[page.id]).toBeUndefined();
+    ProfilePage.cache.remove(page.id);
+    expect(ProfilePage.cache.has(page.id)).toBeFalsy();
 
     const results = await ProfilePage.loadAll();
 
     expect(results).toContainEqual(page);
-    expect(pages[page.id]).toEqual(page);
+    expect(ProfilePage.cache.get(page.id)).toEqual(page);
   });
 });

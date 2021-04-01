@@ -1,4 +1,4 @@
-import { AccountSchema, DbResponse, getDb, IDbStorable, PouchDbId, ProfilePageColorSchema, ProfilePageSchema, throwIfIdMismatch, toId, UTF_MAX } from "db";
+import { AccountSchema, DbCache, DbResponse, getDb, IDbStorable, PouchDbId, ProfilePageColorSchema, ProfilePageSchema, throwIfIdMismatch, toId, UTF_MAX } from "db";
 import { accounts, ThirdPartyAccount } from "search";
 
 export const DEFAULT_COLOR_SCHEME: ProfilePageColorSchema = {
@@ -8,14 +8,14 @@ export const DEFAULT_COLOR_SCHEME: ProfilePageColorSchema = {
   iconColor: "Default"
 };
 
-// TODO: Turn this into a normal cache
-/** Collection of profile pages that have already been pulled out of the database. */
-export const pages: { [key: string]: ProfilePage } = {};
-
 /**
  * Parameters needed to reconstruct the editing state on the profile editor.
  */
 export class ProfilePage implements IDbStorable {
+  public static cache = new DbCache<ProfilePage>();
+  public get pages() {
+    return ProfilePage.cache.items;
+  }
   private static idForDefaultName = 0;
 
   /**
@@ -51,8 +51,7 @@ export class ProfilePage implements IDbStorable {
         continue;
       }
 
-      // TODO: Use cache after merge
-      const existing = pages[doc._id];
+      const existing = ProfilePage.cache.get(doc._id);
       if (existing) {
         results.push(existing);
       } else {
@@ -120,8 +119,7 @@ export class ProfilePage implements IDbStorable {
       }
     }
 
-    // TODO: Rewrite using caches after merge
-    pages[instance.id] = instance;
+    ProfilePage.cache.add(instance);
 
     return instance;
   }
@@ -161,7 +159,7 @@ export class ProfilePage implements IDbStorable {
 
     if (result.ok) {
       this.rev = result.rev;
-      pages[this.id] = this;
+      ProfilePage.cache.add(this);
       return result;
     }
 
@@ -184,9 +182,7 @@ export class ProfilePage implements IDbStorable {
       return;
     }
 
-    // TODO: Add after merge
-    // DbCache.remove(this.id);
-    delete pages[this.id];
+    DbCache.remove(this.id);
 
     if (!result.ok) {
       console.error(`Could not delete ${this.id}!`);
@@ -208,3 +204,11 @@ export class ProfilePage implements IDbStorable {
     };
   }
 }
+
+/**
+ * **DEPRECATED**
+ * @deprecated Use `ProfilePage.cache` instead.
+ *
+ *  Collection of profile pages that have already been pulled out of the database.
+ */
+export const pages: { [key: string]: ProfilePage } = ProfilePage.cache.items;
