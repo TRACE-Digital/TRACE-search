@@ -20,7 +20,7 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
   /**
    * Delete an item from all caches.
    */
-  public static delete(id: IDbStorable['id']) {
+  public static remove(id: IDbStorable['id']) {
     for (const cache of DbCache.caches) {
       cache.remove(id);
     }

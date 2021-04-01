@@ -216,6 +216,28 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     throw new Error('Failed to save account!');
   }
 
+  public async remove(): Promise<void> {
+    console.debug(`Removing ${this.type.toLowerCase()} account ${this.id}...`);
+
+    const db = await getDb();
+    let result;
+    try {
+      result = await db.remove(this.serialize());
+    } catch (e) {
+      console.warn(`Could not remove ${this.id}: ${e}`);
+      return;
+    }
+
+    DbCache.remove(this.id);
+
+    if (!result.ok) {
+      console.error(`Could not delete ${this.id}!`);
+      console.error(result);
+    }
+
+    this.rev = result.rev;
+  }
+
   public serialize(): AccountSchema {
     return {
       _id: this.id,

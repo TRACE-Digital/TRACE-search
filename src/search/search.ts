@@ -214,6 +214,39 @@ export class SearchDefinition implements IDbStorable {
     throw new Error('Failed to save search definition!');
   }
 
+  /**
+   * Remove the search definition and all executions from the database.
+   */
+  public async remove(): Promise<void> {
+    console.debug(`Removing search ${this.id}...`);
+
+    for (const search of this.history) {
+      try {
+        await search.remove();
+      } catch (e) {
+        console.warn(`Could not remove '${search.id}': ${e}`)
+      }
+    }
+
+    const db = await getDb();
+    let result;
+    try {
+      result = await db.remove(this.serialize());
+    } catch (e) {
+      console.warn(`Could not remove ${this.id}: ${e}`);
+      return;
+    }
+
+    DbCache.remove(this.id);
+
+    if (!result.ok) {
+      console.error(`Could not delete ${this.id}!`);
+      console.error(result);
+    }
+
+    this.rev = result.rev;
+  }
+
   public serialize(): SearchDefinitionSchema {
     return {
       _id: this.id,
@@ -557,6 +590,28 @@ export class Search implements IDbStorable {
 
     console.error(result);
     throw new Error('Failed to save search definition!');
+  }
+
+  public async remove(): Promise<void> {
+    console.debug(`Removing search ${this.id}...`);
+
+    const db = await getDb();
+    let result;
+    try {
+      result = await db.remove(this.serialize());
+    } catch (e) {
+      console.warn(`Could not remove ${this.id}: ${e}`);
+      return;
+    }
+
+    DbCache.remove(this.id);
+
+    if (!result.ok) {
+      console.error(`Could not delete ${this.id}!`);
+      console.error(result);
+    }
+
+    this.rev = result.rev;
   }
 
   public serialize(): SearchSchema {
