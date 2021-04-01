@@ -14,7 +14,7 @@ export interface CognitoUserPartial {
 }
 
 /**
- * Ad-hoc type for the object returned from `Auth.currentAuthenticatedUser()`
+ * Ad-hoc type for the object returned from `Auth.currentUserPoolUser()`
  * in `aws-amplify` v3.3.21.
  */
 export interface CognitoUser extends CognitoUserPartial {

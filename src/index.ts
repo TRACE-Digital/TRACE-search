@@ -110,7 +110,7 @@ const DiscoveredAccountAction = AutoSearchAccountAction;
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
+export { getDb, getRemoteDb, resetDb, resetRemoteDb, setRemoteUser, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
 export { ProfilePage, DEFAULT_COLOR_SCHEME, pages } from 'profile';
