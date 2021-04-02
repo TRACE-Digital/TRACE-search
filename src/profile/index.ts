@@ -11,7 +11,7 @@ import {
   toId,
   UTF_MAX,
 } from 'db';
-import { accounts, ThirdPartyAccount } from 'search';
+import { ThirdPartyAccount } from 'search';
 
 export const DEFAULT_COLOR_SCHEME: ProfilePageColorSchema = {
   titleColor: '#FFFFFF',
@@ -114,15 +114,26 @@ export class ProfilePage implements IDbStorable {
           continue;
         }
 
-        // TODO: Rewrite to use caches after merge
-        if (result.id in accounts) {
-          instance.accounts.push(accounts[result.id]);
+        const existing = ThirdPartyAccount.accountCache.get(result.id);
+        if (existing) {
+          instance.accounts.push(existing);
         } else {
           try {
-            const account = await ThirdPartyAccount.deserialize(doc.ok);
+            // doc.ok seems to lie about its type
+            // When logged, it's a Promise
+            let actualDoc = doc.ok;
+            if (doc.ok instanceof Promise) {
+              actualDoc = await doc.ok;
+            }
+
+            const account = await ThirdPartyAccount.deserialize(actualDoc);
+            console.debug(account);
             instance.accounts.push(account);
           } catch (e) {
+            // Debugging for mysterious doc.ok type
             console.debug(result);
+            console.debug(doc.ok);
+            console.debug(await doc.ok);
             console.warn(`Skipping account '${result.id}'. Failed to deserialize: ${e}`);
             continue;
           }
