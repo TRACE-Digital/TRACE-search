@@ -16,7 +16,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "start": "webpack serve --config webpack.dev.js",
-    "start-docs": "webpack-dev-server --static docs --mode none",
+    "start-docs": "npm run build-docs && webpack-dev-server --static docs --mode none",
     "prepare": "npm run build-prod",
     "prepublishOnly": "npm test && npm run lint",
     "build": "npm run build-prod",

@@ -29,6 +29,13 @@ To create a development build:
 npm run build-dev
 ```
 
+Create and serve docs:
+
+```sh
+npm run build-docs
+npm run start-docs
+```
+
 ## Testing ##
 
 ```sh
