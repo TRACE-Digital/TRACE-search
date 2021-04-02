@@ -90,9 +90,11 @@ export class ProfilePage implements IDbStorable {
     instance.id = data._id;
     instance.rev = data._rev;
     instance.title = data.title;
+    instance.published = data.published;
     instance.createdAt = new Date(data.createdAt);
     instance.lastEditedAt = new Date(data.lastEditedAt);
     instance.colorScheme = data.colorScheme;
+    instance.urls = data.urls;
 
     // bulkGet never returns if we pass [] for docs???
     if (data.accountIds.length > 0) {
@@ -150,10 +152,12 @@ export class ProfilePage implements IDbStorable {
   public rev: string = '';
 
   public title: string;
+  public published: boolean = false;
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
 
   public colorScheme: ProfilePageColorSchema;
+  public urls: string[] = [];
 
   // public accountIds: Set<string> = new Set();
   public accounts: ThirdPartyAccount[] = [];
@@ -218,9 +222,11 @@ export class ProfilePage implements IDbStorable {
       _id: this.id,
       _rev: this.rev,
       title: this.title,
+      published: this.published,
       createdAt: this.createdAt.toJSON(),
       lastEditedAt: this.lastEditedAt.toJSON(),
       colorScheme: this.colorScheme,
+      urls: this.urls,
       accountIds: this.accounts.map(account => account.id),
     };
   }

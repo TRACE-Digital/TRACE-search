@@ -95,9 +95,11 @@ export interface SearchSchema extends BaseSchema {
 
 export interface ProfilePageSchema extends BaseSchema {
   title: string;
+  published: boolean;
   createdAt: string;
   lastEditedAt: string;
   colorScheme: ProfilePageColorSchema;
+  urls: string[];
   accountIds: PouchDbId[];
 }
 
