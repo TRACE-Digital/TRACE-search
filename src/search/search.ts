@@ -194,6 +194,8 @@ export class SearchDefinition implements IDbStorable {
   public async save(): Promise<DbResponse> {
     console.debug(`Saving search definition ${this.id}...`);
 
+    this.lastEditedAt = new Date();
+
     const db = await getDb();
     const result = await db.put(this.serialize());
 
