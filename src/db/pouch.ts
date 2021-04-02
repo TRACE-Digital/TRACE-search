@@ -29,22 +29,16 @@ export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
-export const REMOTE_DB_BASE_URL = 'https://couchdb.tracedigital.tk:6984/';
+export const REMOTE_DB_BASE_URL = 'https://couch.api.tracedigital.tk/all';
+export const REMOTE_AUTH_HEADER_NAME = 'auth-token';
 export const REMOTE_DB_DEFAULT_ID = 'trace';
-export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {
-  auth: {
-    username: 'admin',
-    password: '',
-  },
-};
+export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {};
 
 // Don't mess with the filesystem when we're testing
 // Assume that the test suite will add the pouchdb-adapter-memory for us
 if (BUILD_TYPE === 'test') {
   DB_OPTIONS.adapter = 'memory';
   REMOTE_DB_OPTIONS.adapter = 'memory';
-  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
-  REMOTE_DB_OPTIONS.auth.password = 'not needed';
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
 }
 
@@ -102,18 +96,29 @@ export const getRemoteDb = async () => {
     return _remoteDb;
   }
 
-  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
-  REMOTE_DB_OPTIONS.auth.password = REMOTE_DB_OPTIONS.auth.password || '';
-  if (REMOTE_DB_OPTIONS.auth.password.length === 0) {
-    console.warn('No remote database password is present!');
+  const token = _remoteUser?.signInUserSession.idToken.jwtToken || '';
+  if (token.length === 0) {
+    console.warn('User is not set or does not have a token!');
   }
 
-  const userId = _remoteUser?.attributes.sub || REMOTE_DB_DEFAULT_ID;
-  const dbUrl = new URL(userId, REMOTE_DB_BASE_URL);
+  const dbUrl = REMOTE_DB_BASE_URL;
+  const options = {...REMOTE_DB_OPTIONS};
+  options.fetch = (url, opts) => {
+    opts = opts || {};
+    opts.headers = new Headers(opts.headers);
+    opts.headers.set(REMOTE_AUTH_HEADER_NAME, token);
+
+    return PouchDB.fetch(url, opts);
+  }
+
+  console.debug(options);
 
   try {
     console.log(`Connecting to remote database ${dbUrl}...`);
-    _remoteDb = new PouchDB(dbUrl.toString(), REMOTE_DB_OPTIONS);
+    _remoteDb = new PouchDB(
+      dbUrl,
+      options
+    );
     // @ts-ignore
     await _remoteDb.crypto(ENCRYPTION_KEY);
   } catch (e) {
