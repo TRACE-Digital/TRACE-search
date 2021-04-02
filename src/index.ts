@@ -1,3 +1,4 @@
+import 'db/crypto-polyfill';
 import { allSites } from 'sites';
 import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
 import * as meta from 'meta';

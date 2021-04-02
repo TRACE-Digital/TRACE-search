@@ -18,6 +18,10 @@ import { Search, SearchDefinition, ThirdPartyAccount } from 'search';
 import { AccountSchema, ProfilePageSchema, SearchDefinitionSchema, SearchSchema } from './schema';
 import { ProfilePage } from 'profile';
 
+// Issues with this. Had to load crypto-polyfill.ts in the index.ts
+// Has to happen before anything else loads
+console.log(window.Buffer);
+
 PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
