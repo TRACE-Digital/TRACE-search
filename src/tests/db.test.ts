@@ -125,12 +125,28 @@ describe('Remote DB', () => {
       email: 'test123@example.test',
       email_verified: false,
     },
+    signInUserSession: {
+      idToken: {
+        jwtToken: 'hello',
+        payload: {
+          sub: 'test123'
+        },
+      },
+    },
   };
   const USER2: CognitoUserPartial = {
     attributes: {
       sub: 'notTest123',
       email: 'notTest123@example.test',
       email_verified: false,
+    },
+    signInUserSession: {
+      idToken: {
+        jwtToken: 'hello2222',
+        payload: {
+          sub: 'notTest123'
+        },
+      },
     },
   };
 

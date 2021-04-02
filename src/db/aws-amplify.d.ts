@@ -11,6 +11,14 @@ export interface CognitoUserPartial {
     email_verified: boolean;
     email: string;
   };
+  signInUserSession: {
+    idToken: {
+      jwtToken: string;
+      payload: {
+        sub: string;
+      };
+    };
+  };
 }
 
 /**
