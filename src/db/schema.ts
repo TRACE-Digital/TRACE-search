@@ -96,6 +96,7 @@ export interface SearchSchema extends BaseSchema {
 export interface ProfilePageSchema extends BaseSchema {
   title: string;
   published: boolean;
+  hasPassword: boolean;
   createdAt: string;
   lastEditedAt: string;
   colorScheme: ProfilePageColorSchema;

@@ -91,6 +91,7 @@ export class ProfilePage implements IDbStorable {
     instance.rev = data._rev;
     instance.title = data.title;
     instance.published = data.published;
+    instance.hasPassword = data.hasPassword;
     instance.createdAt = new Date(data.createdAt);
     instance.lastEditedAt = new Date(data.lastEditedAt);
     instance.colorScheme = data.colorScheme;
@@ -153,11 +154,16 @@ export class ProfilePage implements IDbStorable {
 
   public title: string;
   public published: boolean = false;
+  public hasPassword: boolean = false;
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
 
   public colorScheme: ProfilePageColorSchema;
   public urls: string[] = [];
+
+  public get hasCustomUrl() {
+    return this.urls.length === 0;
+  }
 
   // public accountIds: Set<string> = new Set();
   public accounts: ThirdPartyAccount[] = [];
@@ -223,6 +229,7 @@ export class ProfilePage implements IDbStorable {
       _rev: this.rev,
       title: this.title,
       published: this.published,
+      hasPassword: this.hasPassword,
       createdAt: this.createdAt.toJSON(),
       lastEditedAt: this.lastEditedAt.toJSON(),
       colorScheme: this.colorScheme,
