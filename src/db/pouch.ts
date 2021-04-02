@@ -257,50 +257,50 @@ const setupDb = async () => {
   // Register for the change feed to keep everything updated
   // Updates made in other tabs should appear via this feed
   // Updates made to the remote database via replication should also appear
-  // _localDb.changes({
-  //   since: 'now',
-  //   live: true,
-  //   include_docs: true,
-  // }).on('change', async (change) => {
-  //   if (change.deleted) {
-  //     DbCache.remove(change.id);
-  //   } else {
-  //     if (change.doc === undefined) {
-  //       console.error(`Change did not contain key 'doc'. Did you pass 'include_docs: true'?`);
-  //       return;
-  //     }
+  _localDb.changes({
+    since: 'now',
+    live: true,
+    include_docs: true,
+  }).on('change', async (change) => {
+    if (change.deleted) {
+      DbCache.remove(change.id);
+    } else {
+      if (change.doc === undefined) {
+        console.error(`Change did not contain key 'doc'. Did you pass 'include_docs: true'?`);
+        return;
+      }
 
-  //     // Deserialize onto the object already in the cache or create a new object
-  //     if (change.id.startsWith('account')) {
-  //       console.debug(`Change '${change.id}' matched account`);
-  //       const existing = ThirdPartyAccount.accountCache.get(change.id);
-  //       await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
-  //     } else if (change.id.match('^searchDef/.*/searchResult')) {
-  //       console.debug(`Change '${change.id}' matched searchResult`);
-  //       const existing = ThirdPartyAccount.resultCache.get(change.id);
-  //       await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
-  //     } else if (change.id.match('^searchDef/.*/search')) {
-  //       console.debug(`Change '${change.id}' matched search`);
-  //       const existing = Search.cache.get(change.id);
-  //       await Search.deserialize(change.doc as SearchSchema, existing);
-  //     } else if (change.id.match('^searchDef')) {
-  //       console.debug(`Change '${change.id}' matched search definition`);
-  //       const existing = SearchDefinition.cache.get(change.id);
-  //       await SearchDefinition.deserialize(change.doc as SearchDefinitionSchema, existing);
-  //     } else if (change.id.match('^profile')) {
-  //       console.debug(`Change '${change.id}' matched profile page`);
-  //       const existing = ProfilePage.cache.get(change.id);
-  //       await ProfilePage.deserialize(change.doc as ProfilePageSchema, existing);
-  //     } else {
-  //       console.warn(`Change '${change.id}' did not match any cache!`);
-  //     }
-  //   }
-  // }).on('error', (e) => {
-  //   console.error('Change feed error:')
-  //   console.error(e);
-  // }).on('complete', () => {
-  //   console.log('Change feed complete');
-  // });
+      // Deserialize onto the object already in the cache or create a new object
+      if (change.id.startsWith('account')) {
+        console.debug(`Change '${change.id}' matched account`);
+        const existing = ThirdPartyAccount.accountCache.get(change.id);
+        await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+      } else if (change.id.match('^searchDef/.*/searchResult')) {
+        console.debug(`Change '${change.id}' matched searchResult`);
+        const existing = ThirdPartyAccount.resultCache.get(change.id);
+        await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+      } else if (change.id.match('^searchDef/.*/search')) {
+        console.debug(`Change '${change.id}' matched search`);
+        const existing = Search.cache.get(change.id);
+        await Search.deserialize(change.doc as SearchSchema, existing);
+      } else if (change.id.match('^searchDef')) {
+        console.debug(`Change '${change.id}' matched search definition`);
+        const existing = SearchDefinition.cache.get(change.id);
+        await SearchDefinition.deserialize(change.doc as SearchDefinitionSchema, existing);
+      } else if (change.id.match('^profile')) {
+        console.debug(`Change '${change.id}' matched profile page`);
+        const existing = ProfilePage.cache.get(change.id);
+        await ProfilePage.deserialize(change.doc as ProfilePageSchema, existing);
+      } else {
+        console.warn(`Change '${change.id}' did not match any cache!`);
+      }
+    }
+  }).on('error', (e) => {
+    console.error('Change feed error:')
+    console.error(e);
+  }).on('complete', () => {
+    console.log('Change feed complete');
+  });
 
   return _localDb;
 };
