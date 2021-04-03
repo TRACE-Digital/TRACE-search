@@ -26,7 +26,7 @@
     "test": "npm run test-quick -- --silent",
     "test-all": "jest",
     "test-quick": "jest --testPathIgnorePatterns='.*\\.slow\\.test\\.ts' --verbose",
-    "test-debug": "node --inspect ./node_modules/.bin/jest --testPathIgnorePatterns='.*\\.slow\\.test\\.ts' --runInBand --detectOpenHandles",
+    "test-debug": "node --trace-warnings --inspect ./node_modules/.bin/jest --testPathIgnorePatterns='.*\\.slow\\.test\\.ts' --runInBand --detectOpenHandles",
     "coverage": "npm test -- --coverage",
     "format": "prettier --write .",
     "lint": "tslint -p tsconfig.json"
