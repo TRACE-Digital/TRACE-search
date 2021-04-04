@@ -384,12 +384,6 @@ export const teardownReplication = async () => {
   } catch (e) {
     throw new Error(`Could not cancel replication: ${e}`);
   }
-
-  // TODO: Do this only when a user requests deletion
-  // await clearRemoteDb();
-
-  // TODO: Should this go here?
-  // await closeRemoteDb();
 };
 
 /**
