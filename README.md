@@ -97,15 +97,13 @@ npm build-dev -- --watch
 
 ### Install from Git ###
 
-This is the slowest but doesn't rely on configuring/managing local directories.
-If you only need to consume the library and aren't actively developing it, this is the best option.
-
-The repository is private right now, so you need credentials in your URL.
-This will eventually be deactivated and removed.
+This is the slowest but doesn't rely on configuring/managing local directories or waiting for a release.
+If you only need to consume the library, aren't actively developing it, and need more recent changes
+than what's published to NPM, this is the best option.
 
 ```sh
 cd external-project
-npm install git+https://trace-digi-bot:dea7cfe0d9c4a88290d7ab9c1676e3ccc44592d3@github.com/TRACE-Digital/trace-search.git
+npm install git+https://github.com/TRACE-Digital/trace-search.git#main
 
 # To update to the latest changes in the default branch
 npm upgrade trace-search
