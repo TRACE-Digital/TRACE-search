@@ -1,3 +1,4 @@
+[![npm version](https://img.shields.io/npm/v/trace-search)](https://www.npmjs.com/package/trace-search)
 [![codecov](https://codecov.io/gh/TRACE-Digital/TRACE-search/branch/main/graph/badge.svg?token=WLKWAZBHEB)](https://codecov.io/gh/TRACE-Digital/TRACE-search)
 
 # TRACE Search #
