@@ -99,6 +99,18 @@ describe('search definition', () => {
     }
   });
 
+  it('removes', async () => {
+    const page = new ProfilePage(undefined);
+    await page.save();
+
+    expect(page.id).toBeInDatabase();
+
+    await page.remove();
+
+    expect(page.id).not.toBeInDatabase();
+    expect(ProfilePage.cache.has(page.id)).toBeFalsy();
+  });
+
   it('deserializes with accounts', async () => {
     const page = new ProfilePage('Test Page');
 
