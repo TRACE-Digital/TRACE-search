@@ -28,8 +28,21 @@ const SITE_NAME = 'Wikipedia';
 const SITE = allSites[SITE_NAME];
 
 describe('Accounts', () => {
+
+  beforeAll(async () => {
+  });
+
   beforeEach(async () => {
     await resetDb();
+
+    // Make and save an instance of each class
+    for (const cls of accountClasses) {
+      const account = new cls(SITE, `${cls.name}_${USERNAME}`);
+      await account.save();
+
+      const result = new cls(SITE, `${cls.name}_${USERNAME}`, SEARCH_PREFIX);
+      await result.save();
+    }
   });
 
   for (const cls of accountClasses) {
@@ -85,6 +98,20 @@ describe('Accounts', () => {
 
         expect(deserialized.type).toEqual(account.type);
         expect(deserialized).toBeInstanceOf(cls);
+      });
+
+      it('has an account cache of only its class/subclasses', () => {
+        expect(Object.values(cls.accounts).length).toBeGreaterThan(0);
+        for (const account of Object.values(cls.accounts)) {
+          expect(account).toBeInstanceOf(cls);
+        }
+      });
+
+      it('has a result cache of only its class/subclasses', () => {
+        expect(Object.values(cls.results).length).toBeGreaterThan(0);
+        for (const account of Object.values(cls.results)) {
+          expect(account).toBeInstanceOf(cls);
+        }
       });
 
       it('saves', async () => {
