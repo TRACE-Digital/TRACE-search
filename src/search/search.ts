@@ -16,13 +16,12 @@ import {
   UTF_MAX,
   DbCache,
 } from 'db';
-import { allSites, Site } from 'sites';
+import { allSites, filterSitesByTags, Site, supportedSites } from 'sites';
 import {
   AutoSearchAccount,
   AutoSearchAccountAction,
   FailedAccount,
   RegisteredAccount,
-  searchResults,
   ThirdPartyAccount,
   UnregisteredAccount,
 } from './accounts';
@@ -106,6 +105,7 @@ export class SearchDefinition implements IDbStorable {
     instance.userNames = data.userNames;
     instance.firstNames = data.firstNames;
     instance.lastNames = data.lastNames;
+    instance.tags = data.tags;
 
     // IMPORTANT: Add our instance before we create search history so that
     // each entry can look us up and won't try to go to the db
@@ -126,6 +126,7 @@ export class SearchDefinition implements IDbStorable {
   public rev: string = '';
 
   public name: string;
+  public tags: string[];
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
 
@@ -158,13 +159,19 @@ export class SearchDefinition implements IDbStorable {
     return null;
   }
 
-  constructor(name?: string, siteNames?: string[]) {
+  constructor(name?: string, siteNames?: string[], tags?: string[]) {
     this.name = name || `Search #${++SearchDefinition.idForDefaultName}`;
+    this.tags = tags || [];
 
-    siteNames = siteNames || Object.keys(allSites);
+    this.includedSites = filterSitesByTags(supportedSites, this.tags);
+
+    siteNames = siteNames || Object.keys(supportedSites);
     for (const siteName of siteNames) {
       if (siteName in allSites) {
-        this.includedSites.push(allSites[siteName]);
+        const site = allSites[siteName];
+        if (!this.includedSites.includes(site)) {
+          this.includedSites.push(site);
+        }
       } else {
         console.warn(`Could not add site '${siteName}'. No definition found!`);
       }
@@ -262,6 +269,7 @@ export class SearchDefinition implements IDbStorable {
       userNames: this.userNames,
       firstNames: this.firstNames,
       lastNames: this.lastNames,
+      tags: this.tags,
     };
   }
 }

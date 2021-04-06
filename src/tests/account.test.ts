@@ -28,10 +28,6 @@ const SITE_NAME = 'Wikipedia';
 const SITE = allSites[SITE_NAME];
 
 describe('Accounts', () => {
-
-  beforeAll(async () => {
-  });
-
   beforeEach(async () => {
     await resetDb();
 

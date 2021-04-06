@@ -1,10 +1,12 @@
 import { resetDb } from 'db';
 import { FailedAccount, findAccount, Search, SearchDefinition, SearchState } from 'search';
-import { Site } from 'sites';
+import { Site, filterSitesByTags, supportedSites } from 'sites';
 import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
 const INVALID_SITE_NAMES = ['xxx not a site'];
+const VALID_TAG_NAMES = ['Developers'];
+const INVALID_TAG_NAMES = ['xxx not a tag'];
 
 beforeEach(async () => {
   await resetDb();
@@ -77,6 +79,30 @@ describe('search definition', () => {
 
     expect(searchDef.includedSites).toHaveLength(VALID_SITE_NAMES.length);
     expect(searchDef.serialize().includedSiteNames).toStrictEqual(VALID_SITE_NAMES);
+  });
+
+  it('accepts tags', () => {
+    const tags = VALID_TAG_NAMES;
+    const searchDef = new SearchDefinition(undefined, [], tags);
+
+    const matchingSupportedSites = filterSitesByTags(supportedSites, tags);
+
+    expect(matchingSupportedSites.length).toBeGreaterThan(0);
+    expect(searchDef.includedSites.length).toBeGreaterThan(0);
+    expect(searchDef.includedSites).toHaveLength(matchingSupportedSites.length);
+  });
+
+  it('accepts tags and site names', () => {
+    const tags = VALID_TAG_NAMES;
+    const siteNames = ['Wikipedia']; /* This should not be tagged with anything in VALID_TAG_NAMES */
+    const searchDef = new SearchDefinition(undefined, siteNames, tags);
+
+    const matchingSupportedSites = filterSitesByTags(supportedSites, tags);
+
+    expect(matchingSupportedSites.length).toBeGreaterThan(0);
+    expect(searchDef.includedSites.length).toBeGreaterThan(0);
+    expect(searchDef.includedSites.length).toBeGreaterThan(siteNames.length);
+    expect(searchDef.includedSites).toHaveLength(siteNames.length + matchingSupportedSites.length);
   });
 
   it('serializes first names, last names, and user names', () => {
@@ -318,7 +344,7 @@ describe('search', () => {
   });
 
   it('calculates progress correctly with multiple user names and sites', async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
 
     const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES.slice(0, 2));
     searchDef.userNames.push('test');
