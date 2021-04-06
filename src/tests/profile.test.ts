@@ -103,11 +103,11 @@ describe('search definition', () => {
     const page = new ProfilePage(undefined);
     await page.save();
 
-    expect(page.id).toBeInDatabase();
+    await expect(page.id).toBeInDatabase();
 
     await page.remove();
 
-    expect(page.id).not.toBeInDatabase();
+    await expect(page.id).not.toBeInDatabase();
     expect(ProfilePage.cache.has(page.id)).toBeFalsy();
   });
 

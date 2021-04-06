@@ -32,7 +32,7 @@ const COGNITO_USER1: CognitoUserPartial = {
     idToken: {
       jwtToken: 'hello',
       payload: {
-        sub: '01-test-user-id'
+        sub: '01-test-user-id',
       },
     },
   },
@@ -47,7 +47,7 @@ const COGNITO_USER2: CognitoUserPartial = {
     idToken: {
       jwtToken: 'hello2222',
       payload: {
-        sub: '02-test-user-id'
+        sub: '02-test-user-id',
       },
     },
   },
@@ -304,9 +304,7 @@ describe('Memory <=> Memory Sync', () => {
     await db.remove(updatedDoc);
     await docWasSynced;
 
-    await expect(remoteDb.get(doc._id))
-    .rejects
-    .toThrow('missing');
+    await expect(remoteDb.get(doc._id)).rejects.toThrow('missing');
 
     const completed = waitForSyncState(sync, 'complete');
 

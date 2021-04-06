@@ -1,4 +1,4 @@
-import { isBrowser, isNode } from "browser-or-node";
+import { isBrowser, isNode } from 'browser-or-node';
 
 // Make Typescript happy about variables defined by the Webpack DefinePlugin
 declare var __NAME__: string;
@@ -14,10 +14,12 @@ export const BUILD_TYPE = __BUILD_TYPE__;
 export const BUILT_AT = __BUILT_AT__;
 
 declare global {
-  interface Window { __TRACE_EXTENSION_HOOK__: {
-    getVersion: () => { major: string, minor: string, rev: string },
-    getVersionStr: () => string
-  }}
+  interface Window {
+    __TRACE_EXTENSION_HOOK__: {
+      getVersion: () => { major: string; minor: string; rev: string };
+      getVersionStr: () => string;
+    };
+  }
 }
 
 // Minimum version of the TRACE browser extension that we are compatible with
@@ -31,11 +33,13 @@ export const checkExtensionVersion = () => {
     if (EXTENSION_VERSION && EXTENSION_VERSION >= EXTENSION_MIN_VERSION) {
       console.log(`Detected compatible TRACE browser extension v${EXTENSION_VERSION}`);
     } else if (EXTENSION_VERSION) {
-      console.warn(`Extension version ${EXTENSION_VERSION} is below minimum supported version ${EXTENSION_MIN_VERSION}`);
+      console.warn(
+        `Extension version ${EXTENSION_VERSION} is below minimum supported version ${EXTENSION_MIN_VERSION}`,
+      );
     } else {
       console.warn('TRACE browser extension is not installed. Some features may not work!');
     }
   }
-}
+};
 
 checkExtensionVersion();

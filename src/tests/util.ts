@@ -8,7 +8,7 @@ export const dumpAllDocs = async (includeDocs = false) => {
   });
 
   return result.rows;
-}
+};
 
 export const checkSaveResponse = (response: PouchDB.Core.Response, item: IDbStorable) => {
   expect(response).toBeDefined();
@@ -27,24 +27,22 @@ export const checkSaveResponse = (response: PouchDB.Core.Response, item: IDbStor
  */
 export const waitForDoc = async (sync: PouchDB.Replication.Sync<any>, doc: PouchDB.Core.IdMeta) => {
   return new Promise<void>((resolve, reject) => {
-    sync
-      .on('change', async syncEvent => {
-
-        // Find our doc
-        let found = null;
-        for (const changedDoc of syncEvent.change.docs) {
-          const resolvedChangedDoc = await changedDoc;
-          if (resolvedChangedDoc._id === doc._id) {
-            found = true;
-            break;
-          }
+    sync.on('change', async syncEvent => {
+      // Find our doc
+      let found = null;
+      for (const changedDoc of syncEvent.change.docs) {
+        const resolvedChangedDoc = await changedDoc;
+        if (resolvedChangedDoc._id === doc._id) {
+          found = true;
+          break;
         }
+      }
 
-        // Complete the promise
-        if (found) {
-          resolve();
-        }
-      });
+      // Complete the promise
+      if (found) {
+        resolve();
+      }
+    });
   });
 };
 
@@ -56,12 +54,14 @@ export const waitForDoc = async (sync: PouchDB.Replication.Sync<any>, doc: Pouch
  *
  * Event types from `@types\pouchdb-replication\index.d.ts`.
  */
-export const waitForSyncState = async (sync: PouchDB.Replication.Sync<any>, eventName: 'change' | 'paused' | 'denied' | 'error' | 'active' | 'complete') => {
+export const waitForSyncState = async (
+  sync: PouchDB.Replication.Sync<any>,
+  eventName: 'change' | 'paused' | 'denied' | 'error' | 'active' | 'complete',
+) => {
   const eventNameNoType = eventName as any;
   return new Promise<void>((resolve, reject) => {
-    sync
-      .on(eventNameNoType, () => {
-        resolve();
-      });
+    sync.on(eventNameNoType, () => {
+      resolve();
+    });
   });
 };
