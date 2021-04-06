@@ -318,7 +318,7 @@ describe('search', () => {
   });
 
   it('calculates progress correctly with multiple user names and sites', async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
 
     const searchDef = new SearchDefinition('Test search', VALID_SITE_NAMES.slice(0, 2));
     searchDef.userNames.push('test');
