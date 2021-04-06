@@ -1,15 +1,15 @@
+import 'db/crypto-polyfill';
 import { allSites } from 'sites';
 import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
 import * as meta from 'meta';
 import {
-  accounts,
   ClaimedAccount,
-  DiscoveredAccount,
+  AutoSearchAccount,
+  AutoSearchAccountAction,
   Search,
   SearchDefinition,
-  searchDefinitions,
-  searches,
   ThirdPartyAccount,
+  RegisteredAccount,
 } from 'search';
 
 async function main() {
@@ -38,20 +38,21 @@ async function main() {
   console.log(search.results);
   console.log(search.resultsMap);
 
-  const claimed = await search.discoveredResults[0].claim();
+  const account = search.unevaluatedResults[0];
+  const claimed = await account.claim();
   console.log('Original account');
-  console.log(search.discoveredResults[0]);
+  console.log(account);
   console.log('Claimed account');
   console.log(claimed);
   console.log(claimed instanceof ClaimedAccount);
-  console.log(claimed instanceof DiscoveredAccount);
+  console.log(claimed instanceof AutoSearchAccount);
 
   console.groupEnd();
   console.groupCollapsed('Test serialization');
 
   console.log(searchDef.serialize());
   console.log(search.serialize());
-  console.log(search.discoveredResults[0].serialize());
+  console.log(search.unevaluatedResults[0].serialize());
   console.log(claimed.serialize());
 
   console.groupEnd();
@@ -71,15 +72,15 @@ async function main() {
 
   const searchDefLoadAll = await SearchDefinition.loadAll();
   console.log(searchDefLoadAll);
-  console.log(searchDefinitions);
+  console.log(SearchDefinition.cache.items);
 
   const searchLoadAll = await Search.loadAll(searchDef.id);
   console.log(searchLoadAll);
-  console.log(searches);
+  console.log(Search.cache.items);
 
   const accountsLoadAll = await ThirdPartyAccount.loadAll();
   console.log(accountsLoadAll);
-  console.log(accounts);
+  console.log(ThirdPartyAccount.accountCache.items);
 
   console.groupEnd();
 }
@@ -103,22 +104,30 @@ async function testReplicate() {
 // tslint:disable-next-line:no-floating-promises
 // main();
 
+/** @deprecated Use `RegisteredAccount` instead. */
+const DiscoveredAccount = RegisteredAccount;
+/** @deprecated Use `AutoSearchAccountAction` instead. */
+const DiscoveredAccountAction = AutoSearchAccountAction;
+
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { getDb, getRemoteDb, resetDb, resetRemoteDb, setupReplication, teardownReplication } from 'db';
+export { getDb, getRemoteDb, resetDb, resetRemoteDb, setRemoteUser, setupReplication, teardownReplication } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
 export { VERSION as version } from 'meta';
+export { ProfilePage, DEFAULT_COLOR_SCHEME, pages } from 'profile';
 export {
   AccountType,
   ClaimedAccount,
-  DiscoveredAccount,
-  DiscoveredAccountAction,
+  AutoSearchAccount,
+  AutoSearchAccountAction,
+  FailedAccount,
   ManualAccount,
   RejectedAccount,
   Search,
   SearchDefinition,
   SearchState,
   ThirdPartyAccount,
+  RegisteredAccount,
   UnregisteredAccount,
   accounts,
   searchDefinitions,
@@ -126,6 +135,10 @@ export {
   searches,
 } from 'search';
 
+// Deprecated stuff
+export { DiscoveredAccount, DiscoveredAccountAction };
+
 // Top level types that we want to be publicly visible
+export { ProfilePageColorSchema } from 'db/schema';
 export * from 'search';
 export { Site, SiteList } from 'sites';

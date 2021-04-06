@@ -1,3 +1,4 @@
+[![npm version](https://img.shields.io/npm/v/trace-search)](https://www.npmjs.com/package/trace-search)
 [![codecov](https://codecov.io/gh/TRACE-Digital/TRACE-search/branch/main/graph/badge.svg?token=WLKWAZBHEB)](https://codecov.io/gh/TRACE-Digital/TRACE-search)
 
 # TRACE Search #
@@ -29,6 +30,13 @@ To create a development build:
 npm run build-dev
 ```
 
+Create and serve docs:
+
+```sh
+npm run build-docs
+npm run start-docs
+```
+
 ## Testing ##
 
 ```sh
@@ -48,18 +56,17 @@ npm run test-debug      # If tests get stuck
 ## Testing with External Project ##
 
 To test with an external project that consumes the library, you can:
-- Install NPM (TODO)
+- Install NPM
 - Link locally
 - Install from Git
 
 ### Install from NPM ###
 
-Once we have a smooth development cycle, this will be the best mechanism.
+Install the official version of the package published on NPM.
 
 ```sh
-# DOES NOT WORK YET
-# cd external-project
-# npm install trace-search
+cd external-project
+npm install trace-search
 ```
 
 ### Link Locally ###
@@ -91,15 +98,13 @@ npm build-dev -- --watch
 
 ### Install from Git ###
 
-This is the slowest but doesn't rely on configuring/managing local directories.
-If you only need to consume the library and aren't actively developing it, this is the best option.
-
-The repository is private right now, so you need credentials in your URL.
-This will eventually be deactivated and removed.
+This is the slowest but doesn't rely on configuring/managing local directories or waiting for a release.
+If you only need to consume the library, aren't actively developing it, and need more recent changes
+than what's published to NPM, this is the best option.
 
 ```sh
 cd external-project
-npm install git+https://trace-digi-bot:dea7cfe0d9c4a88290d7ab9c1676e3ccc44592d3@github.com/TRACE-Digital/trace-search.git
+npm install git+https://github.com/TRACE-Digital/trace-search.git#main
 
 # To update to the latest changes in the default branch
 npm upgrade trace-search
@@ -114,8 +119,10 @@ npm run format  # Run the code formatter
 
 ## Publishing ##
 
-We don't have the NPM package set up yet, but we can test creating a package locally.
-
 ```sh
+# Test creating the package locally
 npm pack
+
+# Publish to NPM
+npm publish
 ```

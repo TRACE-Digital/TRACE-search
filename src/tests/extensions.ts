@@ -1,4 +1,4 @@
-import { getDb, PouchDbId } from 'db';
+import { BaseSchema, getDb, IDbStorable, PouchDbId } from 'db';
 import { dumpAllDocs } from './util';
 
 declare global {

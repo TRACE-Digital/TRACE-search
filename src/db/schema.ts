@@ -1,4 +1,4 @@
-import { AccountType, ConfidenceRating, DiscoveredAccountAction, SearchState } from 'search';
+import { AccountType, ConfidenceRating, AutoSearchAccountAction, SearchState } from 'search';
 import { allSites, Site } from 'sites';
 import { PouchDbId } from './types';
 
@@ -8,6 +8,7 @@ import { PouchDbId } from './types';
 export interface BaseSchema {
   _id: PouchDbId;
   _rev: string;
+  _deleted?: boolean;
 }
 
 ////  Accounts  ////
@@ -26,28 +27,34 @@ export interface AccountSchema extends BaseSchema {
   userName: string;
 }
 
-export interface DiscoveredAccountSchema extends AccountSchema {
-  confidence: ConfidenceRating;
+export interface AutoSearchAccountSchema extends AccountSchema {
   matchedFirstNames: string[];
   matchedLastNames: string[];
-  actionTaken: DiscoveredAccountAction;
+  actionTaken: AutoSearchAccountAction;
 }
 
-export interface ClaimedAccountSchema extends DiscoveredAccountSchema {
+export interface ClaimedAccountSchema extends AutoSearchAccountSchema {
   claimedAt: string;
 }
 
-export interface RejectedAccountSchema extends DiscoveredAccountSchema {
+export interface RejectedAccountSchema extends AutoSearchAccountSchema {
   rejectedAt: string;
+}
+
+// tslint:disable-next-line:no-empty-interface
+export interface RegisteredAccountSchema extends AutoSearchAccountSchema {}
+
+// tslint:disable-next-line:no-empty-interface
+export interface UnregisteredAccountSchema extends AutoSearchAccountSchema {}
+
+export interface FailedAccountSchema extends AutoSearchAccountSchema {
+  reason: string;
 }
 
 export interface ManualAccountSchema extends AccountSchema {
   lastEditedAt: string;
   site: Site;
 }
-
-// tslint:disable-next-line:no-empty-interface
-export interface UnregisteredAccountSchema extends AccountSchema {}
 
 /**
  * Deserialize the `site` or `siteName` packed in `AccountSchema`.
@@ -82,4 +89,24 @@ export interface SearchSchema extends BaseSchema {
   startedAt: string | null;
   endedAt: string | null;
   definitionId: PouchDbId;
+}
+
+////  Profile  ////
+
+export interface ProfilePageSchema extends BaseSchema {
+  title: string;
+  published: boolean;
+  hasPassword: boolean;
+  createdAt: string;
+  lastEditedAt: string;
+  colorScheme: ProfilePageColorSchema;
+  urls: string[];
+  accountIds: PouchDbId[];
+}
+
+export interface ProfilePageColorSchema {
+  titleColor: string;
+  backgroundColor: string;
+  siteColor: string;
+  iconColor: string;
 }

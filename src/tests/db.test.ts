@@ -1,6 +1,4 @@
 import PouchDB from 'pouchdb';
-// @ts-ignore
-import CryptoPouch from 'crypto-pouch';
 import {
   BaseSchema,
   DEFAULT_SETTINGS,
@@ -17,10 +15,43 @@ import {
   resetRemoteDb,
   closeRemoteDb,
   ENCRYPTION_KEY,
-  _replicator,
+  setRemoteUser,
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
+import { CognitoUserPartial } from 'db/aws-amplify';
+import { waitForDoc, waitForSyncState } from './util';
+
+const COGNITO_USER1: CognitoUserPartial = {
+  attributes: {
+    sub: '01-test-user-id',
+    email: 'test123@example.test',
+    email_verified: false,
+  },
+  signInUserSession: {
+    idToken: {
+      jwtToken: 'hello',
+      payload: {
+        sub: '01-test-user-id'
+      },
+    },
+  },
+};
+const COGNITO_USER2: CognitoUserPartial = {
+  attributes: {
+    sub: '02-test-user-id',
+    email: 'notTest123@example.test',
+    email_verified: false,
+  },
+  signInUserSession: {
+    idToken: {
+      jwtToken: 'hello2222',
+      payload: {
+        sub: '02-test-user-id'
+      },
+    },
+  },
+};
 
 describe('PouchDB', () => {
   let db: PouchDB.Database;
@@ -119,8 +150,9 @@ describe('Database IDs', () => {
   });
 });
 
-describe('Remote DB', () => {
+describe('Remote Connection', () => {
   beforeEach(async () => {
+    await setRemoteUser(COGNITO_USER1);
     await resetRemoteDb();
   });
 
@@ -135,16 +167,45 @@ describe('Remote DB', () => {
     expect(obj2).toBe(obj);
   });
 
-  it('closes', async () => {
+  it('accepts a remote user', async () => {
+    const db = await getRemoteDb();
+    expect(db.name).toContain(COGNITO_USER1.attributes.sub);
+  });
+
+  it('keeps the same instance for duplicate calls to setRemoteUser', async () => {
+    await setRemoteUser(COGNITO_USER1);
+    const db = await getRemoteDb();
+    await setRemoteUser(COGNITO_USER1);
+    const db2 = await getRemoteDb();
+    expect(db2).toBe(db);
+  });
+
+  it('doest not open database when setting user', async () => {
+    // beforeEach resetRemoteDb() will have already opened it
+    await closeRemoteDb();
+    await setRemoteUser(COGNITO_USER2);
+  });
+
+  it.skip('invalidates the singleton on switch of user ID', async () => {
+    const obj = await getRemoteDb();
+
+    await setRemoteUser(COGNITO_USER2);
+    const obj2 = await getRemoteDb();
+    expect(obj2).not.toBe(obj);
+    expect(obj2.name).toContain(COGNITO_USER2.attributes.sub);
+  });
+
+  it.skip('closes', async () => {
     const db = await getRemoteDb();
     await closeRemoteDb();
-    const db2 = await getRemoteDb();
-    expect(db2).not.toBe(db);
+    // const db2 = await getRemoteDb();
+    // expect(db2).not.toBe(db);
   });
 });
 
 describe('Memory <=> Memory Sync', () => {
   beforeEach(async () => {
+    await setRemoteUser(COGNITO_USER1);
     await resetDb();
     await resetRemoteDb();
   });
@@ -165,52 +226,91 @@ describe('Memory <=> Memory Sync', () => {
     await teardownReplication();
   });
 
-  it('does sync', async () => {
+  it('syncs with a new document', async () => {
     const db = await getDb();
     const remoteDb = await getRemoteDb();
 
     const obj = await setupReplication();
-    const replicator = obj.TODO_replication;
-    const doc = { _id: 'sync test', test: 'test ' };
+    const sync = obj.TODO_replication;
+    const doc = { _id: 'sync test', test: 'test' };
 
-    // Need to wait for db events to fire some time in the future
-    // Create a promise that we can await so that the test doesn't end
-    const finished = new Promise((resolve, reject) => {
-      replicator
-        .on('change', async change => {
-          expect(change.docs.length).toBeGreaterThan(0);
-
-          // Find our doc
-          let found = null;
-          for (const changedDoc of change.docs) {
-            const resolvedChangedDoc = await changedDoc;
-            if (resolvedChangedDoc._id === doc._id) {
-              found = await remoteDb.get(resolvedChangedDoc._id);
-              console.log(found);
-              break;
-            }
-          }
-
-          expect(found).not.toBeNull();
-
-          // Compare our subset of the object's properties
-          // _rev will have been added by PouchDB
-          expect(found).toMatchObject(doc);
-        })
-        .on('paused', async () => {
-          // Make sure the doc made it into the remote database
-          const retrievedDoc = await remoteDb.get(doc._id);
-
-          expect(retrievedDoc).toMatchObject(doc);
-
-          // Complete the promise
-          resolve(true);
-        });
-    });
+    const docWasSynced = waitForDoc(sync, doc);
 
     await db.put(doc);
+    await docWasSynced;
 
-    const result = await finished;
-    expect(result).toBeTruthy();
+    const retrievedLocalDoc = await db.get(doc._id);
+    const retrievedRemoteDoc = await remoteDb.get(doc._id);
+    expect(retrievedRemoteDoc).toMatchObject(doc);
+    expect(retrievedRemoteDoc).toEqual(retrievedLocalDoc);
+
+    const completed = waitForSyncState(sync, 'complete');
+
+    await teardownReplication();
+    await completed;
+  });
+
+  it('syncs document updates', async () => {
+    const db = await getDb();
+    const remoteDb = await getRemoteDb();
+
+    const obj = await setupReplication();
+    const sync = obj.TODO_replication;
+    const doc = { _id: 'sync test', test: 'test' };
+
+    let docWasSynced = waitForDoc(sync, doc);
+
+    await db.put(doc);
+    await docWasSynced;
+
+    // Get the doc since we need the revision number
+    const updatedDoc = await db.get<typeof doc>(doc._id);
+    updatedDoc.test = `test ${new Date().toJSON()}`;
+
+    docWasSynced = waitForDoc(sync, updatedDoc);
+    await db.put(updatedDoc);
+    await docWasSynced;
+
+    const retrievedLocalDoc = await db.get(doc._id);
+    const retrievedRemoteDoc = await remoteDb.get(doc._id);
+    expect(retrievedRemoteDoc).toEqual(retrievedLocalDoc);
+
+    const completed = waitForSyncState(sync, 'complete');
+
+    await teardownReplication();
+    await completed;
+  });
+
+  it('syncs deletions', async () => {
+    const db = await getDb();
+    const remoteDb = await getRemoteDb();
+
+    const obj = await setupReplication();
+    const sync = obj.TODO_replication;
+    const doc = { _id: 'sync test', test: 'test' };
+
+    let docWasSynced = waitForDoc(sync, doc);
+
+    await db.put(doc);
+    await docWasSynced;
+
+    // Get the doc since we need the revision number
+    const updatedDoc = await db.get<typeof doc & BaseSchema>(doc._id);
+
+    // Assume the deleted flag gets set
+    updatedDoc._deleted = true;
+
+    docWasSynced = waitForDoc(sync, updatedDoc);
+    await db.remove(updatedDoc);
+    await docWasSynced;
+
+    await expect(remoteDb.get(doc._id))
+    .rejects
+    .toThrow('missing');
+
+    const completed = waitForSyncState(sync, 'complete');
+
+    await teardownReplication();
+    await completed;
   });
 });

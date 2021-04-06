@@ -39,6 +39,7 @@ export interface IDbStorable {
   rev: string;
   serialize: () => BaseSchema;
   save: () => Promise<DbResponse>;
+  remove: () => Promise<void>;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { resetDb } from 'db';
-import { Search, SearchDefinition, searchDefinitions, searches, SearchState } from 'search';
+import { FailedAccount, findAccount, Search, SearchDefinition, SearchState } from 'search';
+import { Site } from 'sites';
 import { checkSaveResponse } from './util';
 
 const VALID_SITE_NAMES = ['Wikipedia', 'GitHub'];
@@ -155,7 +156,7 @@ describe('search definition', () => {
     lastRev = result.rev;
 
     // Save should put it in the cache
-    expect(searchDefinitions[searchDef.id]).toBe(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toBe(searchDef);
   });
 
   it('saves multiple times', async () => {
@@ -171,8 +172,49 @@ describe('search definition', () => {
       lastRev = searchDef.rev;
 
       // Save should put it in the cache
-      expect(searchDefinitions[searchDef.id]).toBe(searchDef);
+      expect(SearchDefinition.cache.get(searchDef.id)).toBe(searchDef);
     }
+  });
+
+  it('removes', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await searchDef.save();
+
+    await searchDef.remove();
+
+    await expect(searchDef.id).not.toBeInDatabase();
+    expect(SearchDefinition.cache.get(searchDef.id)).toBeUndefined();
+  });
+
+  it('does not throw on non-existent remove', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    await searchDef.remove();
+  });
+
+  it('clears search history on remove', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+    await searchDef.save();
+
+    await expect(search.id).toBeInDatabase();
+
+    await searchDef.remove();
+
+    await expect(search.id).not.toBeInDatabase();
+  });
+
+  it('clears search history', async () => {
+    const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
+    const search = await searchDef.new();
+    await searchDef.save();
+
+    expect(searchDef.history).toHaveLength(1);
+    await expect(search.id).toBeInDatabase();
+
+    await searchDef.clear();
+
+    expect(searchDef.history).toHaveLength(0);
+    await expect(search.id).not.toBeInDatabase();
   });
 
   it('produces a new search', async () => {
@@ -203,23 +245,23 @@ describe('search definition', () => {
   it('is stored in the cache during deserialization', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
 
-    // TODO: Figure out how newly created definitions will end up in the cache
-    // It's possible that the changes feed will trigger on .save()
     await SearchDefinition.deserialize(searchDef.serialize());
 
-    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toEqual(searchDef);
   });
 
   it('is stored in the cache during loadAll', async () => {
     const searchDef = new SearchDefinition(undefined, VALID_SITE_NAMES);
     await searchDef.save();
 
-    expect(searchDefinitions).not.toContainEqual(searchDef);
+    // Remove from cache since save() should have stored it
+    SearchDefinition.cache.remove(searchDef.id);
+    expect(SearchDefinition.cache.has(searchDef.id)).toBeFalsy();
 
     const results = await SearchDefinition.loadAll();
 
     expect(results).toContainEqual(searchDef);
-    expect(searchDefinitions[searchDef.id]).toEqual(searchDef);
+    expect(SearchDefinition.cache.get(searchDef.id)).toEqual(searchDef);
   });
 });
 
@@ -308,7 +350,7 @@ describe('search', () => {
     lastRev = result.rev;
 
     // Save should put it in the cache
-    expect(searches[search.id]).toBe(search);
+    expect(Search.cache.get(search.id)).toBe(search);
   });
 
   it('saves multiple times', async () => {
@@ -324,8 +366,23 @@ describe('search', () => {
       lastRev = search.rev;
 
       // Save should put it in the cache
-      expect(searches[search.id]).toBe(search);
+      expect(Search.cache.get(search.id)).toBe(search);
     }
+  });
+
+  it('removes', async () => {
+    const search = await definition.new();
+    await search.save();
+
+    await search.remove();
+
+    await expect(search.id).not.toBeInDatabase();
+    expect(Search.cache.get(search.id)).toBeUndefined();
+  });
+
+  it('does not throw on non-existent remove', async () => {
+    const search = await definition.new();
+    await search.remove();
   });
 
   it('deserializes without results', async () => {
@@ -362,4 +419,55 @@ describe('search', () => {
     // expect(deserialized).toEqual(search);
     expect(deserialized.serialize()).toEqual(serialized);
   });
+});
+
+describe('Internal Search', () => {
+  const ERROR_TYPES = ['status_code', 'message', 'response_url'];
+
+  let site: Site;
+  const _baseSiteDoNotUse: Site = {
+    name: 'Example',
+    url: 'https://example.test/user',
+    urlMain: 'https://example.test',
+    errorType: 'status_code',
+    username_claimed: '',
+    username_unclaimed: '',
+    tags: [],
+  };
+
+  beforeEach(() => {
+    site = JSON.parse(JSON.stringify(_baseSiteDoNotUse));
+  });
+
+  it('handles an unknown errorType', async () => {
+    site.errorType = 'not a valid errorType';
+
+    const result = await findAccount(site, 'test');
+    expect(result).toBeInstanceOf(FailedAccount);
+
+    if (result instanceof FailedAccount) {
+      console.log(result.reason);
+      expect(result.reason).toBeDefined();
+      expect(result.reason.length).toBeGreaterThan(0);
+    }
+  });
+
+  for (const errorType of ERROR_TYPES) {
+    describe(`Error type: ${errorType}`, () => {
+      beforeEach(() => {
+        site.errorType = errorType;
+      });
+
+      it('handles invalid DNS', async () => {
+        const result = await findAccount(site, 'test');
+        expect(result).toBeInstanceOf(FailedAccount);
+
+        if (result instanceof FailedAccount) {
+          console.log(result.reason);
+          expect(result.reason).toBeDefined();
+          expect(result.reason.length).toBeGreaterThan(0);
+        }
+      });
+    });
+  }
 });

@@ -12,33 +12,38 @@ import CryptoPouch from 'crypto-pouch';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
-import { accounts, searchDefinitions, searches } from 'search';
+import { DbCache } from './cache';
+import { CognitoUserPartial } from './aws-amplify';
+import { Search, SearchDefinition, ThirdPartyAccount } from 'search';
+import { AccountSchema, ProfilePageSchema, SearchDefinitionSchema, SearchSchema } from './schema';
+import { ProfilePage } from 'profile';
+
+// Issues with this. Had to load crypto-polyfill.ts in the index.ts
+// Has to happen before anything else loads
+console.log(window.Buffer);
 
 PouchDB.plugin(CryptoPouch);
 
 let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
-export let _replicator: PouchDB.Replication.Replication<any> | null = null;
+let _remoteUser: CognitoUserPartial | undefined;
+let _replicator: PouchDB.Replication.Sync<any> | null = null;
 
 export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
-export const REMOTE_DB_URL = 'https://couchdb.tracedigital.tk:6984/trace';
-export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {
-  auth: {
-    username: 'admin',
-    password: '',
-  },
-};
+// export const REMOTE_DB_BASE_URL = 'https://couch.api.tracedigital.tk/all';
+export const REMOTE_DB_BASE_URL = 'https://couchdb.tracedigital.tk:6984/';
+export const REMOTE_AUTH_HEADER_NAME = 'auth-token';
+export const REMOTE_DB_DEFAULT_ID = 'trace';
+export const REMOTE_DB_OPTIONS: PouchDB.Configuration.RemoteDatabaseConfiguration = {};
 
 // Don't mess with the filesystem when we're testing
 // Assume that the test suite will add the pouchdb-adapter-memory for us
 if (BUILD_TYPE === 'test') {
   DB_OPTIONS.adapter = 'memory';
   REMOTE_DB_OPTIONS.adapter = 'memory';
-  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
-  REMOTE_DB_OPTIONS.auth.password = 'not needed';
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
 }
 
@@ -57,21 +62,77 @@ export const getDb = async () => {
 };
 
 /**
+ * Set the remote user that will be used to connect to
+ * the remote database.
+ */
+export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
+  if (_remoteUser?.attributes.sub === cognitoUser.attributes.sub) {
+    console.debug(`Remote user was already set to '${cognitoUser.attributes.sub}'.`);
+    return;
+  }
+
+  const open = _remoteDb;
+  const replicating = _remoteDb && _replicator;
+
+  if (replicating) {
+    await teardownReplication();
+  }
+  if (open) {
+    await closeRemoteDb();
+  }
+
+  _remoteUser = cognitoUser;
+
+  if (replicating) {
+    await setupReplication();
+  }
+  if (open) {
+    await getRemoteDb();
+  }
+};
+
+/**
  * Initialize or return the remote database instance (i.e. CouchDB).
+ *
+ * Passing `userId` sets the
  */
 export const getRemoteDb = async () => {
   if (_remoteDb) {
     return _remoteDb;
   }
 
-  REMOTE_DB_OPTIONS.auth = REMOTE_DB_OPTIONS.auth || {};
-  REMOTE_DB_OPTIONS.auth.password = REMOTE_DB_OPTIONS.auth.password || '';
-  if (REMOTE_DB_OPTIONS.auth.password.length === 0) {
-    console.warn('No remote database password is present!');
+  if (_remoteUser === undefined) {
+    throw new Error('Call setRemoteUser before calling this!');
   }
 
+  const token = _remoteUser?.signInUserSession.idToken.jwtToken || '';
+  if (token.length === 0) {
+    console.warn('User is not set or does not have a token!');
+  }
+
+  const dbName = `db-${_remoteUser.attributes.sub}`;
+  const dbUrl = new URL(`${dbName}`, REMOTE_DB_BASE_URL).toString();
+  const options = { ...REMOTE_DB_OPTIONS };
+  // options.fetch = (url, opts) => {
+  //   opts = opts || {};
+  //   opts.headers = new Headers(opts.headers);
+  //   opts.headers.set(REMOTE_AUTH_HEADER_NAME, token);
+
+  //   return PouchDB.fetch(url, opts);
+  // }
+
+  options.auth = options.auth || {};
+  options.auth.username = 'admin';
+  options.auth.password = '';
+
+  console.debug(options);
+
   try {
-    _remoteDb = new PouchDB(REMOTE_DB_URL, REMOTE_DB_OPTIONS);
+    console.log(`Connecting to remote database ${dbUrl}...`);
+    _remoteDb = new PouchDB(
+      dbUrl,
+      options
+    );
     // @ts-ignore
     await _remoteDb.crypto(ENCRYPTION_KEY);
   } catch (e) {
@@ -100,7 +161,7 @@ export const resetDb = async () => {
   await resetDbCommon(db);
   await setupDb();
 
-  clearDbCache();
+  DbCache.clear();
 };
 
 /**
@@ -157,7 +218,7 @@ export const closeRemoteDb = async () => {
     _remoteDb = null;
     console.log('Closed remote database');
   } else {
-    console.warn('Remote database was not open');
+    console.debug('Remote database was not open');
   }
 };
 
@@ -197,6 +258,56 @@ const setupDb = async () => {
     throw e;
   }
 
+  // Register for the change feed to keep everything updated
+  // Updates made in other tabs should appear via this feed
+  // Updates made to the remote database via replication should also appear
+  if (BUILD_TYPE !== 'test') {
+    _localDb.changes({
+      since: 'now',
+      live: true,
+      include_docs: true,
+    }).on('change', async (change) => {
+      if (change.deleted) {
+        DbCache.remove(change.id);
+      } else {
+        if (change.doc === undefined) {
+          console.error(`Change did not contain key 'doc'. Did you pass 'include_docs: true'?`);
+          return;
+        }
+
+        // Deserialize onto the object already in the cache or create a new object
+        if (change.id.startsWith('account')) {
+          console.debug(`Change '${change.id}' matched account`);
+          const existing = ThirdPartyAccount.accountCache.get(change.id);
+          await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+        } else if (change.id.match('^searchDef/.*/searchResult')) {
+          console.debug(`Change '${change.id}' matched searchResult`);
+          const existing = ThirdPartyAccount.resultCache.get(change.id);
+          await ThirdPartyAccount.deserialize(change.doc as AccountSchema, existing);
+        } else if (change.id.match('^searchDef/.*/search')) {
+          console.debug(`Change '${change.id}' matched search`);
+          const existing = Search.cache.get(change.id);
+          await Search.deserialize(change.doc as SearchSchema, existing);
+        } else if (change.id.match('^searchDef')) {
+          console.debug(`Change '${change.id}' matched search definition`);
+          const existing = SearchDefinition.cache.get(change.id);
+          await SearchDefinition.deserialize(change.doc as SearchDefinitionSchema, existing);
+        } else if (change.id.match('^profile')) {
+          console.debug(`Change '${change.id}' matched profile page`);
+          const existing = ProfilePage.cache.get(change.id);
+          await ProfilePage.deserialize(change.doc as ProfilePageSchema, existing);
+        } else {
+          console.warn(`Change '${change.id}' did not match any cache!`);
+        }
+      }
+    }).on('error', (e) => {
+      console.error('Change feed error:')
+      console.error(e);
+    }).on('complete', () => {
+      console.log('Change feed complete');
+    });
+  }
+
   return _localDb;
 };
 
@@ -219,8 +330,7 @@ export const setupReplication = async () => {
   let replicator;
 
   try {
-    replicator = localDb.replicate
-      .to(remoteDb, {
+    replicator = localDb.sync(remoteDb, {
         live: true,
         since: 0,
       })
@@ -274,24 +384,6 @@ export const teardownReplication = async () => {
   } catch (e) {
     throw new Error(`Could not cancel replication: ${e}`);
   }
-
-  // TODO: Do this only when a user requests deletion
-  // await clearRemoteDb();
-
-  // TODO: Should this go here?
-  // await closeRemoteDb();
-};
-
-/**
- * Clear the in-memory database caches.
- */
-const clearDbCache = () => {
-  // Clear the caches as well
-  for (const cache of [accounts, searches, searchDefinitions]) {
-    for (const prop of Object.getOwnPropertyNames(cache)) {
-      delete cache[prop];
-    }
-  }
 };
 
 /**
@@ -306,5 +398,5 @@ async function _devNukeDb(dbName: string = DB_NAME) {
     await db.destroy();
   }
 
-  clearDbCache();
+  DbCache.clear();
 }
