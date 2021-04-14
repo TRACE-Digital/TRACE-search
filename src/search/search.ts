@@ -407,6 +407,9 @@ export class Search implements IDbStorable {
 
   public events = new EventEmitter();
 
+  public lastUserNameIndex: number = -1;
+  public lastSiteIndex: number = -1
+
   /**
    * `resultsMap` is the best structure for storing and checking results
    * internally during search, but is kind of messy to iterate over after.
@@ -501,7 +504,9 @@ export class Search implements IDbStorable {
       logState = 'active';
     } else if (this.state === SearchState.PAUSED) {
       logState = 'paused';
-    } else {
+    } else if (this.state === SearchState.CANCELLED) {
+      return;   // don't care, just don't do anything. already cancelled
+    }else {
       throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
@@ -511,6 +516,7 @@ export class Search implements IDbStorable {
     this.endedAt = new Date();
 
     // TODO: Interrupt doSearch() if we make it async
+    
 
     await this.save();
   }
@@ -520,9 +526,39 @@ export class Search implements IDbStorable {
    *
    * This is incremental. It won't duplicate sites that already have results.
    */
-  protected async doSearch() {
-    for (const site of this.definition.includedSites) {
+  protected async doSearch(pausedSiteIndex: number = -1, pausedUserNameIndex: number = -1) {
+
+    // TODO: what happens if a duplicate is found?
+
+    for (let site of this.definition.includedSites) {
+
+      // This means that the search has been resumed
+        // Skip until we get to the site that we left off on
+      if (pausedSiteIndex !== -1) {
+        if (this.definition.includedSites.indexOf(site) <= pausedSiteIndex) {
+          continue;
+        }
+        pausedSiteIndex = -1;
+      }
+
       for (const userName of this.definition.userNames) {
+        // If the search has been cancelled, don't do anything else.
+        if (this.state === SearchState.CANCELLED) {
+          // save the site/username to resume on
+          this.lastSiteIndex = this.definition.includedSites.indexOf(site);
+          this.lastUserNameIndex = this.definition.userNames.indexOf(userName)
+          return;
+        }
+
+        // This means that the search has been resumed
+        // Skip until we get to the userName that we left off on
+        if (pausedUserNameIndex !== -1) {
+          if (this.definition.userNames.indexOf(userName) <= pausedUserNameIndex) {
+            continue;
+          }
+          pausedUserNameIndex = -1;
+        }
+
         // Ignore sites that we already have results for
         if (site.name in this.resultsMap) {
           if (userName in this.resultsMap[site.name]) {
