@@ -522,23 +522,31 @@ export class Search implements IDbStorable {
   }
 
   /**
+   * Resume the search
+   */
+  public async resume() {
+    this.state = SearchState.PAUSED;
+    await this.start();
+  }
+
+  /**
    * Perform the search for each `definition.includedSites`.
    *
    * This is incremental. It won't duplicate sites that already have results.
    */
-  protected async doSearch(pausedSiteIndex: number = -1, pausedUserNameIndex: number = -1) {
+  protected async doSearch() {
 
     // TODO: what happens if a duplicate is found?
 
-    for (let site of this.definition.includedSites) {
+    for (const site of this.definition.includedSites) {
 
       // This means that the search has been resumed
         // Skip until we get to the site that we left off on
-      if (pausedSiteIndex !== -1) {
-        if (this.definition.includedSites.indexOf(site) <= pausedSiteIndex) {
+      if (this.lastSiteIndex !== -1) {
+        if (this.definition.includedSites.indexOf(site) <= this.lastSiteIndex) {
           continue;
         }
-        pausedSiteIndex = -1;
+        this.lastSiteIndex = -1;
       }
 
       for (const userName of this.definition.userNames) {
@@ -552,11 +560,11 @@ export class Search implements IDbStorable {
 
         // This means that the search has been resumed
         // Skip until we get to the userName that we left off on
-        if (pausedUserNameIndex !== -1) {
-          if (this.definition.userNames.indexOf(userName) <= pausedUserNameIndex) {
+        if (this.lastUserNameIndex !== -1) {
+          if (this.definition.userNames.indexOf(userName) <= this.lastUserNameIndex) {
             continue;
           }
-          pausedUserNameIndex = -1;
+          this.lastUserNameIndex = -1;
         }
 
         // Ignore sites that we already have results for
