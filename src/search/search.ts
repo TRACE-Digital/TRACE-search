@@ -477,10 +477,20 @@ export class Search implements IDbStorable {
     // Should probably devise something async
     try {
       await this.doSearch();
-
-      console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+      // Only mark as completed if the progress is 100%
+      // If progress is NOT 100%, this means that search has been paused
+      if (this.progress !== 100) {
+        console.groupEnd()
+        return;
+      }
 
       this.state = SearchState.COMPLETED;
+
+      // if (logAction !== 'Resuming') {
+      //   console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+
+      //   this.state = SearchState.COMPLETED;
+      // }
     } catch (e) {
       console.error(`Search failed!:`);
       console.error(e);
@@ -506,18 +516,16 @@ export class Search implements IDbStorable {
       logState = 'paused';
     } else if (this.state === SearchState.CANCELLED) {
       return;   // don't care, just don't do anything. already cancelled
-    }else {
-      throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
+    } else {
+      console.error(`Cannot call cancel() while state is '${this.state}'!`)
+      return;
+      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
     console.log(`Cancelling ${logState} search...`);
 
     this.state = SearchState.CANCELLED;
     this.endedAt = new Date();
-
-    // TODO: Interrupt doSearch() if we make it async
-    
-
     await this.save();
   }
 
@@ -525,8 +533,37 @@ export class Search implements IDbStorable {
    * Resume the search
    */
   public async resume() {
+    let logState = '';
+
+    if (this.state === SearchState.PAUSED) {
+      logState = 'paused';
+    } else {
+      console.error(`Cannot call resume() while state is '${this.state}'!`)
+      return;
+      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
+    }
+
+    // console.log(`Resuming ${logState} search...`); // this is already logged in this.start()
+    
+    await this.start(); // this.start() will automatically mark as IN_PROGRESS
+  }
+
+  /**
+   * Pause the search
+   */
+  public async pause() {
+    let logState = '';
+
+    if (this.state === SearchState.IN_PROGRESS) {
+      logState = 'active';
+    } else {
+      console.error(`Cannot call pause() while state is '${this.state}'!`)
+      return;
+    }
+
+    console.log(`Pausing ${logState} search...`);
+
     this.state = SearchState.PAUSED;
-    await this.start();
   }
 
   /**
@@ -538,12 +575,12 @@ export class Search implements IDbStorable {
 
     // TODO: what happens if a duplicate is found?
 
+    const listOfSites = this.definition.includedSites.map((site) => {return site.name});
     for (const site of this.definition.includedSites) {
-
       // This means that the search has been resumed
         // Skip until we get to the site that we left off on
       if (this.lastSiteIndex !== -1) {
-        if (this.definition.includedSites.indexOf(site) <= this.lastSiteIndex) {
+        if (this.definition.includedSites.indexOf(site) < this.lastSiteIndex) {
           continue;
         }
         this.lastSiteIndex = -1;
@@ -552,6 +589,9 @@ export class Search implements IDbStorable {
       for (const userName of this.definition.userNames) {
         // If the search has been cancelled, don't do anything else.
         if (this.state === SearchState.CANCELLED) {
+          return;
+        }
+        else if (this.state === SearchState.PAUSED) {
           // save the site/username to resume on
           this.lastSiteIndex = this.definition.includedSites.indexOf(site);
           this.lastUserNameIndex = this.definition.userNames.indexOf(userName)
@@ -561,7 +601,11 @@ export class Search implements IDbStorable {
         // This means that the search has been resumed
         // Skip until we get to the userName that we left off on
         if (this.lastUserNameIndex !== -1) {
-          if (this.definition.userNames.indexOf(userName) <= this.lastUserNameIndex) {
+          if (this.definition.userNames.indexOf(userName) < this.lastUserNameIndex) {
+            // if (this.definition.userNames.indexOf(userName) === this.definition.userNames.length) {
+            //   // if this is the last username in the list, we should reset the lastUserNameIndex.
+            //   // helps prevent edge cases like where
+            // }
             continue;
           }
           this.lastUserNameIndex = -1;
@@ -577,8 +621,6 @@ export class Search implements IDbStorable {
           console.warn(`${site.name} omitted.`);
           continue;
         }
-
-        console.log(`Checking ${site.name}...`);
 
         // Search for the account and store results
         const account = await findAccount(site, userName, this);
