@@ -407,8 +407,8 @@ export class Search implements IDbStorable {
 
   public events = new EventEmitter();
 
-  public lastUserNameIndex: number = -1;
-  public lastSiteIndex: number = -1
+  public lastUserNameIndex: number = 0;
+  public lastSiteIndex: number = 0;
 
   /**
    * `resultsMap` is the best structure for storing and checking results
@@ -575,45 +575,29 @@ export class Search implements IDbStorable {
 
     // TODO: what happens if a duplicate is found?
 
-    const listOfSites = this.definition.includedSites.map((site) => {return site.name});
-    for (const site of this.definition.includedSites) {
-      // This means that the search has been resumed
-        // Skip until we get to the site that we left off on
-      if (this.lastSiteIndex !== -1) {
-        if (this.definition.includedSites.indexOf(site) < this.lastSiteIndex) {
-          continue;
-        }
-        this.lastSiteIndex = -1;
-      }
+    // starting from lastSiteIndex will immediately resume from where we paused, if applicable
+    // otherwise, this will have no effect (if not resuming) since lastSiteIndex is initialized to 0
+    for (let i = this.lastSiteIndex; i < this.definition.includedSites.length; i++) {
+      const site = this.definition.includedSites[i];
 
-      for (const userName of this.definition.userNames) {
+      for (let j = this.lastUserNameIndex; j < this.definition.userNames.length; j++) {
         // If the search has been cancelled, don't do anything else.
         if (this.state === SearchState.CANCELLED) {
           return;
         }
         else if (this.state === SearchState.PAUSED) {
           // save the site/username to resume on
-          this.lastSiteIndex = this.definition.includedSites.indexOf(site);
-          this.lastUserNameIndex = this.definition.userNames.indexOf(userName)
+          this.lastSiteIndex = i;
+          this.lastUserNameIndex = j;
           return;
         }
 
-        // This means that the search has been resumed
-        // Skip until we get to the userName that we left off on
-        if (this.lastUserNameIndex !== -1) {
-          if (this.definition.userNames.indexOf(userName) < this.lastUserNameIndex) {
-            // if (this.definition.userNames.indexOf(userName) === this.definition.userNames.length) {
-            //   // if this is the last username in the list, we should reset the lastUserNameIndex.
-            //   // helps prevent edge cases like where
-            // }
-            continue;
-          }
-          this.lastUserNameIndex = -1;
-        }
+        const userName = this.definition.userNames[j];
 
         // Ignore sites that we already have results for
         if (site.name in this.resultsMap) {
           if (userName in this.resultsMap[site.name]) {
+            console.warn(`${site.name} already found.`)
             continue;
           }
         } else if (site.omit) {
@@ -629,7 +613,12 @@ export class Search implements IDbStorable {
         // Store in multiple formats. See note above result* member initialization
         this.storeResult(account);
       }
+      // resets lastUserNameIndex once the search for one site is done.
+      // if resuming, starts back on the exact username that we left off on, 
+      //    but makes sure to search every username for the following site searches
+      this.lastUserNameIndex = 0; 
     }
+    this.lastSiteIndex = 0; // resets lastSiteIndex once the search is done.
   }
 
   /**
