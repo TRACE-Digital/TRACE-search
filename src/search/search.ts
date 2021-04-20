@@ -144,7 +144,7 @@ export class SearchDefinition implements IDbStorable {
   public get lastRun(): Search | null {
     // TODO: If this.history is sorted, we can simplify
     let result = null;
-    for (const search of this.completedHistory) {
+    for (const search of this.history) {
       if (result === null || (search.startedAt && result.startedAt && search.startedAt >= result.startedAt)) {
         result = search;
       }
