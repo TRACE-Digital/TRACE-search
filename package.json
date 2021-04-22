@@ -32,6 +32,7 @@
     "lint": "tslint -p tsconfig.json"
   },
   "main": "dist/trace-search.js",
+  "module": "dist/trace-search.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
