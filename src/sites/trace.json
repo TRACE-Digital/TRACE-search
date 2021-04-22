@@ -345,5 +345,15 @@
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "status_code",
     "urlProbe": "https://crates.io/api/v1/users/{}"
+  },
+  "Stack Overflow": {
+    "urlMain": "https://stackoverflow.com/",
+    "url": "https://stackoverflow.com/users?search={}",
+    "urlProbe": "https://stackoverflow.com/users/filter?search={}",
+    "logoClass": "fab fa-stack-overflow",
+    "username_claimed": "test",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "message",
+    "errorMsg": "No users matched your search"
   }
 }
