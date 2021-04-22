@@ -23,7 +23,7 @@ export interface AccountSchema extends BaseSchema {
   type: AccountType;
   createdAt: string;
   site?: Site; // TODO: Make this SiteSchema if we add functions to Site
-  siteName?: string;
+  siteName?: string; // TODO: This is pretty much not used anymore since we want sites to be editable
   userName: string;
 }
 

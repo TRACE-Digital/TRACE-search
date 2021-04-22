@@ -244,7 +244,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
       _rev: this.rev,
       type: this.type,
       createdAt: this.createdAt.toJSON(),
-      siteName: this.site.name,
+      site: this.site,
       userName: this.userName,
     };
   }
