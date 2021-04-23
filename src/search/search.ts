@@ -144,7 +144,7 @@ export class SearchDefinition implements IDbStorable {
   public get lastRun(): Search | null {
     // TODO: If this.history is sorted, we can simplify
     let result = null;
-    for (const search of this.completedHistory) {
+    for (const search of this.history) {
       if (result === null || (search.startedAt && result.startedAt && search.startedAt >= result.startedAt)) {
         result = search;
       }
@@ -407,6 +407,9 @@ export class Search implements IDbStorable {
 
   public events = new EventEmitter();
 
+  public lastUserNameIndex: number = 0;
+  public lastSiteIndex: number = 0;
+
   /**
    * `resultsMap` is the best structure for storing and checking results
    * internally during search, but is kind of messy to iterate over after.
@@ -474,10 +477,20 @@ export class Search implements IDbStorable {
     // Should probably devise something async
     try {
       await this.doSearch();
-
-      console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+      // Only mark as completed if the progress is 100%
+      // If progress is NOT 100%, this means that search has been paused
+      if (this.progress !== 100) {
+        console.groupEnd()
+        return;
+      }
 
       this.state = SearchState.COMPLETED;
+
+      // if (logAction !== 'Resuming') {
+      //   console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
+
+      //   this.state = SearchState.COMPLETED;
+      // }
     } catch (e) {
       console.error(`Search failed!:`);
       console.error(e);
@@ -501,18 +514,56 @@ export class Search implements IDbStorable {
       logState = 'active';
     } else if (this.state === SearchState.PAUSED) {
       logState = 'paused';
+    } else if (this.state === SearchState.CANCELLED) {
+      return;   // don't care, just don't do anything. already cancelled
     } else {
-      throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
+      console.error(`Cannot call cancel() while state is '${this.state}'!`)
+      return;
+      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
     console.log(`Cancelling ${logState} search...`);
 
     this.state = SearchState.CANCELLED;
     this.endedAt = new Date();
-
-    // TODO: Interrupt doSearch() if we make it async
-
     await this.save();
+  }
+
+  /**
+   * Resume the search
+   */
+  public async resume() {
+    let logState = '';
+
+    if (this.state === SearchState.PAUSED) {
+      logState = 'paused';
+    } else {
+      console.error(`Cannot call resume() while state is '${this.state}'!`)
+      return;
+      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
+    }
+
+    // console.log(`Resuming ${logState} search...`); // this is already logged in this.start()
+    
+    await this.start(); // this.start() will automatically mark as IN_PROGRESS
+  }
+
+  /**
+   * Pause the search
+   */
+  public async pause() {
+    let logState = '';
+
+    if (this.state === SearchState.IN_PROGRESS) {
+      logState = 'active';
+    } else {
+      console.error(`Cannot call pause() while state is '${this.state}'!`)
+      return;
+    }
+
+    console.log(`Pausing ${logState} search...`);
+
+    this.state = SearchState.PAUSED;
   }
 
   /**
@@ -521,11 +572,32 @@ export class Search implements IDbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected async doSearch() {
-    for (const site of this.definition.includedSites) {
-      for (const userName of this.definition.userNames) {
+
+    // TODO: what happens if a duplicate is found?
+
+    // starting from lastSiteIndex will immediately resume from where we paused, if applicable
+    // otherwise, this will have no effect (if not resuming) since lastSiteIndex is initialized to 0
+    for (let i = this.lastSiteIndex; i < this.definition.includedSites.length; i++) {
+      const site = this.definition.includedSites[i];
+
+      for (let j = this.lastUserNameIndex; j < this.definition.userNames.length; j++) {
+        // If the search has been cancelled, don't do anything else.
+        if (this.state === SearchState.CANCELLED) {
+          return;
+        }
+        else if (this.state === SearchState.PAUSED) {
+          // save the site/username to resume on
+          this.lastSiteIndex = i;
+          this.lastUserNameIndex = j;
+          return;
+        }
+
+        const userName = this.definition.userNames[j];
+
         // Ignore sites that we already have results for
         if (site.name in this.resultsMap) {
           if (userName in this.resultsMap[site.name]) {
+            console.warn(`${site.name} already found.`)
             continue;
           }
         } else if (site.omit) {
@@ -534,8 +606,6 @@ export class Search implements IDbStorable {
           continue;
         }
 
-        console.log(`Checking ${site.name}...`);
-
         // Search for the account and store results
         const account = await findAccount(site, userName, this);
         await account.save();
@@ -543,7 +613,12 @@ export class Search implements IDbStorable {
         // Store in multiple formats. See note above result* member initialization
         this.storeResult(account);
       }
+      // resets lastUserNameIndex once the search for one site is done.
+      // if resuming, starts back on the exact username that we left off on, 
+      //    but makes sure to search every username for the following site searches
+      this.lastUserNameIndex = 0; 
     }
+    this.lastSiteIndex = 0; // resets lastSiteIndex once the search is done.
   }
 
   /**
