@@ -26,14 +26,14 @@
   "Blogger": {
     "logoClass": "fab fa-blogger",
     "logoColor": "#F06A35",
-    "tags": ["Blog"]
+    "tags": ["Blogging"]
   },
   "BodyBuilding": {
     "logoClass": "fas fa-dumbbell",
     "logoColor": "#33B1F0",
     "tags": ["Fitness"]
   },
-  "BookCrossing": {
+  "Bookcrossing": {
     "logoClass": "fas fa-book",
     "logoColor": "#FDCB25"
   },
@@ -48,13 +48,21 @@
   },
   "Discogs": {
     "logoClass": "fas fa-record-vinyl",
-    "logoColor": "#333333",
+    "logoColor": "darkslategray",
     "tags": ["Music"]
+  },
+  "Docker Hub": {
+    "logoClass": "fab fa-docker",
+    "logoColor": "#2496ED"
   },
   "Duolingo": {
     "logoClass": "fas fa-language",
     "logoColor": "#58CC02",
     "tags": ["Education"]
+  },
+  "Flipboard": {
+    "logoClass": "fab fa-flipboard",
+    "logoColor": "#CC0000"
   },
   "GoodReads": {
     "logoClass": "fab fa-goodreads",
@@ -91,7 +99,13 @@
     "tags": ["Developers"]
   },
   "Scribd": {
-    "logoClass": "fab fa-scribd"
+    "logoClass": "fab fa-scribd",
+    "logoColor": "#00808C"
+  },
+  "Slack": {
+    "logoClass": "fab fa-slack-hash",
+    "logoColor": "#4A154B",
+    "tags": ["Messaging"]
   },
   "SoundCloud": {
     "logoClass": "fab fa-soundcloud",
@@ -99,8 +113,17 @@
   },
   "Steamid": {
     "logoClass": "fab fa-steam",
-    "logoColor": "#184660",
     "tags": ["Gaming"]
+  },
+  "Strava": {
+    "logoClass": "fab fa-strava",
+    "logoColor": "#F05523",
+    "tags": ["Fitness"]
+  },
+  "Venmo": {
+    "logoClass": "far fa-money-bill-alt",
+    "logoColor": "#3D95CE",
+    "tags": ["Finance"]
   },
   "Reddit": {
     "logoClass": "fab fa-reddit",
@@ -108,7 +131,7 @@
   },
   "Medium": {
     "logoClass": "fab fa-medium",
-    "tags": ["Blog"]
+    "tags": ["Blogging"]
   },
   "npm": {
     "logoClass": "fab fa-npm",
@@ -209,6 +232,7 @@
     "tags": ["Education"]
   },
   "Football": {
+    "logoClass": "fas fa-football-ball",
     "errorType": "status_code",
     "tags": ["Sports"]
   },
@@ -291,7 +315,6 @@
   },
   "Steam": {
     "logoClass": "fab fa-steam",
-    "logoColor": "#184660",
     "tags": ["Gaming"]
   },
   "Xbox Gamertag": {
@@ -314,16 +337,18 @@
   },
   "WordPress": {
     "errorUrl": "https://wordpress.com/typo/?subdomain={}",
-    "tags": ["Blog", "Developers"]
+    "logoClass": "fab fa-wordpress-simple",
+    "logoColor": "#21759B",
+    "tags": ["Blogging"]
   },
   "WordPressOrg": {
     "errorType": "status_code",
-    "tags": ["Blog", "Developers"]
+    "tags": ["Blogging"]
   },
   "Keybase": {
     "logoClass": "fab fa-keybase",
     "logoColor": "#319BF7",
-    "tags": ["Developers", "Social Media"]
+    "tags": ["Developers", "Messaging"]
   },
   "Zhihu": {
     "errorType": "status_code",
@@ -408,7 +433,7 @@
     "username_claimed": "cohenchris",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "status_code",
-    "tags": ["Financial"]
+    "tags": ["Finance"]
   },
   "LinkTree": {
     "urlMain": "https://linktr.ee/",
