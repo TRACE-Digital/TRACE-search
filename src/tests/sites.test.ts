@@ -10,8 +10,11 @@ for (const site of Object.values(allSites)) {
       }
     });
 
-    it('has a template URL', () => {
+    it('has a valid template URL', () => {
       expect(site.url).toContain('{}');
+
+      // Quick check that it only contains 1 {} since we don't do global replace in ThirdPartyAccount
+      expect(site.url.split('{}')).toHaveLength(2);
     });
 
     it('has a claimed username', () => {
