@@ -18,6 +18,11 @@ import {
 import { Site } from 'sites';
 import SparkMD5 from 'spark-md5';
 
+export const toAccountId = (site: Site, userName: string, idPrefix?: string) => {
+  const hash = SparkMD5.hash(toId([site.name, userName]));
+  return toId(['account', hash], idPrefix);
+};
+
 /**
  * Account associated with a third-party `Site`.
  */
@@ -124,22 +129,18 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    */
   public static async deserialize(data: AccountSchema, instance?: ThirdPartyAccount) {
     /**
-     * Hack to handle deserialization of accounts that have an `idPrefix`.
-     * This really only breaks if another ID field (i.e. `userName`) contains
-     * the entire `instance.id`.
+     * Hack to handle deserialization of accounts like search results that have an `idPrefix`.
      *
-     * This is actually possible since userName is supplied by the user, but we'll let
-     * it ride for now. This is really more of a guard for us as developers.
+     * If this is a new instance, child classes will have constructed it without the `idPrefix`
+     * since they have no way to know what it is. We don't have any way to extract the prefix
+     * here either right now, but we can at least sanity check that it's just the prefix causing
+     * the mismatch.
      *
-     * If we create `fromId()` to deconstruct an ID, we can improve this.
+     * If we add a `fromId` that reverses `toId`, we could extract the prefix and construct,
+     * but this basically does the same thing right now and is safe since we hash the site name/account name.
      *
-     * Example:
-     *  data._id: searchResult/account/example.com/user1
-     *  instance._id: account/example.com/user1
-     *
-     * Broken example:
-     *  data._id: searchResult/account/definitely-not-example.com/account/example.com/user1
-     *  instance._id: account/example.com/user1
+     * instance.id: account/hash
+     * data._id:    searchDef/blah/blah/search/blah/searchResult/account/hash
      */
     if (instance && data._id.endsWith(instance.id)) {
       instance.id = data._id;
@@ -175,8 +176,6 @@ export abstract class ThirdPartyAccount implements IDbStorable {
   public site: Site;
   public userName: string;
   public get url() {
-    // TODO: This is simple replacement for the Python format strings
-    // Need to make sure this works for everything
     return this.site.url.replace('{}', this.userName);
   }
 
@@ -184,8 +183,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     this.site = site;
     this.userName = userName;
 
-    const hash = SparkMD5.hash(toId([this.site.name, this.userName]));
-    this.id = toId(['account', hash], idPrefix);
+    this.id = toAccountId(this.site, this.userName, idPrefix);
   }
 
   /**
