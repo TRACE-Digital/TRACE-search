@@ -311,8 +311,9 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
    */
   public async claim(): Promise<ClaimedAccount> {
     if (this.actionTaken === AutoSearchAccountAction.CLAIMED) {
-      throw new Error(`'${this.id}' has already been claimed!`);
+      console.warn(`'${this.id}' has already been claimed!`);
     }
+    this.actionTaken = AutoSearchAccountAction.CLAIMED;
 
     const account = new ClaimedAccount(this.site, this.userName);
 
@@ -337,7 +338,6 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await ClaimedAccount.deserialize(schema, account);
 
-    this.actionTaken = AutoSearchAccountAction.CLAIMED;
     await this.save();
     await account.save();
 
@@ -351,8 +351,9 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
    */
   public async reject(): Promise<RejectedAccount> {
     if (this.actionTaken === AutoSearchAccountAction.REJECTED) {
-      throw new Error(`'${this.id}' has already been rejected!`);
+      console.warn(`'${this.id}' has already been rejected!`);
     }
+    this.actionTaken = AutoSearchAccountAction.REJECTED;
 
     const account = new RejectedAccount(this.site, this.userName);
 
@@ -377,7 +378,6 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await RejectedAccount.deserialize(schema, account);
 
-    this.actionTaken = AutoSearchAccountAction.REJECTED;
     await this.save();
     await account.save();
 
@@ -451,6 +451,7 @@ export class ClaimedAccount extends AutoSearchAccount {
   }
 
   public type = AccountType.CLAIMED;
+  public actionTaken = AutoSearchAccountAction.CLAIMED;
   public claimedAt: Date = new Date();
 
   public serialize(): ClaimedAccountSchema {
@@ -485,6 +486,7 @@ export class RejectedAccount extends AutoSearchAccount {
   }
 
   public type = AccountType.REJECTED;
+  public actionTaken = AutoSearchAccountAction.REJECTED;
   public rejectedAt: Date = new Date();
 
   public serialize(): RejectedAccountSchema {
@@ -592,13 +594,6 @@ export class ManualAccount extends ThirdPartyAccount {
 
   public type = AccountType.MANUAL;
   public lastEditedAt: Date = new Date();
-
-  /**
-   * Don't know what this will do yet.
-   */
-  public edit() {
-    throw new Error('Not implemented!');
-  }
 
   public serialize(): ManualAccountSchema {
     const base = super.serialize() as ManualAccountSchema;
