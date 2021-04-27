@@ -373,6 +373,8 @@ export class Search implements IDbStorable {
     instance.rev = data._rev;
     instance.definition = definition;
     instance.state = data.state;
+    instance.lastSiteIndex = data.lastSiteIndex;
+    instance.lastUserNameIndex = data.lastUserNameIndex;
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
@@ -725,6 +727,8 @@ export class Search implements IDbStorable {
       _id: this.id,
       _rev: this.rev,
       state: this.state,
+      lastSiteIndex: this.lastSiteIndex,
+      lastUserNameIndex: this.lastUserNameIndex,
       startedAt: this.startedAt ? this.startedAt.toJSON() : null,
       endedAt: this.endedAt ? this.endedAt.toJSON() : null,
       definitionId: this.definition.id,

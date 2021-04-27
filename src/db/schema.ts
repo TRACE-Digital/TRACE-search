@@ -87,6 +87,8 @@ export interface SearchDefinitionSchema extends BaseSchema {
 
 export interface SearchSchema extends BaseSchema {
   state: SearchState;
+  lastSiteIndex: number;
+  lastUserNameIndex: number;
   startedAt: string | null;
   endedAt: string | null;
   definitionId: PouchDbId;
