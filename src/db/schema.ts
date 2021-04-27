@@ -98,8 +98,10 @@ export interface ProfilePageSchema extends BaseSchema {
   title: string;
   published: boolean;
   hasPassword: boolean;
+  matomoSiteId: string | null;
   createdAt: string;
   lastEditedAt: string;
+  layoutType: string;
   colorScheme: ProfilePageColorSchema;
   urls: string[];
   accountIds: PouchDbId[];

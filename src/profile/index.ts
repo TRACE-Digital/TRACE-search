@@ -92,8 +92,10 @@ export class ProfilePage implements IDbStorable {
     instance.title = data.title;
     instance.published = data.published;
     instance.hasPassword = data.hasPassword;
+    instance.matomoSiteId = data.matomoSiteId;
     instance.createdAt = new Date(data.createdAt);
     instance.lastEditedAt = new Date(data.lastEditedAt);
+    instance.layoutType = data.layoutType;
     instance.colorScheme = data.colorScheme;
     instance.urls = data.urls;
 
@@ -155,9 +157,11 @@ export class ProfilePage implements IDbStorable {
   public title: string;
   public published: boolean = false;
   public hasPassword: boolean = false;
+  public matomoSiteId: string | null = null;
   public createdAt: Date = new Date();
   public lastEditedAt: Date = new Date();
 
+  public layoutType: string = 'grid';
   public colorScheme: ProfilePageColorSchema;
   public urls: string[] = [];
 
@@ -230,8 +234,10 @@ export class ProfilePage implements IDbStorable {
       title: this.title,
       published: this.published,
       hasPassword: this.hasPassword,
+      matomoSiteId: this.matomoSiteId,
       createdAt: this.createdAt.toJSON(),
       lastEditedAt: this.lastEditedAt.toJSON(),
+      layoutType: this.layoutType,
       colorScheme: this.colorScheme,
       urls: this.urls,
       accountIds: this.accounts.map(account => account.id),
