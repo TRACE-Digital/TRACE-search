@@ -13,6 +13,9 @@
     "logoColor": "#69A041",
     "tags": ["Fitness", "Sports"]
   },
+  "Archive.org": {
+    "logoClass": "fas fa-archive"
+  },
   "Asciinema": {
     "logoClass": "far fa-keyboard",
     "logoColor": "#D50303",
@@ -44,7 +47,22 @@
   },
   "CloudflareCommunity": {
     "logoClass": "fab fa-cloudflare",
-    "logoColor": "#F6821F"
+    "logoColor": "#F6821F",
+    "tags": ["Developers"]
+  },
+  "DailyMotion": {
+    "logoClass": "fab fa-dailymotion",
+    "logoColor": "#00C4F7",
+    "tags": ["News"]
+  },
+  "DEV Community": {
+    "logoClass": "fab fa-dev",
+    "logoColor": "#3B49E5",
+    "tags": ["Blogging", "Developers"]
+  },
+  "DeviantART": {
+    "logoClass": "fab fa-deviantart",
+    "logoColor": "#45B748"
   },
   "Discogs": {
     "logoClass": "fas fa-record-vinyl",
@@ -53,25 +71,66 @@
   },
   "Docker Hub": {
     "logoClass": "fab fa-docker",
-    "logoColor": "#2496ED"
+    "logoColor": "#2496ED",
+    "tags": ["Developers"]
   },
   "Duolingo": {
     "logoClass": "fas fa-language",
     "logoColor": "#58CC02",
     "tags": ["Education"]
   },
+  "Ello": {
+    "logoClass": "fab fa-ello",
+    "logoColor": "#000000"
+  },
+  "Etsy": {
+    "logoClass": "fab fa-etsy",
+    "logoColor": "#F26422",
+    "tags": ["Shopping"]
+  },
+  "Flickr": {
+    "logoClass": "fab fa-flickr",
+    "logoColor": "#FF0084",
+    "tags": ["Photography"]
+  },
+  "Flightradar24": {
+    "logoClass": "fas fa-plane-departure",
+    "logoColor": "#F8C023"
+  },
   "Flipboard": {
     "logoClass": "fab fa-flipboard",
     "logoColor": "#CC0000"
+  },
+  "Gamespot": {
+    "logoClass": "fas fa-gamepad",
+    "logoColor": "#FFDD00",
+    "tags": ["Gaming"]
   },
   "GoodReads": {
     "logoClass": "fab fa-goodreads",
     "tags": ["Social Media"]
   },
+  "Gravatar": {
+    "logoClass": "fas fa-user-astronaut",
+    "logoColor": "#1E8CBE"
+  },
+  "Houzz": {
+    "logoClass": "fab fa-houzz",
+    "logoColor": "#4DBC15",
+    "tags": ["Forum"]
+  },
+  "Imgur": {
+    "logoClass": "far fa-images",
+    "logoColor": "#32BE7D"
+  },
   "Kik": {
     "logoClass": "far fa-comments",
     "logoColor": "#5DCE09",
     "tags": ["Messaging"]
+  },
+  "Launchpad": {
+    "logoClass": "fas fa-rocket",
+    "logoColor": "#F8C300"
   },
   "LeetCode": {
     "logoClass": "fas fa-code",
@@ -83,15 +142,52 @@
     "logoColor": "#556677",
     "tags": ["Entertainment"]
   },
+  "mastodon.cloud": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.social": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.technology": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.xyz": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "OpenStreetMap": {
+    "logoClass": "far fa-map",
+    "logoColor": "#9ED284"
+  },
   "Pastebin": {
     "logoClass": "fas fa-paste",
     "logoColor": "#0C3C5A",
     "tags": ["Developers"]
   },
+  "Periscope": {
+    "logoClass": "fab fa-periscope",
+    "logoColor": "#3EA6C5"
+  },
+  "PlayStore": {
+    "logoClass": "fab fa-google-play",
+    "logoColor": "#38CDFF"
+  },
   "PyPi": {
     "logoClass": "fab fa-python",
     "logoColor": "#FFDA49",
     "tags": ["Developers"]
+  },
+  "ResearchGate": {
+    "logoClass": "fab fa-researchgate",
+    "logoColor": "#00D0AF",
+    "tags": ["Education"]
   },
   "RubyGems": {
     "logoClass": "far fa-gem",
@@ -107,9 +203,18 @@
     "logoColor": "#4A154B",
     "tags": ["Messaging"]
   },
+  "SlideShare": {
+    "logoClass": "fab fa-slideshare",
+    "logoColor": "#FB8C00",
+    "tags": ["Productivity"]
+  },
   "SoundCloud": {
     "logoClass": "fab fa-soundcloud",
     "tags": ["Music"]
+  },
+  "SteamGroup": {
+    "logoClass": "fab fa-steam",
+    "tags": ["Gaming"]
   },
   "Steamid": {
     "logoClass": "fab fa-steam",
@@ -120,10 +225,38 @@
     "logoColor": "#F05523",
     "tags": ["Fitness"]
   },
+  "TradingView": {
+    "logoClass": "fas fa-chart-line",
+    "logoColor": "#2196F3",
+    "tags": ["Finance"]
+  },
+  "Ultimate-Guitar": {
+    "logoClass": "fas fa-guitar",
+    "logoColor": "#FEC42E",
+    "tags": ["Music"]
+  },
+  "Unsplash": {
+    "logoClass": "fab fa-unsplash",
+    "logoColor": "#000000",
+    "tags": ["Photography"]
+  },
   "Venmo": {
     "logoClass": "far fa-money-bill-alt",
     "logoColor": "#3D95CE",
     "tags": ["Finance"]
+  },
+  "Vimeo": {
+    "logoClass": "fab fa-vimeo-v",
+    "logoColor": "#1AB7EA",
+    "tags": ["Entertainment"]
+  },
+  "VirusTotal": {
+    "logoClass": "fas fa-viruses",
+    "logoColor": "#3B61FF",
+    "tags": ["Developers"]
+  },
+  "VSCO": {
+    "tags": ["Photography"]
   },
   "Reddit": {
     "logoClass": "fab fa-reddit",
@@ -208,6 +341,11 @@
     "username_claimed": "franciscod",
     "tags": ["Developers", "Forum"]
   },
+  "Atom Discussions": {
+    "logoClass": "fas fa-atom",
+    "logoColor": "#89D36C",
+    "tags": ["Developers"]
+  },
   "BitBucket": {
     "logoClass": "fab fa-bitbucket",
     "tags": ["Developers"]
@@ -226,17 +364,25 @@
     "logoColor": "#95BB4A",
     "tags": ["Gaming"]
   },
+  "Lichess": {
+    "logoClass": "fas fa-chess-knight",
+    "logoColor": "#EDEBE9",
+    "tags": ["Gaming"]
+  },
   "Clozemaster": {
     "errorType": "response_url",
     "errorUrl": "https://www.clozemaster.com/dashboard",
     "tags": ["Education"]
   },
   "Football": {
-    "logoClass": "fas fa-football-ball",
     "errorType": "status_code",
     "tags": ["Sports"]
   },
   "GitHub": {
+    "logoClass": "fab fa-github",
+    "tags": ["Developers"]
+  },
+  "GitHub Support Community": {
     "logoClass": "fab fa-github",
     "tags": ["Developers"]
   },
@@ -342,6 +488,8 @@
     "tags": ["Blogging"]
   },
   "WordPressOrg": {
+    "logoClass": "fab fa-wordpress-simple",
+    "logoColor": "#21759B",
     "errorType": "status_code",
     "tags": ["Blogging"]
   },
