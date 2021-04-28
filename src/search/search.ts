@@ -477,6 +477,7 @@ export class Search implements IDbStorable {
       this.startedAt = new Date();
     }
     this.state = SearchState.IN_PROGRESS;
+    await this.save();
 
     // TODO: This is synchronous right now
     // Should probably devise something async
@@ -610,6 +611,7 @@ export class Search implements IDbStorable {
           // save the site/username to resume on
           this.lastSiteIndex = i;
           this.lastUserNameIndex = j;
+          await this.save();
           return;
         }
 

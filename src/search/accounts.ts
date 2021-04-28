@@ -180,7 +180,8 @@ export abstract class ThirdPartyAccount implements IDbStorable {
   }
 
   constructor(site: Site, userName: string, idPrefix?: string) {
-    this.site = site;
+    // Make a copy so that site edits don't apply to more than one account
+    this.site = JSON.parse(JSON.stringify(site));
     this.userName = userName;
 
     this.id = toAccountId(this.site, this.userName, idPrefix);
