@@ -56,7 +56,7 @@ npm run test-debug      # If tests get stuck
 ## Testing with External Project ##
 
 To test with an external project that consumes the library, you can:
-- Install NPM
+- Install from NPM
 - Link locally
 - Install from Git
 
@@ -82,7 +82,7 @@ cd external-project
 npm link ../trace-search
 
 cd ../trace-search
-npm build-dev -- --watch
+npm run build-dev -- --watch
 
 ### OR the long way
 
@@ -93,7 +93,7 @@ cd external-project
 npm link trace-search   # Link the global package into the project
 
 cd ../trace-search
-npm build-dev -- --watch
+npm run build-dev -- --watch
 ```
 
 ### Install from Git ###
