@@ -17,5 +17,6 @@ module.exports = merge(common, {
   devServer: {
     static: path.resolve(__dirname, 'dist'),
     port: 8000,
+    writeToDisk: true,
   },
 });

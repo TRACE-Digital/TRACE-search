@@ -6,134 +6,391 @@
     "omit": true
   },
   "AllTrails": {
-    "logoClass": "fa-question-circle",
     "headers": {
       "credentials": "include"
     },
-    "tags": ["Sports"]
+    "logoClass": "fas fa-hiking",
+    "logoColor": "#69A041",
+    "tags": ["Fitness", "Sports"]
+  },
+  "Archive.org": {
+    "logoClass": "fas fa-archive"
+  },
+  "Asciinema": {
+    "logoClass": "far fa-keyboard",
+    "logoColor": "#D50303",
+    "tags": ["Developers"]
+  },
+  "Bandcamp": {
+    "logoClass": "fab fa-bandcamp",
+    "logoColor": "#1DA0C3",
+    "tags": ["Music"]
+  },
+  "Blogger": {
+    "logoClass": "fab fa-blogger",
+    "logoColor": "#F06A35",
+    "tags": ["Blogging"]
+  },
+  "BodyBuilding": {
+    "logoClass": "fas fa-dumbbell",
+    "logoColor": "#33B1F0",
+    "tags": ["Fitness"]
+  },
+  "Bookcrossing": {
+    "logoClass": "fas fa-book",
+    "logoColor": "#FDCB25"
+  },
+  "BuyMeACoffee": {
+    "logoClass": "fas fa-coffee",
+    "logoColor": "#FFDD00",
+    "tags": ["Developers", "Finance"]
+  },
+  "CloudflareCommunity": {
+    "logoClass": "fab fa-cloudflare",
+    "logoColor": "#F6821F",
+    "tags": ["Developers"]
+  },
+  "DailyMotion": {
+    "logoClass": "fab fa-dailymotion",
+    "logoColor": "#00C4F7",
+    "tags": ["News"]
+  },
+  "DEV Community": {
+    "logoClass": "fab fa-dev",
+    "logoColor": "#3B49E5",
+    "tags": ["Blogging", "Developers"]
+  },
+  "DeviantART": {
+    "logoClass": "fab fa-deviantart",
+    "logoColor": "#45B748"
+  },
+  "Discogs": {
+    "logoClass": "fas fa-record-vinyl",
+    "logoColor": "darkslategray",
+    "tags": ["Music"]
+  },
+  "Docker Hub": {
+    "logoClass": "fab fa-docker",
+    "logoColor": "#2496ED",
+    "tags": ["Developers"]
+  },
+  "Duolingo": {
+    "logoClass": "fas fa-language",
+    "logoColor": "#58CC02",
+    "tags": ["Education"]
+  },
+  "Ello": {
+    "logoClass": "fab fa-ello",
+    "logoColor": "#000000"
+  },
+  "Etsy": {
+    "logoClass": "fab fa-etsy",
+    "logoColor": "#F26422",
+    "tags": ["Shopping"]
+  },
+  "Flickr": {
+    "logoClass": "fab fa-flickr",
+    "logoColor": "#FF0084",
+    "tags": ["Photography"]
+  },
+  "Flightradar24": {
+    "logoClass": "fas fa-plane-departure",
+    "logoColor": "#F8C023"
+  },
+  "Flipboard": {
+    "logoClass": "fab fa-flipboard",
+    "logoColor": "#CC0000"
+  },
+  "Gamespot": {
+    "logoClass": "fas fa-gamepad",
+    "logoColor": "#FFDD00",
+    "tags": ["Gaming"]
+  },
+  "GoodReads": {
+    "logoClass": "fab fa-goodreads",
+    "tags": ["Social Media"]
+  },
+  "Gravatar": {
+    "logoClass": "fas fa-user-astronaut",
+    "logoColor": "#1E8CBE"
+  },
+  "Houzz": {
+    "logoClass": "fab fa-houzz",
+    "logoColor": "#4DBC15",
+    "tags": ["Forum"]
+  },
+  "Imgur": {
+    "logoClass": "far fa-images",
+    "logoColor": "#32BE7D"
+  },
+  "Kik": {
+    "logoClass": "far fa-comments",
+    "logoColor": "#5DCE09",
+    "tags": ["Messaging"]
+  },
+  "Launchpad": {
+    "logoClass": "fas fa-rocket",
+    "logoColor": "#F8C300"
+  },
+  "LeetCode": {
+    "logoClass": "fas fa-code",
+    "logoColor": "#F89F1B",
+    "tags": ["Developers"]
+  },
+  "Letterboxd": {
+    "logoClass": "fas fa-film",
+    "logoColor": "#556677",
+    "tags": ["Entertainment"]
+  },
+  "mastodon.cloud": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.social": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.technology": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "mastodon.xyz": {
+    "logoClass": "fab fa-mastodon",
+    "logoColor": "#2791DA",
+    "tags": ["Social Media"]
+  },
+  "OpenStreetMap": {
+    "logoClass": "far fa-map",
+    "logoColor": "#9ED284"
+  },
+  "Pastebin": {
+    "logoClass": "fas fa-paste",
+    "logoColor": "#0C3C5A",
+    "tags": ["Developers"]
+  },
+  "Periscope": {
+    "logoClass": "fab fa-periscope",
+    "logoColor": "#3EA6C5"
+  },
+  "PlayStore": {
+    "logoClass": "fab fa-google-play",
+    "logoColor": "#38CDFF"
+  },
+  "PyPi": {
+    "logoClass": "fab fa-python",
+    "logoColor": "#FFDA49",
+    "tags": ["Developers"]
+  },
+  "ResearchGate": {
+    "logoClass": "fab fa-researchgate",
+    "logoColor": "#00D0AF",
+    "tags": ["Education"]
+  },
+  "RubyGems": {
+    "logoClass": "far fa-gem",
+    "logoColor": "#D6422B",
+    "tags": ["Developers"]
+  },
+  "Scribd": {
+    "logoClass": "fab fa-scribd",
+    "logoColor": "#00808C"
+  },
+  "Slack": {
+    "logoClass": "fab fa-slack-hash",
+    "logoColor": "#4A154B",
+    "tags": ["Messaging"]
+  },
+  "SlideShare": {
+    "logoClass": "fab fa-slideshare",
+    "logoColor": "#FB8C00",
+    "tags": ["Productivity"]
+  },
+  "SoundCloud": {
+    "logoClass": "fab fa-soundcloud",
+    "tags": ["Music"]
+  },
+  "SteamGroup": {
+    "logoClass": "fab fa-steam",
+    "tags": ["Gaming"]
+  },
+  "Steamid": {
+    "logoClass": "fab fa-steam",
+    "tags": ["Gaming"]
+  },
+  "Strava": {
+    "logoClass": "fab fa-strava",
+    "logoColor": "#F05523",
+    "tags": ["Fitness"]
+  },
+  "TradingView": {
+    "logoClass": "fas fa-chart-line",
+    "logoColor": "#2196F3",
+    "tags": ["Finance"]
+  },
+  "Ultimate-Guitar": {
+    "logoClass": "fas fa-guitar",
+    "logoColor": "#FEC42E",
+    "tags": ["Music"]
+  },
+  "Unsplash": {
+    "logoClass": "fab fa-unsplash",
+    "logoColor": "#000000",
+    "tags": ["Photography"]
+  },
+  "Venmo": {
+    "logoClass": "far fa-money-bill-alt",
+    "logoColor": "#3D95CE",
+    "tags": ["Finance"]
+  },
+  "Vimeo": {
+    "logoClass": "fab fa-vimeo-v",
+    "logoColor": "#1AB7EA",
+    "tags": ["Entertainment"]
+  },
+  "VirusTotal": {
+    "logoClass": "fas fa-viruses",
+    "logoColor": "#3B61FF",
+    "tags": ["Developers"]
+  },
+  "VSCO": {
+    "tags": ["Photography"]
   },
   "Reddit": {
-    "logoClass": "fa-reddit",
+    "logoClass": "fab fa-reddit",
     "tags": ["Social Media"]
   },
   "Medium": {
-    "logoClass": "fa-medium",
-    "tags": ["Forum"]
+    "logoClass": "fab fa-medium",
+    "tags": ["Blogging"]
   },
   "npm": {
-    "logoClass": "fa-npm",
+    "logoClass": "fab fa-npm",
     "tags": ["Developers"]
   },
   "Telegram": {
-    "logoClass": "fa-telegram-plane",
+    "logoClass": "fab fa-telegram-plane",
     "tags": ["Messaging"]
   },
   "Apple Discussions": {
-    "logoClass": "fa-apple",
+    "logoClass": "fab fa-apple",
     "tags": ["Forum"]
   },
   "Behance": {
-    "logoClass": "fa-behance",
+    "logoClass": "fab fa-behance",
     "tags": ["Social Media"]
   },
   "YouTube": {
-    "logoClass": "fa-youtube",
+    "logoClass": "fab fa-youtube",
     "tags": ["Entertainment"]
   },
   "Wikipedia": {
-    "logoClass": "fa-wikipedia-w",
+    "logoClass": "fab fa-wikipedia-w",
     "tags": ["Education"]
   },
   "Facebook": {
-    "logoClass": "fa-facebook-square",
+    "logoClass": "fab fa-facebook-square",
     "tags": ["Social Media"]
   },
   "Kaggle": {
-    "logoClass": "fa-kaggle",
+    "logoClass": "fab fa-kaggle",
     "tags": ["Developers"]
   },
   "HackerRank": {
-    "logoClass": "fa-hackerrank",
+    "logoClass": "fab fa-hackerrank",
     "tags": ["Developers"]
   },
   "Codepen": {
-    "logoClass": "fa-codepen",
+    "logoClass": "fab fa-codepen",
     "tags": ["Developers"]
   },
   "Dribbble": {
-    "logoClass": "fa-dribble",
+    "logoClass": "fab fa-dribbble",
     "tags": ["Social Media"]
   },
   "HackerNews": {
-    "logoClass": "fa-hacker-news",
-    "tags": ["Developers", "News"]
+    "logoClass": "fab fa-hacker-news",
+    "tags": ["Developers", "News", "Social Media"]
   },
   "Pinterest": {
-    "logoClass": "fa-pinterest-square",
+    "logoClass": "fab fa-pinterest-square",
     "tags": ["Social Media"]
   },
   "Patreon": {
-    "logoClass": "fa-patreon",
-    "tags": ["Money"]
+    "logoClass": "fab fa-patreon",
+    "tags": ["Finance"]
   },
   "BitCoinForum": {
-    "logoClass": "fa-bitcoin",
-    "tags": ["Money", "Forum"]
+    "logoClass": "fab fa-bitcoin",
+    "tags": ["Finance", "Forum"]
   },
   "Trakt": {
-    "logoClass": "fa-film",
+    "logoClass": "fas fa-film",
+    "logoColor": "#E61B23",
     "tags": ["Entertainment"]
   },
   "Anobii": {
-    "logoClass": "fa-question-circle",
     "errorUrl": "https://www.anobii.com/stream",
     "tags": ["Forum", "Education"]
   },
   "Ask Fedora": {
-    "logoClass": "fa-question-circle",
+    "logoClass": "fab fa-fedora",
+    "logoColor": "#294172",
     "username_claimed": "franciscod",
     "tags": ["Developers", "Forum"]
   },
+  "Atom Discussions": {
+    "logoClass": "fas fa-atom",
+    "logoColor": "#89D36C",
+    "tags": ["Developers"]
+  },
   "BitBucket": {
-    "logoClass": "fa-bitbucket",
+    "logoClass": "fab fa-bitbucket",
     "tags": ["Developers"]
   },
   "BOOTH": {
-    "logoClass": "fa-question-circle",
     "errorUrl": "https://booth.pm/en",
     "tags": ["Shopping"]
   },
   "Carbonmade": {
-    "logoClass": "fa-question-circle",
     "errorType": "status_code",
     "tags": ["Social Media"]
   },
   "Chess": {
-    "logoClass": "fa-question-circle",
     "errorType": "status_code",
+    "logoClass": "fas fa-chess",
+    "logoColor": "#95BB4A",
+    "tags": ["Gaming"]
+  },
+  "Lichess": {
+    "logoClass": "fas fa-chess-knight",
+    "logoColor": "#EDEBE9",
     "tags": ["Gaming"]
   },
   "Clozemaster": {
-    "logoClass": "fa-question-circle",
     "errorType": "response_url",
     "errorUrl": "https://www.clozemaster.com/dashboard",
     "tags": ["Education"]
   },
   "Football": {
-    "logoClass": "fa-question-circle",
     "errorType": "status_code",
     "tags": ["Sports"]
   },
   "GitHub": {
-    "logoClass": "fa-github",
+    "logoClass": "fab fa-github",
+    "tags": ["Developers"]
+  },
+  "GitHub Support Community": {
+    "logoClass": "fab fa-github",
     "tags": ["Developers"]
   },
   "GitLab": {
-    "logoClass": "fa-gitlab",
+    "logoClass": "fab fa-gitlab",
     "tags": ["Developers"]
   },
   "NameMC (Minecraft.net skins)": {
-    "logoClass": "fa-question-circle",
     "errorMsg": ["Status: Available", "Status: Too Long"],
     "username_unclaimed": "fdkhajkj",
     "tags": ["Gaming"]
@@ -142,7 +399,6 @@
     "omit": true
   },
   "Nightbot": {
-    "logoClass": "fa-question-circle",
     "request_head_only": false,
     "tags": ["Gaming"]
   },
@@ -150,15 +406,14 @@
     "omit": true
   },
   "PSNProfiles.com": {
-    "logoClass": "fa-question-circle",
     "username_unclaimed": "dslakjfas",
     "tags": ["Gaming"]
   },
   "Plug.DJ": {
-    "omit": true
+    "omit": true,
+    "tags": ["Music"]
   },
   "ProductHunt": {
-    "logoClass": "fa-question-circle",
     "errorType": "status_code",
     "tags": ["Forum"]
   },
@@ -166,52 +421,54 @@
     "omit": true
   },
   "Spotify": {
-    "logoClass": "fa-spotify",
+    "logoClass": "fab fa-spotify",
+    "logoColor": "#1DB954",
     "errorType": "message",
     "errorMsg": "<title>Spotify – Web Player</title>",
     "tags": ["Music"]
   },
   "last.fm": {
-    "logoClass": "fa-lastfm",
+    "logoClass": "fab fa-lastfm",
     "tags": ["Music"]
   },
   "Twitch": {
-    "logoClass": "fa-twitch",
+    "logoClass": "fab fa-twitch",
     "tags": ["Gaming", "Entertainment", "Social Media"]
   },
   "Tinder": {
-    "logoClass": "fa-question-circle",
     "headers": {
       "User-Agent": "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)"
     },
+    "logoClass": "fas fa-fire",
+    "logoColor": "#FE3C72",
     "tags": ["Social Media"]
   },
   "TripAdvisor": {
-    "logoClass": "fa-tripadvisor",
+    "logoClass": "fab fa-tripadvisor",
     "tags": ["Travel"]
   },
   "Quora": {
-    "logoClass": "fa-quora",
+    "logoClass": "fab fa-quora",
     "tags": ["Forum"]
   },
   "Trello": {
-    "logoClass": "fa-trello",
-    "tags": ["Organization"]
+    "logoClass": "fab fa-trello",
+    "tags": ["Developers", "Productivity"]
   },
   "Wix": {
-    "logoClass": "fa-wix",
+    "logoClass": "fab fa-wix",
     "tags": ["Developers"]
   },
   "Steam": {
-    "logoClass": "fa-steam",
+    "logoClass": "fab fa-steam",
     "tags": ["Gaming"]
   },
   "Xbox Gamertag": {
-    "logoClass": "fa-xbox",
+    "logoClass": "fab fa-xbox",
     "tags": ["Gaming"]
   },
   "Twitter": {
-    "logoClass": "fa-twitter-square",
+    "logoClass": "fab fa-twitter-square",
     "headers": {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:50.0) Gecko/20100101 Firefox/50.0"
     },
@@ -220,27 +477,28 @@
     "tags": ["Social Media"]
   },
   "VK": {
-    "logoClass": "fa-question-circle",
     "errorType": "message",
     "errorMsg": "https://vk.com/images/error404.png",
     "tags": ["Social Media"]
   },
   "WordPress": {
-    "logoClass": "fa-question-circle",
     "errorUrl": "https://wordpress.com/typo/?subdomain={}",
-    "tags": ["Developers"]
+    "logoClass": "fab fa-wordpress-simple",
+    "logoColor": "#21759B",
+    "tags": ["Blogging"]
   },
   "WordPressOrg": {
-    "logoClass": "fa-question-circle",
+    "logoClass": "fab fa-wordpress-simple",
+    "logoColor": "#21759B",
     "errorType": "status_code",
-    "tags": ["Developers"]
+    "tags": ["Blogging"]
   },
   "Keybase": {
-    "logoClass": "fa-keybase",
-    "tags": ["Developers", "Social Media"]
+    "logoClass": "fab fa-keybase",
+    "logoColor": "#319BF7",
+    "tags": ["Developers", "Messaging"]
   },
   "Zhihu": {
-    "logoClass": "fa-question-circle",
     "errorType": "status_code",
     "tags": ["Forum"]
   },
@@ -248,7 +506,6 @@
     "omit": true
   },
   "labpentestit": {
-    "logoClass": "fa-question-circle",
     "errorUrl": "https://lab.pentestit.ru/",
     "tags": ["Developers"]
   },
@@ -259,7 +516,6 @@
     "omit": true
   },
   "svidbook": {
-    "logoClass": "fa-question-circle",
     "username_claimed": "Balumba",
     "tags": ["Education"]
   },
@@ -269,7 +525,8 @@
     "username_claimed": "tourist",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "response_url",
-    "errorUrl": "https://codeforces.com/"
+    "errorUrl": "https://codeforces.com/",
+    "tags": ["Developers"]
   },
   "Code Sandbox": {
     "urlMain": "https://codesandbox.io/",
@@ -277,14 +534,16 @@
     "username_claimed": "blue",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "status_code",
-    "urlProbe": "https://codesandbox.io/api/v1/users/{}"
+    "urlProbe": "https://codesandbox.io/api/v1/users/{}",
+    "tags": ["Developers"]
   },
   "hackerearth": {
     "urlMain": "https://www.hackerearth.com/",
     "url": "https://www.hackerearth.com/@{}",
     "username_claimed": "demo69",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Developers"]
   },
   "Chocolatey": {
     "urlMain": "https://chocolatey.org/",
@@ -292,70 +551,80 @@
     "username_claimed": "red",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "status_code",
-    "request_head_only": false
+    "request_head_only": false,
+    "tags": ["Developers"]
   },
   "Ebay": {
     "urlMain": "https://www.ebay.com/",
     "url": "https://www.ebay.com/usr/{}",
-    "logoClass": "fa-ebay",
+    "logoClass": "fab fa-ebay",
     "username_claimed": "blue",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "message",
-    "errorMsg": "eBay Profile - error"
+    "errorMsg": "eBay Profile - error",
+    "tags": ["Shopping"]
   },
   "Instagram": {
     "urlMain": "https://www.instagram.com/",
     "url": "https://www.instagram.com/{}",
-    "logoClass": "fa-instagram",
+    "logoClass": "fab fa-instagram",
     "username_claimed": "arianagrande",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "message",
     "errorMsg": "This profile does not exist",
-    "urlProbe": "https://www.instadp.com/profile/{}"
+    "urlProbe": "https://www.instadp.com/profile/{}",
+    "tags": ["Social Media"]
   },
   "CashApp": {
     "urlMain": "https://cash.app/",
     "url": "https://cash.app/${}",
     "username_claimed": "cohenchris",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Finance"]
   },
   "LinkTree": {
     "urlMain": "https://linktr.ee/",
     "url": "https://linktr.ee/{}",
     "username_claimed": "garyvee",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Social Media"]
   },
   "CampSite Bio": {
     "urlMain": "https://campsite.bio/",
     "url": "https://campsite.bio/{}",
     "username_claimed": "red",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Social Media"]
   },
   "Sessionize": {
     "urlMain": "https://sessionize.com/",
     "url": "https://sessionize.com/{}",
     "username_claimed": "chris",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Education"]
   },
   "Untappd": {
     "urlMain": "https://untappd.com/",
     "url": "https://untappd.com/user/{}",
-    "logoClass": "fa-untappd",
+    "logoClass": "fab fa-untappd",
+    "logoColor": "#FFC000",
     "username_claimed": "demotrace",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Food & Drink", "Social Media"]
   },
   "Tumblr": {
     "urlMain": "https://www.tumblr.com/",
     "url": "https://{}.tumblr.com",
-    "logoClass": "fa-tumblr-square",
+    "logoClass": "fab fa-tumblr-square",
     "username_claimed": "blue",
     "username_unclaimed": "noonewouldeverusethis",
-    "errorType": "status_code"
+    "errorType": "status_code",
+    "tags": ["Social Media"]
   },
   "Crates.io": {
     "urlMain": "https://crates.io/",
@@ -363,6 +632,18 @@
     "username_claimed": "UnwrittenFun",
     "username_unclaimed": "noonewouldeverusethis",
     "errorType": "status_code",
-    "urlProbe": "https://crates.io/api/v1/users/{}"
+    "urlProbe": "https://crates.io/api/v1/users/{}",
+    "tags": ["Developers"]
+  },
+  "Stack Overflow": {
+    "urlMain": "https://stackoverflow.com/",
+    "url": "https://stackoverflow.com/users?search={}",
+    "urlProbe": "https://stackoverflow.com/users/filter?search={}",
+    "logoClass": "fab fa-stack-overflow",
+    "username_claimed": "test",
+    "username_unclaimed": "noonewouldeverusethis",
+    "errorType": "message",
+    "errorMsg": "No users matched your search",
+    "tags": ["Social Media"]
   }
 }

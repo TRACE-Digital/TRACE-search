@@ -1,0 +1,41 @@
+name: Publish Docs
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ${{ github.branch }}
+        uses: actions/checkout@v2
+
+      - name: Grab Node version from NVMRC version
+        run: echo "NVMRC=$(cat .nvmrc)" >> "${GITHUB_ENV}"
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NVMRC }}
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Build docs
+        run: npm run build-docs
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: leigholiver/commit-with-deploy-key@v1.0.2
+        with:
+          source: docs
+          deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
+          destination_branch: main
+          destination_folder: .
+          destination_repo: TRACE-Digital/TRACE-search-docs
+          delete_destination: true
+          git_username: trace-digi-bot
+          git_email: 78513483+trace-digi-bot@users.noreply.github.com

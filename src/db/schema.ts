@@ -23,7 +23,7 @@ export interface AccountSchema extends BaseSchema {
   type: AccountType;
   createdAt: string;
   site?: Site; // TODO: Make this SiteSchema if we add functions to Site
-  siteName?: string;
+  siteName?: string; // TODO: This is pretty much not used anymore since we want sites to be editable
   userName: string;
 }
 
@@ -87,6 +87,8 @@ export interface SearchDefinitionSchema extends BaseSchema {
 
 export interface SearchSchema extends BaseSchema {
   state: SearchState;
+  lastSiteIndex: number;
+  lastUserNameIndex: number;
   startedAt: string | null;
   endedAt: string | null;
   definitionId: PouchDbId;
@@ -98,10 +100,12 @@ export interface ProfilePageSchema extends BaseSchema {
   title: string;
   published: boolean;
   hasPassword: boolean;
+  matomoSiteId: string | null;
   createdAt: string;
   lastEditedAt: string;
+  layoutType: string;
   colorScheme: ProfilePageColorSchema;
-  urls: string[];
+  customPath: string | null;
   accountIds: PouchDbId[];
 }
 

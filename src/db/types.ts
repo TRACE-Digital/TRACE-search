@@ -19,6 +19,11 @@ export type PouchDbId = string;
 export const UTF_MAX = '\ufff0';
 export const ID_SEPARATOR = '/';
 
+/** Generate a pseudo-random ID. */
+export const getRandomId = () => {
+  return Math.random().toString(36).substr(2);
+}
+
 /**
  * Convert `value` into a PouchDB document ID.
  *
