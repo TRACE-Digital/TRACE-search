@@ -119,7 +119,7 @@ export const getRemoteDb = async () => {
 
   options.auth = options.auth || {};
   options.auth.username = 'admin';
-  options.auth.password = '';
+  options.auth.password = atob('Q291Y2hEQkNhblN0aWxsSHVydFlvdToo'); // Shhhh...
 
   console.debug(options);
 
