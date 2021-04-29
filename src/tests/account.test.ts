@@ -282,12 +282,12 @@ describe('ManualAccount', () => {
   });
 
   it('accepts a manual site', () => {
-    expect(account.site).toBe(site);
+    expect(account.site).toEqual(site);
   });
 
   it('serializes with a manual site', () => {
     const serialized = account.serialize();
-    expect(serialized.site).toBe(site);
+    expect(serialized.site).toEqual(site);
   });
 
   it('deserializes with a manual site', async () => {
