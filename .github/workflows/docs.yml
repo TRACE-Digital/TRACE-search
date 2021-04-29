@@ -13,11 +13,15 @@ jobs:
       - name: Checkout ${{ github.branch }}
         uses: actions/checkout@v2
 
-      - name: Setup Node using nvm
-        shell: bash -l {0}
-        run: nvm install
+      - name: Grab Node version from NVMRC version
+        run: echo "NVMRC=$(cat .nvmrc)" >> "${GITHUB_ENV}"
 
-      - name: Install typedoc
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NVMRC }}
+
+      - name: Install packages
         run: npm install -g typedoc
 
       - name: Build docs
