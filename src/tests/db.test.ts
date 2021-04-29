@@ -15,6 +15,9 @@ import {
   resetRemoteDb,
   closeRemoteDb,
   setRemoteUser,
+  getEncryptionKey,
+  generateEncryptionKey,
+
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
@@ -52,7 +55,7 @@ const COGNITO_USER2: CognitoUserPartial = {
   },
 };
 
-const ENCRYPTION_KEY = "testing123"
+generateEncryptionKey("testing123", COGNITO_USER1.attributes.sub)
 
 describe('PouchDB', () => {
   let db: PouchDB.Database;
@@ -80,7 +83,7 @@ describe('PouchDB', () => {
   it('does migrations', async () => {
     const rawDb = new PouchDB('db.test.ts', DB_OPTIONS);
     // @ts-ignore
-    await rawDb.crypto(ENCRYPTION_KEY);
+    await rawDb.crypto(getEncryptionKey());
     await doMigrations(rawDb);
   });
 

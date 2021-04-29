@@ -1,4 +1,14 @@
+import { isNode } from "browser-or-node";
+
 export const sha256 = async (message: string) => {
+
+    if (isNode) {
+        const crypto = require('crypto');
+        const hash = crypto.createHash('sha256')
+                            .update(message)
+                            .digest('hex');
+        return hash;
+    }
     // encode as UTF-8
     const msgBuffer = new TextEncoder().encode(message);                    
 

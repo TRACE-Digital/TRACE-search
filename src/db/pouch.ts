@@ -69,7 +69,7 @@ export const generateEncryptionKey = async (password: string, cognitoID: string)
  * Compute current user's encryption key, if they are logged in
  * If not logged in, error is thrown
  */
-const getEncryptionKey = (): string => {
+export const getEncryptionKey = (): string => {
   // Check if already exists in localStorage
   const localStorageKey = localStorage.getItem('hashKey');
   if (localStorageKey) {  // If it's in localStorage, simply return
