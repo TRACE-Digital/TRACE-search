@@ -15,6 +15,7 @@ import {
   throwIfIdMismatch,
   UTF_MAX,
   DbCache,
+  getRandomId,
 } from 'db';
 import { allSites, filterSitesByTags, Site, supportedSites } from 'sites';
 import {
@@ -93,7 +94,7 @@ export class SearchDefinition implements IDbStorable {
   public static async deserialize(data: SearchDefinitionSchema, existingInstance?: SearchDefinition) {
     throwIfIdMismatch(data, existingInstance);
 
-    const instance = existingInstance || new SearchDefinition(data.name, data.includedSiteNames);
+    const instance = existingInstance || new SearchDefinition(data.name, data.includedSiteNames, data.tags);
 
     // TODO: Trust the constructor to get this right? Yes, probably
     // instance.includedSites
@@ -178,7 +179,8 @@ export class SearchDefinition implements IDbStorable {
       }
     }
 
-    this.id = toId(['searchDef', this.createdAt.toJSON(), this.name]);
+    const randomId = getRandomId();
+    this.id = toId(['searchDef', this.createdAt.toJSON(), randomId]);
   }
 
   /**

@@ -3,6 +3,7 @@ import {
   DbCache,
   DbResponse,
   getDb,
+  getRandomId,
   IDbStorable,
   PouchDbId,
   ProfilePageColorSchema,
@@ -177,9 +178,8 @@ export class ProfilePage implements IDbStorable {
     this.title = title || `Profile Page #${++ProfilePage.idForDefaultName}`;
     this.colorScheme = { ...DEFAULT_COLOR_SCHEME };
 
-    // TODO: Switch to hash after merge
-    const titleHash = SparkMD5.hash(this.title);
-    this.id = toId(['profile', this.createdAt.toJSON(), titleHash]);
+    const randomId = getRandomId();
+    this.id = toId(['profile', this.createdAt.toJSON(), randomId]);
   }
 
   /**
