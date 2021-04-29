@@ -12,6 +12,7 @@ import {
   UTF_MAX,
 } from 'db';
 import { ThirdPartyAccount } from 'search';
+import SparkMD5 from 'spark-md5';
 
 export const DEFAULT_COLOR_SCHEME: ProfilePageColorSchema = {
   titleColor: '#FFFFFF',
@@ -97,7 +98,7 @@ export class ProfilePage implements IDbStorable {
     instance.lastEditedAt = new Date(data.lastEditedAt);
     instance.layoutType = data.layoutType;
     instance.colorScheme = data.colorScheme;
-    instance.urls = data.urls;
+    instance.customPath = data.customPath;
 
     // bulkGet never returns if we pass [] for docs???
     if (data.accountIds.length > 0) {
@@ -163,10 +164,10 @@ export class ProfilePage implements IDbStorable {
 
   public layoutType: string = 'grid';
   public colorScheme: ProfilePageColorSchema;
-  public urls: string[] = [];
+  public customPath: string | null = null;
 
-  public get hasCustomUrl() {
-    return this.urls.length === 0;
+  public get hasCustomPath() {
+    return this.customPath !== null;
   }
 
   // public accountIds: Set<string> = new Set();
@@ -177,7 +178,8 @@ export class ProfilePage implements IDbStorable {
     this.colorScheme = { ...DEFAULT_COLOR_SCHEME };
 
     // TODO: Switch to hash after merge
-    this.id = toId(['profile', this.createdAt.toJSON(), this.title]);
+    const titleHash = SparkMD5.hash(this.title);
+    this.id = toId(['profile', this.createdAt.toJSON(), titleHash]);
   }
 
   /**
@@ -200,6 +202,15 @@ export class ProfilePage implements IDbStorable {
 
     console.error(result);
     throw new Error('Failed to save profile page!');
+  }
+
+  /** Remove an account from the profile page. Does not call `save()`. */
+  public removeAccount(id: PouchDbId) {
+    for (let i = this.accounts.length - 1; i >= 0; i--) {
+      if (this.accounts[i].id === id) {
+        this.accounts.splice(i, 1);
+      }
+    }
   }
 
   /**
@@ -239,7 +250,7 @@ export class ProfilePage implements IDbStorable {
       lastEditedAt: this.lastEditedAt.toJSON(),
       layoutType: this.layoutType,
       colorScheme: this.colorScheme,
-      urls: this.urls,
+      customPath: this.customPath,
       accountIds: this.accounts.map(account => account.id),
     };
   }

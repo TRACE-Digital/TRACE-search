@@ -105,7 +105,7 @@ export interface ProfilePageSchema extends BaseSchema {
   lastEditedAt: string;
   layoutType: string;
   colorScheme: ProfilePageColorSchema;
-  urls: string[];
+  customPath: string | null;
   accountIds: PouchDbId[];
 }
 
