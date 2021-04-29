@@ -9,6 +9,7 @@
 import PouchDB from 'pouchdb';
 // @ts-ignore
 import CryptoPouch from 'crypto-pouch';
+import { sha256 } from './sha256';
 import { isNode, isJsDom, isBrowser } from 'browser-or-node';
 import { doMigrations } from './migrations';
 import { BUILD_TYPE } from 'meta';
@@ -24,8 +25,6 @@ let _localDb: PouchDB.Database | null = null;
 let _remoteDb: PouchDB.Database | null = null;
 let _remoteUser: CognitoUserPartial | undefined;
 let _replicator: PouchDB.Replication.Sync<any> | null = null;
-
-export const ENCRYPTION_KEY = 'thisisatestthatdoesntreallymatterfornow';
 
 export const DB_NAME = 'trace';
 export const DB_OPTIONS: PouchDB.Configuration.LocalDatabaseConfiguration = {};
@@ -43,8 +42,42 @@ if (BUILD_TYPE === 'test') {
   console.log(`Using in-memory database '${DB_NAME}' for BUILD_TYPE === '${BUILD_TYPE}'`);
 }
 
-if (ENCRYPTION_KEY.length === 0) {
-  console.warn('No encryption key defined for PouchDB/CouchDB encryption!');
+const isLoggedIn = () => {
+  return _remoteUser;
+}
+
+const encryptionKeyExists = () => {
+  return localStorage.getItem('hashKey');
+}
+
+/**
+ * Based off of the password passed in, encryption key is stored in localStorage
+ */
+export const generateEncryptionKey = async (password: string, cognitoID: string) => {
+  // Key already present
+  const localStorageKey = localStorage.getItem('hashKey');
+  if (localStorageKey) {
+    throw new Error("Encryption key has already been set!")
+  }
+
+  // Key is not in localStorage, compute it and put it there
+  const hashKey: string = await sha256(password + cognitoID)
+  localStorage.setItem('hashKey', hashKey)
+}
+
+/**
+ * Compute current user's encryption key, if they are logged in
+ * If not logged in, error is thrown
+ */
+const getEncryptionKey = (): string => {
+  // Check if already exists in localStorage
+  const localStorageKey = localStorage.getItem('hashKey');
+  if (localStorageKey) {  // If it's in localStorage, simply return
+    return localStorageKey;
+  }
+  else {
+    throw new Error("Encryption key has not been defined yet!")
+  }
 }
 
 /**
@@ -126,8 +159,13 @@ export const getRemoteDb = async () => {
   try {
     console.log(`Connecting to remote database ${dbUrl}...`);
     _remoteDb = new PouchDB(dbUrl, options);
-    // @ts-ignore
-    await _remoteDb.crypto(ENCRYPTION_KEY);
+
+    // Only encrypt remoteDb if logged in!
+    if (isLoggedIn()) {
+      const key: string = getEncryptionKey()
+      // @ts-ignore
+      await _remoteDb.crypto(key);
+    }
   } catch (e) {
     throw new Error(`Could not connect to remote database!: ${e}`);
   }
@@ -145,6 +183,26 @@ export const getRemoteDb = async () => {
 };
 
 /**
+ * Completely removes everything in the local database
+ * This includes the database and the encryption keys
+ */
+export const destroyLocalDb = async () => {
+  // remove encryption key from localStorage
+  localStorage.removeItem('hashKey');
+
+  // tear down replication (so that data removal isn't synced)
+  await teardownReplication();
+
+  // clear local DB
+  const db = await getDb();
+  await resetDbCommon(db);
+
+  // straight up delete the database from the browser
+  indexedDB.deleteDatabase('_pouch_trace');
+}
+
+
+/**
  * Remove all data in the local database and re-run setup.
  *
  * This also clears the in-memory cache of all objects.
@@ -155,7 +213,7 @@ export const resetDb = async () => {
   await setupDb();
 
   DbCache.clear();
-};
+}
 
 /**
  * Remove all data from the remote database.
@@ -179,7 +237,8 @@ const resetDbCommon = async (db: PouchDB.Database) => {
     });
     console.log('Cleared database');
   } catch (e) {
-    throw new Error(`Could not clear database: ${e}`);
+    console.error(`Could not clear database: ${e}`)
+    // throw new Error(`Could not clear database: ${e}`);
   }
 };
 
@@ -226,8 +285,13 @@ const setupDb = async () => {
 
   if (_localDb === null) {
     _localDb = new PouchDB(DB_NAME, DB_OPTIONS);
-    // @ts-ignore
-    await _localDb.crypto(ENCRYPTION_KEY);
+
+    // Only encrypt localDb if logged in!
+    if (encryptionKeyExists()) {
+      const key: string = getEncryptionKey()
+      // @ts-ignore
+      await _localDb.crypto(key);
+    }
   }
   if (BUILD_TYPE !== 'test') console.debug(_localDb);
 

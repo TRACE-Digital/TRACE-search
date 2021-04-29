@@ -14,7 +14,6 @@ import {
   resetDb,
   resetRemoteDb,
   closeRemoteDb,
-  ENCRYPTION_KEY,
   setRemoteUser,
 } from 'db';
 import { doMigrations } from 'db/migrations';
@@ -52,6 +51,8 @@ const COGNITO_USER2: CognitoUserPartial = {
     },
   },
 };
+
+const ENCRYPTION_KEY = "testing123"
 
 describe('PouchDB', () => {
   let db: PouchDB.Database;
