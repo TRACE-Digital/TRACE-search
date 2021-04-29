@@ -17,8 +17,11 @@ jobs:
         shell: bash -l {0}
         run: nvm install
 
-      - name: Install packages
-        run: npm ci
+      - name: Install typedoc
+        run: npm install -g typedoc
+
+      - name: Build docs
+        run: npm run build-docs
 
       - name: Deploy to GitHub Pages
         if: success()
