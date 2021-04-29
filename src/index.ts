@@ -133,6 +133,7 @@ export {
   searchDefinitions,
   searchResults,
   searches,
+  toAccountId,
 } from 'search';
 
 // Deprecated stuff

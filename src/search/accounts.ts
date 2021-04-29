@@ -18,6 +18,11 @@ import {
 import { Site } from 'sites';
 import SparkMD5 from 'spark-md5';
 
+export const toAccountId = (site: Site, userName: string, idPrefix?: string) => {
+  const hash = SparkMD5.hash(toId([site.name, userName]));
+  return toId(['account', hash], idPrefix);
+};
+
 /**
  * Account associated with a third-party `Site`.
  */
@@ -124,22 +129,18 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    */
   public static async deserialize(data: AccountSchema, instance?: ThirdPartyAccount) {
     /**
-     * Hack to handle deserialization of accounts that have an `idPrefix`.
-     * This really only breaks if another ID field (i.e. `userName`) contains
-     * the entire `instance.id`.
+     * Hack to handle deserialization of accounts like search results that have an `idPrefix`.
      *
-     * This is actually possible since userName is supplied by the user, but we'll let
-     * it ride for now. This is really more of a guard for us as developers.
+     * If this is a new instance, child classes will have constructed it without the `idPrefix`
+     * since they have no way to know what it is. We don't have any way to extract the prefix
+     * here either right now, but we can at least sanity check that it's just the prefix causing
+     * the mismatch.
      *
-     * If we create `fromId()` to deconstruct an ID, we can improve this.
+     * If we add a `fromId` that reverses `toId`, we could extract the prefix and construct,
+     * but this basically does the same thing right now and is safe since we hash the site name/account name.
      *
-     * Example:
-     *  data._id: searchResult/account/example.com/user1
-     *  instance._id: account/example.com/user1
-     *
-     * Broken example:
-     *  data._id: searchResult/account/definitely-not-example.com/account/example.com/user1
-     *  instance._id: account/example.com/user1
+     * instance.id: account/hash
+     * data._id:    searchDef/blah/blah/search/blah/searchResult/account/hash
      */
     if (instance && data._id.endsWith(instance.id)) {
       instance.id = data._id;
@@ -175,17 +176,15 @@ export abstract class ThirdPartyAccount implements IDbStorable {
   public site: Site;
   public userName: string;
   public get url() {
-    // TODO: This is simple replacement for the Python format strings
-    // Need to make sure this works for everything
     return this.site.url.replace('{}', this.userName);
   }
 
   constructor(site: Site, userName: string, idPrefix?: string) {
-    this.site = site;
+    // Make a copy so that site edits don't apply to more than one account
+    this.site = JSON.parse(JSON.stringify(site));
     this.userName = userName;
 
-    const hash = SparkMD5.hash(toId([this.site.name, this.userName]));
-    this.id = toId(['account', hash], idPrefix);
+    this.id = toAccountId(this.site, this.userName, idPrefix);
   }
 
   /**
@@ -244,7 +243,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
       _rev: this.rev,
       type: this.type,
       createdAt: this.createdAt.toJSON(),
-      siteName: this.site.name,
+      site: this.site,
       userName: this.userName,
     };
   }
@@ -313,8 +312,9 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
    */
   public async claim(): Promise<ClaimedAccount> {
     if (this.actionTaken === AutoSearchAccountAction.CLAIMED) {
-      throw new Error(`'${this.id}' has already been claimed!`);
+      console.warn(`'${this.id}' has already been claimed!`);
     }
+    this.actionTaken = AutoSearchAccountAction.CLAIMED;
 
     const account = new ClaimedAccount(this.site, this.userName);
 
@@ -339,7 +339,6 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await ClaimedAccount.deserialize(schema, account);
 
-    this.actionTaken = AutoSearchAccountAction.CLAIMED;
     await this.save();
     await account.save();
 
@@ -353,8 +352,9 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
    */
   public async reject(): Promise<RejectedAccount> {
     if (this.actionTaken === AutoSearchAccountAction.REJECTED) {
-      throw new Error(`'${this.id}' has already been rejected!`);
+      console.warn(`'${this.id}' has already been rejected!`);
     }
+    this.actionTaken = AutoSearchAccountAction.REJECTED;
 
     const account = new RejectedAccount(this.site, this.userName);
 
@@ -379,7 +379,6 @@ export abstract class AutoSearchAccount extends ThirdPartyAccount {
     // Copy over the base account's properties
     await RejectedAccount.deserialize(schema, account);
 
-    this.actionTaken = AutoSearchAccountAction.REJECTED;
     await this.save();
     await account.save();
 
@@ -453,6 +452,7 @@ export class ClaimedAccount extends AutoSearchAccount {
   }
 
   public type = AccountType.CLAIMED;
+  public actionTaken = AutoSearchAccountAction.CLAIMED;
   public claimedAt: Date = new Date();
 
   public serialize(): ClaimedAccountSchema {
@@ -487,6 +487,7 @@ export class RejectedAccount extends AutoSearchAccount {
   }
 
   public type = AccountType.REJECTED;
+  public actionTaken = AutoSearchAccountAction.REJECTED;
   public rejectedAt: Date = new Date();
 
   public serialize(): RejectedAccountSchema {
@@ -594,13 +595,6 @@ export class ManualAccount extends ThirdPartyAccount {
 
   public type = AccountType.MANUAL;
   public lastEditedAt: Date = new Date();
-
-  /**
-   * Don't know what this will do yet.
-   */
-  public edit() {
-    throw new Error('Not implemented!');
-  }
 
   public serialize(): ManualAccountSchema {
     const base = super.serialize() as ManualAccountSchema;

@@ -202,12 +202,11 @@ describe('Accounts', () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
         if (account instanceof AutoSearchAccount) {
-          expect(account.actionTaken).toEqual(AutoSearchAccountAction.NONE);
-
           const claimed = await account.claim();
 
           expect(claimed).toBeInstanceOf(ClaimedAccount);
           expect(account.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
+          expect(claimed.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
         }
       });
 
@@ -215,12 +214,11 @@ describe('Accounts', () => {
         const account = new cls(SITE, USERNAME, SEARCH_PREFIX);
 
         if (account instanceof AutoSearchAccount) {
-          expect(account.actionTaken).toEqual(AutoSearchAccountAction.NONE);
-
           const rejected = await account.reject();
 
           expect(rejected).toBeInstanceOf(RejectedAccount);
           expect(account.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
+          expect(rejected.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
         }
       });
 
@@ -237,6 +235,7 @@ describe('Accounts', () => {
           expect(claimed).toBeInstanceOf(ClaimedAccount);
 
           expect(account.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
+          expect(claimed.actionTaken).toEqual(AutoSearchAccountAction.CLAIMED);
 
           // Confirm that cache was overwritten
           expect(ThirdPartyAccount.accountCache.get(rejected.id)).toBe(claimed);
@@ -257,6 +256,7 @@ describe('Accounts', () => {
           expect(rejected).toBeInstanceOf(RejectedAccount);
 
           expect(account.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
+          expect(rejected.actionTaken).toEqual(AutoSearchAccountAction.REJECTED);
 
           // Confirm that cache was overwritten
           expect(ThirdPartyAccount.accountCache.get(claimed.id)).toBe(rejected);
@@ -282,12 +282,12 @@ describe('ManualAccount', () => {
   });
 
   it('accepts a manual site', () => {
-    expect(account.site).toBe(site);
+    expect(account.site).toEqual(site);
   });
 
   it('serializes with a manual site', () => {
     const serialized = account.serialize();
-    expect(serialized.site).toBe(site);
+    expect(serialized.site).toEqual(site);
   });
 
   it('deserializes with a manual site', async () => {

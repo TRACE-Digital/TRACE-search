@@ -15,6 +15,7 @@ import {
   throwIfIdMismatch,
   UTF_MAX,
   DbCache,
+  getRandomId,
 } from 'db';
 import { allSites, filterSitesByTags, Site, supportedSites } from 'sites';
 import {
@@ -23,6 +24,7 @@ import {
   FailedAccount,
   RegisteredAccount,
   ThirdPartyAccount,
+  toAccountId,
   UnregisteredAccount,
 } from './accounts';
 import { findAccount } from './findAccount';
@@ -92,7 +94,7 @@ export class SearchDefinition implements IDbStorable {
   public static async deserialize(data: SearchDefinitionSchema, existingInstance?: SearchDefinition) {
     throwIfIdMismatch(data, existingInstance);
 
-    const instance = existingInstance || new SearchDefinition(data.name, data.includedSiteNames);
+    const instance = existingInstance || new SearchDefinition(data.name, data.includedSiteNames, data.tags);
 
     // TODO: Trust the constructor to get this right? Yes, probably
     // instance.includedSites
@@ -177,7 +179,8 @@ export class SearchDefinition implements IDbStorable {
       }
     }
 
-    this.id = toId(['searchDef', this.createdAt.toJSON(), this.name]);
+    const randomId = getRandomId();
+    this.id = toId(['searchDef', this.createdAt.toJSON(), randomId]);
   }
 
   /**
@@ -372,6 +375,8 @@ export class Search implements IDbStorable {
     instance.rev = data._rev;
     instance.definition = definition;
     instance.state = data.state;
+    instance.lastSiteIndex = data.lastSiteIndex;
+    instance.lastUserNameIndex = data.lastUserNameIndex;
     instance.startedAt = data.startedAt ? new Date(data.startedAt) : null;
     instance.endedAt = data.endedAt ? new Date(data.endedAt) : null;
 
@@ -470,8 +475,11 @@ export class Search implements IDbStorable {
 
     console.groupCollapsed(`${logAction} search...`);
 
+    if (this.state === SearchState.CREATED) {
+      this.startedAt = new Date();
+    }
     this.state = SearchState.IN_PROGRESS;
-    this.startedAt = new Date();
+    await this.save();
 
     // TODO: This is synchronous right now
     // Should probably devise something async
@@ -486,11 +494,6 @@ export class Search implements IDbStorable {
 
       this.state = SearchState.COMPLETED;
 
-      // if (logAction !== 'Resuming') {
-      //   console.assert(this.progress === 100, 'Finished search did not have 100% progress!');
-
-      //   this.state = SearchState.COMPLETED;
-      // }
     } catch (e) {
       console.error(`Search failed!:`);
       console.error(e);
@@ -519,7 +522,6 @@ export class Search implements IDbStorable {
     } else {
       console.error(`Cannot call cancel() while state is '${this.state}'!`)
       return;
-      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
     console.log(`Cancelling ${logState} search...`);
@@ -540,11 +542,8 @@ export class Search implements IDbStorable {
     } else {
       console.error(`Cannot call resume() while state is '${this.state}'!`)
       return;
-      //throw new Error(`Cannot call cancel() while state is '${this.state}'!`);
     }
 
-    // console.log(`Resuming ${logState} search...`); // this is already logged in this.start()
-    
     await this.start(); // this.start() will automatically mark as IN_PROGRESS
   }
 
@@ -564,6 +563,9 @@ export class Search implements IDbStorable {
     console.log(`Pausing ${logState} search...`);
 
     this.state = SearchState.PAUSED;
+    await this.save();
+
+    // TODO: Wait for the pause to actually complete
   }
 
   /**
@@ -574,6 +576,28 @@ export class Search implements IDbStorable {
   protected async doSearch() {
 
     // TODO: what happens if a duplicate is found?
+
+    // Save everything that the user has already claimed/rejected
+    if (this.lastSiteIndex === 0 && this.lastUserNameIndex === 0) {
+      // Load all claimed/rejected accounts into the cache since we need to check against a ton of them
+      // These should already be loaded for the dashboard anyway
+      await ThirdPartyAccount.loadAll();
+
+      for (const site of this.definition.includedSites) {
+        for (const userName of this.definition.userNames) {
+          // It's not straightforward to lookup a search result given only the account ID
+          // We need to know the search definition and search or query across everything
+          // Just grab the account for now
+          const id = toAccountId(site, userName);
+          const existing = ThirdPartyAccount.accountCache.get(id);
+
+          // It's not safe to push manual accounts into the results
+          if (existing && existing instanceof AutoSearchAccount) {
+            this.storeResult(existing);
+          }
+        }
+      }
+    }
 
     // starting from lastSiteIndex will immediately resume from where we paused, if applicable
     // otherwise, this will have no effect (if not resuming) since lastSiteIndex is initialized to 0
@@ -589,6 +613,7 @@ export class Search implements IDbStorable {
           // save the site/username to resume on
           this.lastSiteIndex = i;
           this.lastUserNameIndex = j;
+          await this.save();
           return;
         }
 
@@ -614,9 +639,9 @@ export class Search implements IDbStorable {
         this.storeResult(account);
       }
       // resets lastUserNameIndex once the search for one site is done.
-      // if resuming, starts back on the exact username that we left off on, 
+      // if resuming, starts back on the exact username that we left off on,
       //    but makes sure to search every username for the following site searches
-      this.lastUserNameIndex = 0; 
+      this.lastUserNameIndex = 0;
     }
     this.lastSiteIndex = 0; // resets lastSiteIndex once the search is done.
   }
@@ -706,6 +731,8 @@ export class Search implements IDbStorable {
       _id: this.id,
       _rev: this.rev,
       state: this.state,
+      lastSiteIndex: this.lastSiteIndex,
+      lastUserNameIndex: this.lastUserNameIndex,
       startedAt: this.startedAt ? this.startedAt.toJSON() : null,
       endedAt: this.endedAt ? this.endedAt.toJSON() : null,
       definitionId: this.definition.id,
