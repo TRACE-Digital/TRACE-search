@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ env.NVMRC }}
 
       - name: Install packages
-        run: npm install -g typedoc
+        run: npm ci
 
       - name: Build docs
         run: npm run build-docs
