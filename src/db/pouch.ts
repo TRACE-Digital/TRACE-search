@@ -100,8 +100,19 @@ export const getDb = async () => {
 /**
  * Set the remote user that will be used to connect to
  * the remote database.
+ *
+ * Call with `null` to reset all remote/user-related utilities.
  */
-export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
+export const setRemoteUser = async (cognitoUser: CognitoUserPartial | null) => {
+  if (cognitoUser === null) {
+    await teardownReplication();
+    removeEncryptionKey();
+    await closeRemoteDb();
+
+    _remoteUser = undefined;
+    return;
+  }
+
   if (_remoteUser?.attributes.sub === cognitoUser.attributes.sub) {
     console.debug(`Remote user was already set to '${cognitoUser.attributes.sub}'.`);
     return;
