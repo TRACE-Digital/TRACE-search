@@ -1,0 +1,935 @@
+{
+  "2Dimensions": {
+    "privacyRating": "none"
+  },
+  "3dnews": {
+    "privacyRating": "none"
+  },
+  "7Cups": {
+    "privacyRating": "none"
+  },
+  "9GAG": {
+    "privacyRating": "none"
+  },
+  "About.me": {
+    "privacyRating": "none"
+  },
+  "Academia.edu": {
+    "privacyRating": "none"
+  },
+  "Alik.cz": {
+    "privacyRating": "none"
+  },
+  "AllTrails": {
+    "privacyRating": "none"
+  },
+  "Anobii": {
+    "privacyRating": "none"
+  },
+  "Apple Discussions": {
+    "privacyRating": "none"
+  },
+  "Archive.org": {
+    "privacyRating": "B"
+  },
+  "Asciinema": {
+    "privacyRating": "none"
+  },
+  "Ask Fedora": {
+    "privacyRating": "none"
+  },
+  "AskFM": {
+    "privacyRating": "E"
+  },
+  "Atom Discussions": {
+    "privacyRating": "none"
+  },
+  "Audiojungle": {
+    "privacyRating": "none"
+  },
+  "Avizo": {
+    "privacyRating": "none"
+  },
+  "BLIP.fm": {
+    "privacyRating": "none"
+  },
+  "BOOTH": {
+    "privacyRating": "none"
+  },
+  "Bandcamp": {
+    "privacyRating": "D"
+  },
+  "Bazar.cz": {
+    "privacyRating": "none"
+  },
+  "Behance": {
+    "privacyRating": "none"
+  },
+  "BinarySearch": {
+    "privacyRating": "none"
+  },
+  "BitBucket": {
+    "privacyRating": "none"
+  },
+  "BitCoinForum": {
+    "privacyRating": "none"
+  },
+  "Blogger": {
+    "privacyRating": "none"
+  },
+  "BodyBuilding": {
+    "privacyRating": "none"
+  },
+  "Bookcrossing": {
+    "privacyRating": "none"
+  },
+  "BuyMeACoffee": {
+    "privacyRating": "none"
+  },
+  "BuzzFeed": {
+    "privacyRating": "none"
+  },
+  "CNET": {
+    "privacyRating": "B"
+  },
+  "CapFriendly": {
+    "privacyRating": "none"
+  },
+  "Carbonmade": {
+    "privacyRating": "none"
+  },
+  "Career.habr": {
+    "privacyRating": "none"
+  },
+  "Cent": {
+    "privacyRating": "none"
+  },
+  "Championat": {
+    "privacyRating": "none"
+  },
+  "Chatujme.cz": {
+    "privacyRating": "none"
+  },
+  "Chess": {
+    "privacyRating": "B"
+  },
+  "Cloob": {
+    "privacyRating": "none"
+  },
+  "CloudflareCommunity": {
+    "privacyRating": "none"
+  },
+  "Clozemaster": {
+    "privacyRating": "none"
+  },
+  "Codecademy": {
+    "privacyRating": "none"
+  },
+  "Codechef": {
+    "privacyRating": "none"
+  },
+  "Codepen": {
+    "privacyRating": "none"
+  },
+  "Codewars": {
+    "privacyRating": "B"
+  },
+  "ColourLovers": {
+    "privacyRating": "none"
+  },
+  "Contently": {
+    "privacyRating": "none"
+  },
+  "Coroflot": {
+    "privacyRating": "none"
+  },
+  "Countable": {
+    "privacyRating": "none"
+  },
+  "Cracked": {
+    "privacyRating": "none"
+  },
+  "Crevado": {
+    "privacyRating": "none"
+  },
+  "DEV Community": {
+    "privacyRating": "A"
+  },
+  "DailyMotion": {
+    "privacyRating": "E"
+  },
+  "Designspiration": {
+    "privacyRating": "none"
+  },
+  "DeviantART": {
+    "privacyRating": "C"
+  },
+  "Discogs": {
+    "privacyRating": "C"
+  },
+  "Discuss.Elastic.co": {
+    "privacyRating": "none"
+  },
+  "Disqus": {
+    "privacyRating": "E"
+  },
+  "Docker Hub": {
+    "privacyRating": "none"
+  },
+  "Dribbble": {
+    "privacyRating": "B"
+  },
+  "Duolingo": {
+    "privacyRating": "none"
+  },
+  "Ello": {
+    "privacyRating": "B"
+  },
+  "Etsy": {
+    "privacyRating": "D"
+  },
+  "Euw": {
+    "privacyRating": "none"
+  },
+  "EyeEm": {
+    "privacyRating": "none"
+  },
+  "F3.cool": {
+    "privacyRating": "none"
+  },
+  "Facebook": {
+    "privacyRating": "E"
+  },
+  "Facenama": {
+    "privacyRating": "none"
+  },
+  "Fandom": {
+    "privacyRating": "E"
+  },
+  "Flickr": {
+    "privacyRating": "E"
+  },
+  "Flightradar24": {
+    "privacyRating": "none"
+  },
+  "Flipboard": {
+    "privacyRating": "none"
+  },
+  "Football": {
+    "privacyRating": "B"
+  },
+  "FortniteTracker": {
+    "privacyRating": "none"
+  },
+  "Freelance.habr": {
+    "privacyRating": "none"
+  },
+  "Freelancer.com": {
+    "privacyRating": "none"
+  },
+  "Freesound": {
+    "privacyRating": "none"
+  },
+  "GDProfiles": {
+    "privacyRating": "none"
+  },
+  "Gamespot": {
+    "privacyRating": "B"
+  },
+  "GetMyUni": {
+    "privacyRating": "none"
+  },
+  "Giphy": {
+    "privacyRating": "none"
+  },
+  "GitHub": {
+    "privacyRating": "B"
+  },
+  "GitHub Support Community": {
+    "privacyRating": "D"
+  },
+  "GitLab": {
+    "privacyRating": "B"
+  },
+  "Gitee": {
+    "privacyRating": "none"
+  },
+  "GoodReads": {
+    "privacyRating": "E"
+  },
+  "Gravatar": {
+    "privacyRating": "B"
+  },
+  "Gumroad": {
+    "privacyRating": "none"
+  },
+  "GunsAndAmmo": {
+    "privacyRating": "none"
+  },
+  "GuruShots": {
+    "privacyRating": "none"
+  },
+  "HackTheBox": {
+    "privacyRating": "none"
+  },
+  "Hackaday": {
+    "privacyRating": "none"
+  },
+  "HackerNews": {
+    "privacyRating": "B"
+  },
+  "HackerOne": {
+    "privacyRating": "none"
+  },
+  "HackerRank": {
+    "privacyRating": "none"
+  },
+  "House-Mixes.com": {
+    "privacyRating": "none"
+  },
+  "Houzz": {
+    "privacyRating": "B"
+  },
+  "HubPages": {
+    "privacyRating": "none"
+  },
+  "Hubski": {
+    "privacyRating": "none"
+  },
+  "ICQ": {
+    "privacyRating": "none"
+  },
+  "IFTTT": {
+    "privacyRating": "D"
+  },
+  "ImgUp.cz": {
+    "privacyRating": "none"
+  },
+  "Imgur": {
+    "privacyRating": "none"
+  },
+  "Instructables": {
+    "privacyRating": "none"
+  },
+  "Issuu": {
+    "privacyRating": "none"
+  },
+  "Itch.io": {
+    "privacyRating": "B"
+  },
+  "Jimdo": {
+    "privacyRating": "none"
+  },
+  "Kaggle": {
+    "privacyRating": "none"
+  },
+  "Kali community": {
+    "privacyRating": "E"
+  },
+  "Keybase": {
+    "privacyRating": "B"
+  },
+  "Kik": {
+    "privacyRating": "none"
+  },
+  "Kongregate": {
+    "privacyRating": "D"
+  },
+  "LOR": {
+    "privacyRating": "none"
+  },
+  "Launchpad": {
+    "privacyRating": "none"
+  },
+  "LeetCode": {
+    "privacyRating": "none"
+  },
+  "Letterboxd": {
+    "privacyRating": "B"
+  },
+  "Lichess": {
+    "privacyRating": "B"
+  },
+  "LiveJournal": {
+    "privacyRating": "none"
+  },
+  "LiveLeak": {
+    "privacyRating": "none"
+  },
+  "Lobsters": {
+    "privacyRating": "none"
+  },
+  "Lolchess": {
+    "privacyRating": "none"
+  },
+  "Medium": {
+    "privacyRating": "B"
+  },
+  "Memrise": {
+    "privacyRating": "none"
+  },
+  "MixCloud": {
+    "privacyRating": "none"
+  },
+  "Munzee": {
+    "privacyRating": "none"
+  },
+  "MyAnimeList": {
+    "privacyRating": "B"
+  },
+  "MyMiniFactory": {
+    "privacyRating": "none"
+  },
+  "Myspace": {
+    "privacyRating": "none"
+  },
+  "NICommunityForum": {
+    "privacyRating": "none"
+  },
+  "NameMC (Minecraft.net skins)": {
+    "privacyRating": "C"
+  },
+  "NationStates Nation": {
+    "privacyRating": "none"
+  },
+  "NationStates Region": {
+    "privacyRating": "none"
+  },
+  "Naver": {
+    "privacyRating": "B"
+  },
+  "Newgrounds": {
+    "privacyRating": "D"
+  },
+  "Nightbot": {
+    "privacyRating": "none"
+  },
+  "NotABug.org": {
+    "privacyRating": "none"
+  },
+  "OK": {
+    "privacyRating": "A"
+  },
+  "OpenStreetMap": {
+    "privacyRating": "B"
+  },
+  "Opensource": {
+    "privacyRating": "none"
+  },
+  "Oracle Community": {
+    "privacyRating": "E"
+  },
+  "Otzovik": {
+    "privacyRating": "B"
+  },
+  "OurDJTalk": {
+    "privacyRating": "none"
+  },
+  "PCGamer": {
+    "privacyRating": "E"
+  },
+  "PCPartPicker": {
+    "privacyRating": "none"
+  },
+  "PSNProfiles.com": {
+    "privacyRating": "none"
+  },
+  "Packagist": {
+    "privacyRating": "none"
+  },
+  "Pastebin": {
+    "privacyRating": "B"
+  },
+  "Patreon": {
+    "privacyRating": "B"
+  },
+  "Periscope": {
+    "privacyRating": "none"
+  },
+  "Pinkbike": {
+    "privacyRating": "none"
+  },
+  "Pinterest": {
+    "privacyRating": "E"
+  },
+  "PlayStore": {
+    "privacyRating": "none"
+  },
+  "Plug.DJ": {
+    "privacyRating": "none"
+  },
+  "Pokemon Showdown": {
+    "privacyRating": "none"
+  },
+  "Polarsteps": {
+    "privacyRating": "none"
+  },
+  "Polygon": {
+    "privacyRating": "none"
+  },
+  "ProductHunt": {
+    "privacyRating": "none"
+  },
+  "PromoDJ": {
+    "privacyRating": "none"
+  },
+  "PyPi": {
+    "privacyRating": "none"
+  },
+  "Quizlet": {
+    "privacyRating": "D"
+  },
+  "Quora": {
+    "privacyRating": "E"
+  },
+  "Raidforums": {
+    "privacyRating": "none"
+  },
+  "Rajce.net": {
+    "privacyRating": "none"
+  },
+  "Rate Your Music": {
+    "privacyRating": "A"
+  },
+  "Redbubble": {
+    "privacyRating": "D"
+  },
+  "Reddit": {
+    "privacyRating": "none"
+  },
+  "Repl.it": {
+    "privacyRating": "B"
+  },
+  "ResearchGate": {
+    "privacyRating": "B"
+  },
+  "ReverbNation": {
+    "privacyRating": "none"
+  },
+  "Roblox": {
+    "privacyRating": "D"
+  },
+  "RubyGems": {
+    "privacyRating": "none"
+  },
+  "Sbazar.cz": {
+    "privacyRating": "none"
+  },
+  "Scratch": {
+    "privacyRating": "B"
+  },
+  "Scribd": {
+    "privacyRating": "none"
+  },
+  "ShitpostBot5000": {
+    "privacyRating": "none"
+  },
+  "Signal": {
+    "privacyRating": "B"
+  },
+  "Slack": {
+    "privacyRating": "B"
+  },
+  "Slashdot": {
+    "privacyRating": "none"
+  },
+  "SlideShare": {
+    "privacyRating": "none"
+  },
+  "Smashcast": {
+    "privacyRating": "none"
+  },
+  "Smule": {
+    "privacyRating": "none"
+  },
+  "SoundCloud": {
+    "privacyRating": "D"
+  },
+  "SourceForge": {
+    "privacyRating": "E"
+  },
+  "SoylentNews": {
+    "privacyRating": "none"
+  },
+  "SparkPeople": {
+    "privacyRating": "none"
+  },
+  "Speedrun.com": {
+    "privacyRating": "none"
+  },
+  "Splits.io": {
+    "privacyRating": "none"
+  },
+  "Sporcle": {
+    "privacyRating": "none"
+  },
+  "SportsRU": {
+    "privacyRating": "none"
+  },
+  "Spotify": {
+    "privacyRating": "D"
+  },
+  "Star Citizen": {
+    "privacyRating": "none"
+  },
+  "Steam": {
+    "privacyRating": "A"
+  },
+  "SteamGroup": {
+    "privacyRating": "C"
+  },
+  "Steamid": {
+    "privacyRating": "none"
+  },
+  "Strava": {
+    "privacyRating": "E"
+  },
+  "SublimeForum": {
+    "privacyRating": "none"
+  },
+  "TETR.IO": {
+    "privacyRating": "none"
+  },
+  "Telegram": {
+    "privacyRating": "B"
+  },
+  "Tellonym.me": {
+    "privacyRating": "none"
+  },
+  "TikTok": {
+    "privacyRating": "D"
+  },
+  "Tinder": {
+    "privacyRating": "B"
+  },
+  "TrackmaniaLadder": {
+    "privacyRating": "none"
+  },
+  "TradingView": {
+    "privacyRating": "none"
+  },
+  "Trakt": {
+    "privacyRating": "none"
+  },
+  "TrashboxRU": {
+    "privacyRating": "none"
+  },
+  "Trello": {
+    "privacyRating": "C"
+  },
+  "TripAdvisor": {
+    "privacyRating": "E"
+  },
+  "TryHackMe": {
+    "privacyRating": "none"
+  },
+  "Twitch": {
+    "privacyRating": "E"
+  },
+  "Twitter": {
+    "privacyRating": "none"
+  },
+  "Typeracer": {
+    "privacyRating": "none"
+  },
+  "Ultimate-Guitar": {
+    "privacyRating": "none"
+  },
+  "Unsplash": {
+    "privacyRating": "none"
+  },
+  "VK": {
+    "privacyRating": "E"
+  },
+  "VSCO": {
+    "privacyRating": "none"
+  },
+  "Velomania": {
+    "privacyRating": "none"
+  },
+  "Venmo": {
+    "privacyRating": "C"
+  },
+  "Vero": {
+    "privacyRating": "none"
+  },
+  "Vimeo": {
+    "privacyRating": "E"
+  },
+  "Virgool": {
+    "privacyRating": "none"
+  },
+  "VirusTotal": {
+    "privacyRating": "B"
+  },
+  "Warrior Forum": {
+    "privacyRating": "B"
+  },
+  "Wattpad": {
+    "privacyRating": "D"
+  },
+  "We Heart It": {
+    "privacyRating": "none"
+  },
+  "WebNode": {
+    "privacyRating": "none"
+  },
+  "Whonix Forum": {
+    "privacyRating": "B"
+  },
+  "Wikidot": {
+    "privacyRating": "B"
+  },
+  "Wikipedia": {
+    "privacyRating": "E"
+  },
+  "Windy": {
+    "privacyRating": "none"
+  },
+  "Wix": {
+    "privacyRating": "none"
+  },
+  "WordPress": {
+    "privacyRating": "none"
+  },
+  "WordPressOrg": {
+    "privacyRating": "A"
+  },
+  "Xbox Gamertag": {
+    "privacyRating": "none"
+  },
+  "YouNow": {
+    "privacyRating": "none"
+  },
+  "YouPic": {
+    "privacyRating": "none"
+  },
+  "YouTube": {
+    "privacyRating": "E"
+  },
+  "Zhihu": {
+    "privacyRating": "none"
+  },
+  "akniga": {
+    "privacyRating": "none"
+  },
+  "allmylinks": {
+    "privacyRating": "none"
+  },
+  "aminoapp": {
+    "privacyRating": "none"
+  },
+  "authorSTREAM": {
+    "privacyRating": "none"
+  },
+  "babyRU": {
+    "privacyRating": "none"
+  },
+  "babyblogRU": {
+    "privacyRating": "none"
+  },
+  "chaos.social": {
+    "privacyRating": "none"
+  },
+  "couchsurfing": {
+    "privacyRating": "E"
+  },
+  "d3RU": {
+    "privacyRating": "none"
+  },
+  "dailykos": {
+    "privacyRating": "none"
+  },
+  "datingRU": {
+    "privacyRating": "none"
+  },
+  "devRant": {
+    "privacyRating": "none"
+  },
+  "drive2": {
+    "privacyRating": "none"
+  },
+  "eGPU": {
+    "privacyRating": "none"
+  },
+  "eintracht": {
+    "privacyRating": "none"
+  },
+  "fixya": {
+    "privacyRating": "none"
+  },
+  "fl": {
+    "privacyRating": "none"
+  },
+  "forum_guns": {
+    "privacyRating": "none"
+  },
+  "forumhouseRU": {
+    "privacyRating": "none"
+  },
+  "geocaching": {
+    "privacyRating": "none"
+  },
+  "gfycat": {
+    "privacyRating": "E"
+  },
+  "habr": {
+    "privacyRating": "none"
+  },
+  "hackster": {
+    "privacyRating": "none"
+  },
+  "hunting": {
+    "privacyRating": "none"
+  },
+  "iMGSRC.RU": {
+    "privacyRating": "none"
+  },
+  "igromania": {
+    "privacyRating": "none"
+  },
+  "interpals": {
+    "privacyRating": "none"
+  },
+  "irecommend": {
+    "privacyRating": "C"
+  },
+  "jbzd.com.pl": {
+    "privacyRating": "none"
+  },
+  "jeuxvideo": {
+    "privacyRating": "none"
+  },
+  "kofi": {
+    "privacyRating": "B"
+  },
+  "kwork": {
+    "privacyRating": "none"
+  },
+  "labpentestit": {
+    "privacyRating": "none"
+  },
+  "last.fm": {
+    "privacyRating": "C"
+  },
+  "leasehackr": {
+    "privacyRating": "none"
+  },
+  "livelib": {
+    "privacyRating": "none"
+  },
+  "mastodon.cloud": {
+    "privacyRating": "none"
+  },
+  "mastodon.social": {
+    "privacyRating": "B"
+  },
+  "mastodon.technology": {
+    "privacyRating": "none"
+  },
+  "mastodon.xyz": {
+    "privacyRating": "none"
+  },
+  "mercadolivre": {
+    "privacyRating": "none"
+  },
+  "metacritic": {
+    "privacyRating": "none"
+  },
+  "moikrug": {
+    "privacyRating": "none"
+  },
+  "mstdn.io": {
+    "privacyRating": "none"
+  },
+  "nairaland.com": {
+    "privacyRating": "none"
+  },
+  "nnRU": {
+    "privacyRating": "none"
+  },
+  "note": {
+    "privacyRating": "C"
+  },
+  "npm": {
+    "privacyRating": "C"
+  },
+  "opennet": {
+    "privacyRating": "none"
+  },
+  "osu!": {
+    "privacyRating": "A"
+  },
+  "phpRU": {
+    "privacyRating": "none"
+  },
+  "pikabu": {
+    "privacyRating": "none"
+  },
+  "pr0gramm": {
+    "privacyRating": "none"
+  },
+  "prog.hu": {
+    "privacyRating": "none"
+  },
+  "radio_echo_msk": {
+    "privacyRating": "none"
+  },
+  "satsisRU": {
+    "privacyRating": "none"
+  },
+  "social.tchncs.de": {
+    "privacyRating": "none"
+  },
+  "spletnik": {
+    "privacyRating": "none"
+  },
+  "svidbook": {
+    "privacyRating": "none"
+  },
+  "toster": {
+    "privacyRating": "none"
+  },
+  "uid": {
+    "privacyRating": "none"
+  },
+  "Codeforces": {
+    "privacyRating": "none"
+  },
+  "Code Sandbox": {
+    "privacyRating": "D"
+  },
+  "hackerearth": {
+    "privacyRating": "none"
+  },
+  "Chocolatey": {
+    "privacyRating": "none"
+  },
+  "Ebay": {
+    "privacyRating": "E"
+  },
+  "Instagram": {
+    "privacyRating": "E"
+  },
+  "CashApp": {
+    "privacyRating": "C"
+  },
+  "LinkTree": {
+    "privacyRating": "none"
+  },
+  "CampSite Bio": {
+    "privacyRating": "none"
+  },
+  "Sessionize": {
+    "privacyRating": "none"
+  },
+  "Untappd": {
+    "privacyRating": "none"
+  },
+  "Tumblr": {
+    "privacyRating": "B"
+  },
+  "Crates.io": {
+    "privacyRating": "none"
+  }
+}

@@ -1,5 +1,12 @@
 import * as sherlock from './sherlock.json';
 import * as trace from './trace.json';
+import * as ratings from './privacy_ratings.json';
+
+interface PrivacyRatingList {
+  [key: string]: {
+    privacyRating: string;
+  };
+}
 
 /** Properties present on JSON site definitions from Sherlock. */
 interface SherlockSite {
@@ -110,6 +117,9 @@ delete unsupportedSites['default'];
 
 /** All tags available on TRACE sites. */
 export const tags = Object.keys(tagSet).sort();
+
+/** All privacy ratings available for TRACE sites. */
+export const privacyRatings: PrivacyRatingList = JSON.parse(JSON.stringify(ratings));
 
 /** Contains all sites, including unsupported ones. */
 export const allSites: SiteList = mergedSites;

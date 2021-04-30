@@ -120,6 +120,8 @@ export {
   closeRemoteDb,
   destroyDb,
   destroyRemoteDb,
+  generateEncryptionKey,
+  getEncryptionKey,
   setRemoteUser,
   setupReplication,
   teardownReplication,
@@ -127,7 +129,7 @@ export {
   exportToReadableJson,
   exportToCsv
 } from 'db';
-export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags } from 'sites';
+export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags, privacyRatings } from 'sites';
 export { VERSION, EXTENSION_MIN_VERSION, EXTENSION_VERSION, checkExtensionVersion } from 'meta';
 export { ProfilePage, DEFAULT_COLOR_SCHEME, pages } from 'profile';
 export {

@@ -45,6 +45,7 @@ const config = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     plugins: [new TsconfigPathsPlugin({})],
+    fallback: { "crypto": false }
   },
 };
 
