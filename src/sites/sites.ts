@@ -10,18 +10,30 @@ interface PrivacyRatingList {
 
 /** Properties present on JSON site definitions from Sherlock. */
 interface SherlockSite {
-  errorType: string; // status_code, message, or response_url
-  url: string; // url for website profile page
-  urlMain: string; // url for website home page
-  username_claimed: string; // username that is claimed on the website
-  username_unclaimed: string; // username that is not claimed on the website
-  errorMsg?: string | string[]; // if errorType = message, this message will pop up if the profile doesn't exist
-  regexCheck?: string; // regex for valid usernames on the website
-  errorUrl?: string; // if errorType = response_url, this is the url that the use will be redirected to if the profile doesn't exist
-  urlProbe?: string; // alternate profile page test url for sites where profiles aren't publicly facing
-  noPeriod?: string; // ???
-  headers?: {}; // headers to send with the request if needed
-  request_head_only?: boolean; // for status_code errorType website -- use a GET request instead of a HEAD request
+  /** `status_code`, `message`, or `response_url` */
+  errorType: string;
+  /** Template URL for website profile page */
+  url: string;
+  /** URL for website home page */
+  urlMain: string;
+  /** Username that is claimed on the website */
+  username_claimed: string;
+  /** Username that is not claimed on the website */
+  username_unclaimed: string;
+  /** If `errorType === 'message'`, this message will pop up if the profile doesn't exist */
+  errorMsg?: string | string[];
+  /** RegEx for valid usernames on the website */
+  regexCheck?: string;
+  /** If `errorType === 'response_url'`, this is the url that the use will be redirected to if the profile doesn't exist */
+  errorUrl?: string;
+  /** Alternate profile page test url for sites where profiles aren't publicly facing */
+  urlProbe?: string;
+  /** ??? */
+  noPeriod?: string;
+  /** HTTP headers to send with the request if needed */
+  headers?: {};
+  /** For `errorType === 'status_code'` websites -- use a GET request instead of a HEAD request */
+  request_head_only?: boolean;
 }
 
 interface SherlockSiteList {
@@ -30,10 +42,14 @@ interface SherlockSiteList {
 
 /** Properties added in the TRACE JSON overlay. */
 interface TraceSite {
-  prettyUrl?: string; // Host/pretty formatted version of the site's URL
-  logoClass?: string; // FontAwesome CSS class for the logo (for use in frontend)
-  logoColor?: string; // Optional value to be assigned to the CSS 'color' property
-  omit?: boolean; // tells program to not process the site
+  /** Host/pretty formatted version of the site's URL */
+  prettyUrl?: string;
+  /** FontAwesome CSS class for the logo (for use in frontend) */
+  logoClass?: string;
+  /** Optional value to be assigned to the CSS 'color' property */
+  logoColor?: string;
+  /** If `true`, skip this site */
+  omit?: boolean;
   tags?: string[];
 }
 

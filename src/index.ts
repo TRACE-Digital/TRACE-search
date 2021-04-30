@@ -1,6 +1,6 @@
 import 'db/crypto-polyfill';
 import { allSites } from 'sites';
-import { getDb, UTF_MAX, setupReplication, teardownReplication } from 'db';
+import { destroyDb, getDb, UTF_MAX, setupReplication, teardownReplication, removeEncryptionKey } from 'db';
 import * as meta from 'meta';
 import {
   ClaimedAccount,
@@ -108,10 +108,32 @@ async function testReplicate() {
 const DiscoveredAccount = RegisteredAccount;
 /** @deprecated Use `AutoSearchAccountAction` instead. */
 const DiscoveredAccountAction = AutoSearchAccountAction;
+/** @deprecated Use `destroyDb` instead. */
+const destroyLocalDb = () => { removeEncryptionKey(); destroyDb() };
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
-export { getDb, getRemoteDb, resetDb, resetRemoteDb, setRemoteUser, setupReplication, teardownReplication, generateEncryptionKey, getEncryptionKey, destroyLocalDb } from 'db';
+export {
+  getDb,
+  getRemoteDb,
+  resetDb,
+  resetRemoteDb,
+  closeDb,
+  closeRemoteDb,
+  destroyDb,
+  destroyRemoteDb,
+  disableSync,
+  enableSync,
+  generateEncryptionKey,
+  getEncryptionKey,
+  removeEncryptionKey,
+  setRemoteUser,
+  setupReplication,
+  teardownReplication,
+  exportToJson,
+  exportToReadableJson,
+  exportToCsv
+} from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags, privacyRatings } from 'sites';
 export { VERSION, EXTENSION_MIN_VERSION, EXTENSION_VERSION, checkExtensionVersion } from 'meta';
 export { ProfilePage, DEFAULT_COLOR_SCHEME, pages } from 'profile';
@@ -137,7 +159,7 @@ export {
 } from 'search';
 
 // Deprecated stuff
-export { DiscoveredAccount, DiscoveredAccountAction };
+export { DiscoveredAccount, DiscoveredAccountAction, destroyLocalDb };
 
 // Top level types that we want to be publicly visible
 export { ProfilePageColorSchema } from 'db/schema';

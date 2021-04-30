@@ -28,6 +28,7 @@ import {
   UnregisteredAccount,
 } from './accounts';
 import { findAccount } from './findAccount';
+import { perfLog } from 'meta';
 
 /**
  * Parameters that define a repeatable `Search`.
@@ -49,12 +50,19 @@ export class SearchDefinition implements IDbStorable {
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
+
+    const perfId = `SearchDef.loadAll.query.${getRandomId(3)}`
+    if (perfLog) console.time(perfId);
+
     const response = await db.allDocs<SearchDefinitionSchema>({
       include_docs: true,
       startkey: toId(['searchDef'], idPrefix),
       endkey: toId(['searchDef', UTF_MAX], idPrefix),
     });
-    console.debug(response);
+
+    if (perfLog) console.timeEnd(perfId);
+
+    DbCache.blockEvents(true);
 
     const results = [];
     for (const row of response.rows) {
@@ -87,6 +95,8 @@ export class SearchDefinition implements IDbStorable {
         }
       }
     }
+
+    DbCache.blockEvents(false);
 
     return results;
   }
@@ -298,12 +308,19 @@ export class Search implements IDbStorable {
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
+
+    const perfId = `Search.loadAll.query.${getRandomId(3)}`
+    if (perfLog) console.time(perfId);
+
     const response = await db.allDocs<SearchSchema>({
       include_docs: true,
       startkey: toId(['search'], idPrefix),
       endkey: toId(['search', UTF_MAX], idPrefix),
     });
-    console.debug(response);
+
+    if (perfLog) console.timeEnd(perfId);
+
+    DbCache.blockEvents(true);
 
     const results = [];
     for (const row of response.rows) {
@@ -336,6 +353,8 @@ export class Search implements IDbStorable {
         }
       }
     }
+
+    DbCache.blockEvents(false);
 
     return results;
   }

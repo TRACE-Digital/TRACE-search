@@ -18,6 +18,7 @@ import { CognitoUserPartial } from './aws-amplify';
 import { Search, SearchDefinition, ThirdPartyAccount } from 'search';
 import { AccountSchema, ProfilePageSchema, SearchDefinitionSchema, SearchSchema } from './schema';
 import { ProfilePage } from 'profile';
+import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
 
 PouchDB.plugin(CryptoPouch);
 
@@ -81,6 +82,13 @@ export const getEncryptionKey = (): string => {
 }
 
 /**
+ * Remove encryption key from localStorage
+ */
+export const removeEncryptionKey = () => {
+  localStorage.removeItem('hashKey');
+}
+
+/**
  * Initialize or return the PouchDB instance.
  */
 export const getDb = async () => {
@@ -93,8 +101,19 @@ export const getDb = async () => {
 /**
  * Set the remote user that will be used to connect to
  * the remote database.
+ *
+ * Call with `null` to reset all remote/user-related utilities.
  */
-export const setRemoteUser = async (cognitoUser: CognitoUserPartial) => {
+export const setRemoteUser = async (cognitoUser: CognitoUserPartial | null) => {
+  if (cognitoUser === null) {
+    await teardownReplication();
+    removeEncryptionKey();
+    await closeRemoteDb();
+
+    _remoteUser = undefined;
+    return;
+  }
+
   if (_remoteUser?.attributes.sub === cognitoUser.attributes.sub) {
     console.debug(`Remote user was already set to '${cognitoUser.attributes.sub}'.`);
     return;
@@ -152,9 +171,7 @@ export const getRemoteDb = async () => {
 
   options.auth = options.auth || {};
   options.auth.username = 'admin';
-  options.auth.password = '';
-
-  console.debug(options);
+  options.auth.password = atob('Q291Y2hEQkNhblN0aWxsSHVydFlvdToo'); // Shhhh...
 
   try {
     console.log(`Connecting to remote database ${dbUrl}...`);
@@ -181,26 +198,6 @@ export const getRemoteDb = async () => {
 
   return _remoteDb;
 };
-
-/**
- * Completely removes everything in the local database
- * This includes the database and the encryption keys
- */
-export const destroyLocalDb = async () => {
-  // remove encryption key from localStorage
-  localStorage.removeItem('hashKey');
-
-  // tear down replication (so that data removal isn't synced)
-  await teardownReplication();
-
-  // clear local DB
-  const db = await getDb();
-  await resetDbCommon(db);
-
-  // straight up delete the database from the browser
-  indexedDB.deleteDatabase('_pouch_trace');
-}
-
 
 /**
  * Remove all data in the local database and re-run setup.
@@ -272,6 +269,35 @@ export const closeRemoteDb = async () => {
   } else {
     console.debug('Remote database was not open');
   }
+};
+
+/**
+ * Destroy the local database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getDb()`.
+ *
+ * This also removed the user's encryption key.
+ */
+export const destroyDb = async () => {
+  const db = await getDb();
+  _localDb = null;
+  await db.destroy();
+  DbCache.clear();
+  console.log('Destroyed local database');
+};
+
+/**
+ * Destroy the remote database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getRemoteDb()`.
+ */
+export const destroyRemoteDb = async () => {
+  const db = await getRemoteDb();
+  _remoteDb = null;
+  await db.destroy();
+  console.log('Destroyed remote database');
 };
 
 /**
@@ -373,6 +399,46 @@ const setupDb = async () => {
 };
 
 /**
+ * Turn on sync and remember that it's on.
+ */
+export const enableSync = async () => {
+  try {
+    const db = await getDb();
+    const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+    if (!settings.syncEnabled) {
+      settings.syncEnabled = true;
+      await db.put(settings);
+    }
+  } catch(e) {
+    console.error('Could not update sync settings!');
+    console.error(e);
+  }
+
+  return await setupReplication();
+}
+
+/**
+ * Turn off sync and remember that it's off.
+ */
+export const disableSync = async () => {
+  try {
+    const db = await getDb();
+    const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+    if (settings.syncEnabled) {
+      settings.syncEnabled = false;
+      await db.put(settings);
+    }
+  } catch(e) {
+    console.error('Could not update sync settings!');
+    console.error(e);
+  }
+
+  return await teardownReplication();
+}
+
+/**
+ * YOU PROBABLY SHOULD BE USING `enableSync`.
+ *
  * Setup replication to and from the remote CouchDB server.
  */
 export const setupReplication = async () => {
@@ -447,18 +513,3 @@ export const teardownReplication = async () => {
     throw new Error(`Could not cancel replication: ${e}`);
   }
 };
-
-/**
- * Nuke the database.
- */
-async function _devNukeDb(dbName: string = DB_NAME) {
-  if (_localDb && _localDb.name === dbName) {
-    await _localDb.destroy();
-    _localDb = null;
-  } else {
-    const db = new PouchDB(dbName, DB_OPTIONS);
-    await db.destroy();
-  }
-
-  DbCache.clear();
-}
