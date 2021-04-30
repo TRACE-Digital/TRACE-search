@@ -49,6 +49,8 @@ export class ProfilePage implements IDbStorable {
     });
     console.debug(response);
 
+    DbCache.blockEvents(true);
+
     const results = [];
     for (const row of response.rows) {
       const doc = row.doc;
@@ -80,6 +82,8 @@ export class ProfilePage implements IDbStorable {
         }
       }
     }
+
+    DbCache.blockEvents(false);
 
     return results;
   }
@@ -134,7 +138,6 @@ export class ProfilePage implements IDbStorable {
             }
 
             const account = await ThirdPartyAccount.deserialize(actualDoc);
-            console.debug(account);
             instance.accounts.push(account);
           } catch (e) {
             // Debugging for mysterious doc.ok type

@@ -200,7 +200,7 @@
   },
   "Slack": {
     "logoClass": "fab fa-slack-hash",
-    "logoColor": "#4A154B",
+    "logoColor": "#36C5EF",
     "tags": ["Messaging"]
   },
   "SlideShare": {

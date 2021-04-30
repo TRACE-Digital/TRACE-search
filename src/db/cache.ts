@@ -36,6 +36,48 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
   }
 
   /**
+   * Number of callers that requested updates to be blocked.
+   */
+  private static blockEventCount = 0;
+
+  /**
+   * Returns true if events should be emitted.
+   */
+  private static get shouldEmit() {
+    return DbCache.blockEventCount === 0;
+  }
+
+  /**
+   * Temporarily block events from being emitted.
+   *
+   * This is useful for performance when doing bulk changes.
+   *
+   * The call that unblocks events will emit a generic `change`
+   * event from all `DbCache` objects.
+   *
+   * Inspired by https://doc.qt.io/qt-5/qobject.html#blockSignals
+   */
+  public static blockEvents(block: boolean) {
+    if (block) {
+      DbCache.blockEventCount++;
+    } else {
+      DbCache.blockEventCount--;
+    }
+
+    if (DbCache.blockEventCount < 0) {
+      console.warn('Mismatched DbCache.blockEvents(false) call! Count went negative');
+    }
+
+    // If we've just come back from blocking events,
+    // emit a generic change event for all caches
+    if (DbCache.shouldEmit) {
+      for (const cache of DbCache.caches) {
+        cache.events.emit('change');
+      }
+    }
+  }
+
+  /**
    * Items cached from the database.
    */
   public items: { [key: string]: T } = {};
@@ -55,17 +97,17 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
   public add(item: T) {
     if (item.id in this.items) {
       if (this.items[item.id].rev !== item.rev) {
-        this.events.emit('update', item.id);
+        if (DbCache.shouldEmit) this.events.emit('update', item.id);
       }
     } else {
       // TODO: Could do 'add' eventually
-      this.events.emit('update', item.id);
+      if (DbCache.shouldEmit) this.events.emit('update', item.id);
     }
 
     this.items[item.id] = item;
 
     // TODO: Don't get fancy yet. Just emit a change for everything
-    this.events.emit('change');
+    if (DbCache.shouldEmit) this.events.emit('change');
   }
 
   /**
@@ -92,11 +134,11 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
   public remove(id: IDbStorable['id']) {
     if (id in this.items) {
       delete this.items[id];
-      this.events.emit('remove', id);
+      if (DbCache.shouldEmit) this.events.emit('remove', id);
     }
 
     // TODO: Don't get fancy yet. Just emit a change for everything
-    this.events.emit('change');
+    if (DbCache.shouldEmit) this.events.emit('change');
   }
 
   /**
@@ -106,10 +148,10 @@ export class DbCache<T extends IDbStorable = IDbStorable> {
     for (const prop of Object.getOwnPropertyNames(this.items)) {
       delete this.items[prop];
     }
-    this.events.emit('clear');
+    if (DbCache.shouldEmit) this.events.emit('clear');
 
     // TODO: Don't get fancy yet. Just emit a change for everything
-    this.events.emit('change');
+    if (DbCache.shouldEmit) this.events.emit('change');
   }
 
   /**

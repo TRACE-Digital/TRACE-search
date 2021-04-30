@@ -3,7 +3,7 @@
  * and third-party accounts.
  */
 
-import { DbCache, DbResponse, getDb, IDbStorable, PouchDbId, throwIfIdMismatch, toId, UTF_MAX } from 'db';
+import { DbCache, DbResponse, getDb, getRandomId, IDbStorable, PouchDbId, throwIfIdMismatch, toId, UTF_MAX } from 'db';
 import {
   AccountSchema,
   ClaimedAccountSchema,
@@ -15,6 +15,7 @@ import {
   UnregisteredAccountSchema,
   RegisteredAccountSchema,
 } from 'db/schema';
+import { perfLog } from 'meta';
 import { Site } from 'sites';
 import SparkMD5 from 'spark-md5';
 
@@ -69,11 +70,19 @@ export abstract class ThirdPartyAccount implements IDbStorable {
    */
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
+
+    const perfId = `Account.loadAll.query.${getRandomId(3)}`
+    if (perfLog) console.time(perfId);
+
     const response = await db.allDocs<AccountSchema>({
       include_docs: true,
       startkey: toId(['account'], idPrefix),
       endkey: toId(['account', UTF_MAX], idPrefix),
     });
+
+    if (perfLog) console.timeEnd(perfId);
+
+    DbCache.blockEvents(true);
 
     const results = [];
     for (const row of response.rows) {
@@ -111,6 +120,8 @@ export abstract class ThirdPartyAccount implements IDbStorable {
       }
     }
 
+    DbCache.blockEvents(false);
+
     return results;
   }
 
@@ -147,9 +158,11 @@ export abstract class ThirdPartyAccount implements IDbStorable {
     }
     throwIfIdMismatch(data, instance);
 
-    // IMPORTANT: if a derived class doesn't override deserialize() or calls this
-    // without creating an instance, we'll recurse infinitely
-    instance = instance || (await ThirdPartyAccount.factory(data));
+    if (!instance) {
+      // IMPORTANT: if a derived class doesn't override deserialize() or calls this
+      // without creating an instance, we'll recurse infinitely
+      return await ThirdPartyAccount.factory(data);
+    }
 
     instance.id = data._id;
     instance.rev = data._rev;

@@ -13,6 +13,8 @@ export const DESCRIPTION = __DESCRIPTION__;
 export const BUILD_TYPE = __BUILD_TYPE__;
 export const BUILT_AT = __BUILT_AT__;
 
+export const perfLog = BUILD_TYPE === 'dev';
+
 declare global {
   interface Window {
     __TRACE_EXTENSION_HOOK__: {

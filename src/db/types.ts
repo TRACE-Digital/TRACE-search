@@ -20,8 +20,8 @@ export const UTF_MAX = '\ufff0';
 export const ID_SEPARATOR = '/';
 
 /** Generate a pseudo-random ID. */
-export const getRandomId = () => {
-  return Math.random().toString(36).substr(2);
+export const getRandomId = (len?: number) => {
+  return Math.random().toString(36).substr(2, len);
 }
 
 /**
