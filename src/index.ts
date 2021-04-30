@@ -122,6 +122,8 @@ export {
   closeRemoteDb,
   destroyDb,
   destroyRemoteDb,
+  disableSync,
+  enableSync,
   generateEncryptionKey,
   getEncryptionKey,
   removeEncryptionKey,

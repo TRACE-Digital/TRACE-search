@@ -18,6 +18,7 @@ import { CognitoUserPartial } from './aws-amplify';
 import { Search, SearchDefinition, ThirdPartyAccount } from 'search';
 import { AccountSchema, ProfilePageSchema, SearchDefinitionSchema, SearchSchema } from './schema';
 import { ProfilePage } from 'profile';
+import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
 
 PouchDB.plugin(CryptoPouch);
 
@@ -171,8 +172,6 @@ export const getRemoteDb = async () => {
   options.auth = options.auth || {};
   options.auth.username = 'admin';
   options.auth.password = atob('Q291Y2hEQkNhblN0aWxsSHVydFlvdToo'); // Shhhh...
-
-  console.debug(options);
 
   try {
     console.log(`Connecting to remote database ${dbUrl}...`);
@@ -400,6 +399,46 @@ const setupDb = async () => {
 };
 
 /**
+ * Turn on sync and remember that it's on.
+ */
+export const enableSync = async () => {
+  try {
+    const db = await getDb();
+    const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+    if (!settings.syncEnabled) {
+      settings.syncEnabled = true;
+      await db.put(settings);
+    }
+  } catch(e) {
+    console.error('Could not update sync settings!');
+    console.error(e);
+  }
+
+  return await setupReplication();
+}
+
+/**
+ * Turn off sync and remember that it's off.
+ */
+export const disableSync = async () => {
+  try {
+    const db = await getDb();
+    const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+    if (settings.syncEnabled) {
+      settings.syncEnabled = false;
+      await db.put(settings);
+    }
+  } catch(e) {
+    console.error('Could not update sync settings!');
+    console.error(e);
+  }
+
+  return await teardownReplication();
+}
+
+/**
+ * YOU PROBABLY SHOULD BE USING `enableSync`.
+ *
  * Setup replication to and from the remote CouchDB server.
  */
 export const setupReplication = async () => {

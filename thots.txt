@@ -1,0 +1,144 @@
+Add Static.load(ids?: PouchDbId[], startkey?: string, endkey?: string) methods
+Add load(n, sortKey: string = 'createdAt')
+Add unload(n, sortKey: string = 'createdAt')
+  Remove the lowest when sorting by `sortKey`
+
+Take in and save tags in searchDefinition
+
+Add list of IDs to expect().toBeInDatabase()
+Add account tests
+
+Reverse proxy for CouchDB?
+Container for CouchDB?
+Relay lambda for anything that needs keys
+
+Check if initiator matches tracedigital.tk or localhost
+
+
+
+
+
+
+
+Listen to the db change feed
+  If we don't have the ID, ignore the change (unless it's an account)
+  If we have it
+    Check for deleted
+    deserialize() onto the instance we already have
+Logging framework
+
+"scripts": {
+   "test": "jest --config jestconfig.json",
+   "build": "tsc",
+   "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+   "lint": "tslint -p tsconfig.json",
+   "prepare": "npm run build",
+   "prepublishOnly": "npm test && npm run lint",
+   "preversion": "npm run lint",
+   "version": "npm run format && git add -A src",
+   "postversion": "git push && git push --tags"
+}
+
+    "prepublishOnly": "npm test && (npm run lint || read -p '\n\nLINT FAILED!\nPress any key to bypass linter or Ctrl+C to cancel...' noop)",
+
+
+
+  if (isNode || isJsDom()) {
+    const thePouch: PouchDB.Static = require('pouchdb');
+    _localDb = new thePouch(DB_NAME);
+  } else {
+    _localDb = new PouchDB(DB_NAME);
+  }
+
+
+
+Externals
+https://webpack.js.org/guides/author-libraries/#externalize-lodash
+
+
+import pouchDbDebug from 'pouchdb-debug';
+
+PouchDB.plugin(pouchDbDebug);
+console.log(PouchDB.debug);
+PouchDB.debug.enable('*');
+
+
+  constructor(account: AutoSearchAccount) {
+    super(account.site, account.userName);
+
+    /**
+     * Would love to not have to copy these over by hand, but this was
+     * the best I could come up with for now.
+     *
+     * Some of these are shallow copies
+     * Shouldn't be an issue though as we don't really need the data frozen
+     */
+    this.discoveredOn = account.discoveredOn;
+    this.confidence = account.confidence;
+    this.matchedFirstNames = account.matchedFirstNames;
+    this.matchedLastNames = account.matchedLastNames;
+  }
+
+/**
+ * Flatten a `SearchResults` dictionary into an array of
+ * accounts that satisfy `predicate`.
+ */
+function resultsAsArrayHelper(results: SearchResults, predicate: (account: ThirdPartyAccount) => boolean) {
+    const flattened = [];
+      for (const accountMap of Object.values(results)) {
+        for (const account of Object.values(accountMap)) {
+          if (predicate(account)) {
+            flattened.push(account);
+          }
+        }
+      }
+      return flattened;
+  }
+
+
+
+
+# Don't make request if username is invalid for the site
+regex_check = net_info.get("regexCheck")
+if regex_check and re.search(regex_check, username) is None:
+    # No need to do the check at the site: this user name is not allowed.
+    results_site['status'] = QueryResult(username,
+                                          social_network,
+                                          url,
+                                          QueryStatus.ILLEGAL)
+
+
+import { getDb, PouchDbId } from "db";
+
+expect.extend({
+  /**
+   * Expect database ID `id` to be present in the database.
+   */
+  async toBeInDatabase(id: PouchDbId) {
+    const db = await getDb();
+
+    let exists = {
+      message: () =>
+        `expected '${id}' to be present in the database (${db.name})`,
+      pass: true,
+    };
+    let absent = {
+      message: () =>
+        `expected '${id}' to be present in the database (${db.name})`,
+      pass: false,
+    };
+
+    if (this.isNot) {
+      exists.pass = !exists.pass;
+      absent.pass = !absent.pass;
+    }
+
+    try {
+      await db.get(id);
+      return exists;
+    } catch (e) {
+      return absent;
+    }
+  },
+});
+
