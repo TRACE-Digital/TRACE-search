@@ -1,4 +1,3 @@
-import PouchDB from 'pouchdb';
 import { VERSION } from 'meta';
 import { DEFAULT_SETTINGS, SETTINGS_KEY } from './settings';
 
@@ -58,6 +57,10 @@ export async function doMigrations(db: PouchDB.Database) {
   }
   console.log('Migrations complete');
   console.groupEnd();
+
+  const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+  settings.version = currentVersion;
+  await db.put(settings);
 }
 
 interface MigrationDefinitions {
