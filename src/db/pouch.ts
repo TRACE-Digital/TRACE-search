@@ -81,6 +81,13 @@ export const getEncryptionKey = (): string => {
 }
 
 /**
+ * Remove encryption key from localStorage
+ */
+export const removeEncryptionKey = () => {
+  localStorage.removeItem('hashKey');
+}
+
+/**
  * Initialize or return the PouchDB instance.
  */
 export const getDb = async () => {
@@ -183,26 +190,6 @@ export const getRemoteDb = async () => {
 };
 
 /**
- * Completely removes everything in the local database
- * This includes the database and the encryption keys
- */
-export const destroyLocalDb = async () => {
-  // remove encryption key from localStorage
-  localStorage.removeItem('hashKey');
-
-  // tear down replication (so that data removal isn't synced)
-  await teardownReplication();
-
-  // clear local DB
-  const db = await getDb();
-  await resetDbCommon(db);
-
-  // straight up delete the database from the browser
-  indexedDB.deleteDatabase('_pouch_trace');
-}
-
-
-/**
  * Remove all data in the local database and re-run setup.
  *
  * This also clears the in-memory cache of all objects.
@@ -274,17 +261,19 @@ export const closeRemoteDb = async () => {
   }
 };
 
-
 /**
  * Destroy the local database connection.
  *
  * This creates a new instance of the singleton
  * on the next call to `getDb()`.
+ *
+ * This also removed the user's encryption key.
  */
 export const destroyDb = async () => {
   const db = await getDb();
   _localDb = null;
   await db.destroy();
+  DbCache.clear();
   console.log('Destroyed local database');
 };
 
@@ -474,18 +463,3 @@ export const teardownReplication = async () => {
     throw new Error(`Could not cancel replication: ${e}`);
   }
 };
-
-/**
- * Nuke the database.
- */
-async function _devNukeDb(dbName: string = DB_NAME) {
-  if (_localDb && _localDb.name === dbName) {
-    await _localDb.destroy();
-    _localDb = null;
-  } else {
-    const db = new PouchDB(dbName, DB_OPTIONS);
-    await db.destroy();
-  }
-
-  DbCache.clear();
-}
