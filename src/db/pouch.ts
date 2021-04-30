@@ -215,6 +215,33 @@ export const closeRemoteDb = async () => {
   }
 };
 
+
+/**
+ * Destroy the local database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getDb()`.
+ */
+export const destroyDb = async () => {
+  const db = await getDb();
+  _localDb = null;
+  await db.destroy();
+  console.log('Destroyed local database');
+};
+
+/**
+ * Destroy the remote database connection.
+ *
+ * This creates a new instance of the singleton
+ * on the next call to `getRemoteDb()`.
+ */
+export const destroyRemoteDb = async () => {
+  const db = await getRemoteDb();
+  _remoteDb = null;
+  await db.destroy();
+  console.log('Destroyed remote database');
+};
+
 /**
  * Initializes the PouchDB instance.
  */
