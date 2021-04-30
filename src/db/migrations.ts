@@ -110,4 +110,12 @@ const migrations: MigrationDefinitions = {
     nextVersion: '0.0.4',
     operations: [],
   },
+  '0.0.4': {
+    nextVersion: '0.0.5',
+    operations: [],
+  },
+  '0.0.5': {
+    nextVersion: '0.0.6',
+    operations: [],
+  },
 };
