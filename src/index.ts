@@ -109,7 +109,7 @@ const DiscoveredAccount = RegisteredAccount;
 /** @deprecated Use `AutoSearchAccountAction` instead. */
 const DiscoveredAccountAction = AutoSearchAccountAction;
 /** @deprecated Use `destroyDb` instead. */
-const destroyLocalDb = () => { removeEncryptionKey(); destroyDb() };
+const destroyLocalDb = async () => { removeEncryptionKey(); await destroyDb() };
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them

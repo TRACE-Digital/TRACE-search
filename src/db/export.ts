@@ -67,6 +67,6 @@ const getData = async () => {
   return {
     version: VERSION,
     dateExported: new Date().toJSON(),
-    accounts: accounts,
+    accounts,
   };
 }

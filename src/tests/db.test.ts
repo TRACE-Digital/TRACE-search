@@ -55,10 +55,12 @@ const COGNITO_USER2: CognitoUserPartial = {
   },
 };
 
-generateEncryptionKey("testing123", COGNITO_USER1.attributes.sub)
-
 describe('PouchDB', () => {
   let db: PouchDB.Database;
+
+  beforeAll(async () => {
+    await generateEncryptionKey("testing123", COGNITO_USER1.attributes.sub);
+  });
 
   beforeEach(async () => {
     db = await getDb();
