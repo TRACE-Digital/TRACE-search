@@ -51,7 +51,7 @@ export class SearchDefinition implements IDbStorable {
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
 
-    const perfId = `SearchDef.loadAll.query.${getRandomId(3)}`
+    const perfId = `SearchDef.loadAll.query.${getRandomId(3)}`;
     if (perfLog) console.time(perfId);
 
     const response = await db.allDocs<SearchDefinitionSchema>({
@@ -309,7 +309,7 @@ export class Search implements IDbStorable {
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
 
-    const perfId = `Search.loadAll.query.${getRandomId(3)}`
+    const perfId = `Search.loadAll.query.${getRandomId(3)}`;
     if (perfLog) console.time(perfId);
 
     const response = await db.allDocs<SearchSchema>({
@@ -507,12 +507,11 @@ export class Search implements IDbStorable {
       // Only mark as completed if the progress is 100%
       // If progress is NOT 100%, this means that search has been paused
       if (this.progress !== 100) {
-        console.groupEnd()
+        console.groupEnd();
         return;
       }
 
       this.state = SearchState.COMPLETED;
-
     } catch (e) {
       console.error(`Search failed!:`);
       console.error(e);
@@ -537,9 +536,9 @@ export class Search implements IDbStorable {
     } else if (this.state === SearchState.PAUSED) {
       logState = 'paused';
     } else if (this.state === SearchState.CANCELLED) {
-      return;   // don't care, just don't do anything. already cancelled
+      return; // don't care, just don't do anything. already cancelled
     } else {
-      console.error(`Cannot call cancel() while state is '${this.state}'!`)
+      console.error(`Cannot call cancel() while state is '${this.state}'!`);
       return;
     }
 
@@ -559,7 +558,7 @@ export class Search implements IDbStorable {
     if (this.state === SearchState.PAUSED) {
       logState = 'paused';
     } else {
-      console.error(`Cannot call resume() while state is '${this.state}'!`)
+      console.error(`Cannot call resume() while state is '${this.state}'!`);
       return;
     }
 
@@ -575,7 +574,7 @@ export class Search implements IDbStorable {
     if (this.state === SearchState.IN_PROGRESS) {
       logState = 'active';
     } else {
-      console.error(`Cannot call pause() while state is '${this.state}'!`)
+      console.error(`Cannot call pause() while state is '${this.state}'!`);
       return;
     }
 
@@ -593,7 +592,6 @@ export class Search implements IDbStorable {
    * This is incremental. It won't duplicate sites that already have results.
    */
   protected async doSearch() {
-
     // TODO: what happens if a duplicate is found?
 
     // Save everything that the user has already claimed/rejected
@@ -627,8 +625,7 @@ export class Search implements IDbStorable {
         // If the search has been cancelled, don't do anything else.
         if (this.state === SearchState.CANCELLED) {
           return;
-        }
-        else if (this.state === SearchState.PAUSED) {
+        } else if (this.state === SearchState.PAUSED) {
           // save the site/username to resume on
           this.lastSiteIndex = i;
           this.lastUserNameIndex = j;
@@ -641,7 +638,7 @@ export class Search implements IDbStorable {
         // Ignore sites that we already have results for
         if (site.name in this.resultsMap) {
           if (userName in this.resultsMap[site.name]) {
-            console.warn(`${site.name} already found.`)
+            console.warn(`${site.name} already found.`);
             continue;
           }
         } else if (site.omit) {

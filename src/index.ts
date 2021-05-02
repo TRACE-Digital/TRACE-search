@@ -109,7 +109,10 @@ const DiscoveredAccount = RegisteredAccount;
 /** @deprecated Use `AutoSearchAccountAction` instead. */
 const DiscoveredAccountAction = AutoSearchAccountAction;
 /** @deprecated Use `destroyDb` instead. */
-const destroyLocalDb = async () => { removeEncryptionKey(); await destroyDb() };
+const destroyLocalDb = async () => {
+  removeEncryptionKey();
+  await destroyDb();
+};
 
 // Top level exports that we want to be publicly visible
 // Name each explicitly so that JavaScript has an easier time with them
@@ -132,7 +135,7 @@ export {
   teardownReplication,
   exportToJson,
   exportToReadableJson,
-  exportToCsv
+  exportToCsv,
 } from 'db';
 export { allSites, supportedSites, unsupportedSites, tags, filterSitesByTags, privacyRatings } from 'sites';
 export { VERSION, EXTENSION_MIN_VERSION, EXTENSION_VERSION, checkExtensionVersion } from 'meta';

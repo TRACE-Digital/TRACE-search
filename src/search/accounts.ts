@@ -71,7 +71,7 @@ export abstract class ThirdPartyAccount implements IDbStorable {
   public static async loadAll(idPrefix?: string) {
     const db = await getDb();
 
-    const perfId = `Account.loadAll.query.${getRandomId(3)}`
+    const perfId = `Account.loadAll.query.${getRandomId(3)}`;
     if (perfLog) console.time(perfId);
 
     const response = await db.allDocs<AccountSchema>({

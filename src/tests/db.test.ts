@@ -17,7 +17,6 @@ import {
   setRemoteUser,
   getEncryptionKey,
   generateEncryptionKey,
-
 } from 'db';
 import { doMigrations } from 'db/migrations';
 import { VERSION } from 'meta';
@@ -59,7 +58,7 @@ describe('PouchDB', () => {
   let db: PouchDB.Database;
 
   beforeAll(async () => {
-    await generateEncryptionKey("testing123", COGNITO_USER1.attributes.sub);
+    await generateEncryptionKey('testing123', COGNITO_USER1.attributes.sub);
   });
 
   beforeEach(async () => {

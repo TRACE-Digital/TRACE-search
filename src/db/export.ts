@@ -1,6 +1,6 @@
-import { VERSION } from "meta";
-import { ClaimedAccount, ManualAccount, ThirdPartyAccount } from "search"
-import { AccountSchema } from "./schema";
+import { VERSION } from 'meta';
+import { ClaimedAccount, ManualAccount, ThirdPartyAccount } from 'search';
+import { AccountSchema } from './schema';
 
 /**
  * Serialize and export all dashboard accounts and
@@ -12,7 +12,7 @@ export const exportToJson = async () => {
   const data = await getData();
 
   const serializedAccounts: AccountSchema[] = [];
-  const newData = {...data} as any;
+  const newData = { ...data } as any;
   newData.accounts = serializedAccounts;
 
   for (const account of data.accounts) {
@@ -20,7 +20,7 @@ export const exportToJson = async () => {
   }
 
   return JSON.stringify(newData, null, 2);
-}
+};
 
 /**
  * Export all dashboard accounts and searches
@@ -31,7 +31,7 @@ export const exportToJson = async () => {
  */
 export const exportToReadableJson = async () => {
   return JSON.stringify(await getData(), null, 2);
-}
+};
 
 /**
  * Export all accounts to CSV.
@@ -50,18 +50,14 @@ export const exportToCsv = async () => {
 
   const csv = lines.map(line => line.join(',')).join('\r\n');
   return csv;
-}
+};
 
 const getData = async () => {
   await ClaimedAccount.loadAll();
   await ManualAccount.loadAll();
 
   let accounts: ThirdPartyAccount[] = [];
-  accounts = accounts.concat(
-    Object.values(ClaimedAccount.accounts)
-  ).concat(
-    Object.values(ManualAccount.accounts)
-  );
+  accounts = accounts.concat(Object.values(ClaimedAccount.accounts)).concat(Object.values(ManualAccount.accounts));
   accounts.sort((a, b) => a.site.name.localeCompare(b.site.name));
 
   return {
@@ -69,4 +65,4 @@ const getData = async () => {
     dateExported: new Date().toJSON(),
     accounts,
   };
-}
+};

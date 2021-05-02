@@ -45,11 +45,11 @@ if (BUILD_TYPE === 'test') {
 
 const isLoggedIn = () => {
   return _remoteUser;
-}
+};
 
 const encryptionKeyExists = () => {
   return localStorage.getItem('hashKey');
-}
+};
 
 /**
  * Based off of the password passed in, encryption key is stored in localStorage
@@ -58,13 +58,13 @@ export const generateEncryptionKey = async (password: string, cognitoID: string)
   // Key already present
   const localStorageKey = localStorage.getItem('hashKey');
   if (localStorageKey) {
-    throw new Error("Encryption key has already been set!")
+    throw new Error('Encryption key has already been set!');
   }
 
   // Key is not in localStorage, compute it and put it there
-  const hashKey: string = await sha256(password + cognitoID)
-  localStorage.setItem('hashKey', hashKey)
-}
+  const hashKey: string = await sha256(password + cognitoID);
+  localStorage.setItem('hashKey', hashKey);
+};
 
 /**
  * Compute current user's encryption key, if they are logged in
@@ -73,20 +73,20 @@ export const generateEncryptionKey = async (password: string, cognitoID: string)
 export const getEncryptionKey = (): string => {
   // Check if already exists in localStorage
   const localStorageKey = localStorage.getItem('hashKey');
-  if (localStorageKey) {  // If it's in localStorage, simply return
+  if (localStorageKey) {
+    // If it's in localStorage, simply return
     return localStorageKey;
+  } else {
+    throw new Error('Encryption key has not been defined yet!');
   }
-  else {
-    throw new Error("Encryption key has not been defined yet!")
-  }
-}
+};
 
 /**
  * Remove encryption key from localStorage
  */
 export const removeEncryptionKey = () => {
   localStorage.removeItem('hashKey');
-}
+};
 
 /**
  * Initialize or return the PouchDB instance.
@@ -179,7 +179,7 @@ export const getRemoteDb = async () => {
 
     // Only encrypt remoteDb if logged in!
     if (isLoggedIn()) {
-      const key: string = getEncryptionKey()
+      const key: string = getEncryptionKey();
       // @ts-ignore
       await _remoteDb.crypto(key);
     }
@@ -210,7 +210,7 @@ export const resetDb = async () => {
   await setupDb();
 
   DbCache.clear();
-}
+};
 
 /**
  * Remove all data from the remote database.
@@ -234,7 +234,7 @@ const resetDbCommon = async (db: PouchDB.Database) => {
     });
     console.log('Cleared database');
   } catch (e) {
-    console.error(`Could not clear database: ${e}`)
+    console.error(`Could not clear database: ${e}`);
     // throw new Error(`Could not clear database: ${e}`);
   }
 };
@@ -314,7 +314,7 @@ const setupDb = async () => {
 
     // Only encrypt localDb if logged in!
     if (encryptionKeyExists()) {
-      const key: string = getEncryptionKey()
+      const key: string = getEncryptionKey();
       // @ts-ignore
       await _localDb.crypto(key);
     }
@@ -409,13 +409,13 @@ export const enableSync = async () => {
       settings.syncEnabled = true;
       await db.put(settings);
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Could not update sync settings!');
     console.error(e);
   }
 
   return await setupReplication();
-}
+};
 
 /**
  * Turn off sync and remember that it's off.
@@ -430,12 +430,12 @@ export const disableSync = async () => {
         settings.syncEnabled = false;
         await db.put(settings);
       }
-    } catch(e) {
+    } catch (e) {
       console.error('Could not update sync settings!');
       console.error(e);
     }
   }
-}
+};
 
 /**
  * YOU PROBABLY SHOULD BE USING `enableSync`.

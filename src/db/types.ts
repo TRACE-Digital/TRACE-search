@@ -22,7 +22,7 @@ export const ID_SEPARATOR = '/';
 /** Generate a pseudo-random ID. */
 export const getRandomId = (len?: number) => {
   return Math.random().toString(36).substr(2, len);
-}
+};
 
 /**
  * Convert `value` into a PouchDB document ID.
