@@ -421,19 +421,20 @@ export const enableSync = async () => {
  * Turn off sync and remember that it's off.
  */
 export const disableSync = async () => {
-  try {
-    const db = await getDb();
-    const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
-    if (settings.syncEnabled) {
-      settings.syncEnabled = false;
-      await db.put(settings);
-    }
-  } catch(e) {
-    console.error('Could not update sync settings!');
-    console.error(e);
-  }
+  await teardownReplication();
 
-  return await teardownReplication();
+  for (const db of [await getDb(), await getRemoteDb()]) {
+    try {
+      const settings = await db.get<typeof DEFAULT_SETTINGS>(SETTINGS_KEY);
+      if (settings.syncEnabled) {
+        settings.syncEnabled = false;
+        await db.put(settings);
+      }
+    } catch(e) {
+      console.error('Could not update sync settings!');
+      console.error(e);
+    }
+  }
 }
 
 /**
